@@ -43,3 +43,11 @@ yarn-error.log*
 next-env.d.ts
 
 /app/generated/prisma
+
+# internal data
+/private-data/
+*.pdf
+*.docx
+*.xlsx
+!docs/**/*.pdf
+!docs/**/*.docx

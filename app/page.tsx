@@ -16,7 +16,7 @@ export default function HomePage() {
               面试质量评估、Offer 风险提醒
             </p>
           </div>
-          <StatusBadge label="Phase 0 · 工程底座" variant="default" />
+          <StatusBadge label="Phase 1 · 权限与角色" variant="default" />
         </div>
       </SectionCard>
 
@@ -85,8 +85,8 @@ export default function HomePage() {
       <SectionCard title="Phase 规划">
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           {[
-            { phase: "0", name: "工程底座", status: "current" },
-            { phase: "1", name: "权限与角色", status: "pending" },
+            { phase: "0", name: "工程底座", status: "done" },
+            { phase: "1", name: "权限与角色", status: "current" },
             { phase: "2", name: "核心数据模型", status: "pending" },
             { phase: "3", name: "岗位管理", status: "pending" },
             { phase: "4", name: "候选人链路", status: "pending" },
@@ -103,17 +103,21 @@ export default function HomePage() {
             <div
               key={p.phase}
               className={`rounded-md border px-3 py-2 ${
-                p.status === "current"
-                  ? "border-[var(--color-primary)] bg-[var(--color-primary-light)]"
-                  : "border-[var(--color-border)]"
+                  p.status === "done"
+                    ? "border-[var(--color-success)] bg-[var(--color-success-light)]"
+                    : p.status === "current"
+                    ? "border-[var(--color-primary)] bg-[var(--color-primary-light)]"
+                    : "border-[var(--color-border)]"
               }`}
             >
               <div className="flex items-center gap-2">
                 <span
                   className={`text-xs font-bold ${
-                    p.status === "current"
-                      ? "text-[var(--color-primary)]"
-                      : "text-[var(--color-text-tertiary)]"
+                    p.status === "done"
+                      ? "text-[var(--color-success)]"
+                      : p.status === "current"
+                        ? "text-[var(--color-primary)]"
+                        : "text-[var(--color-text-tertiary)]"
                   }`}
                 >
                   P{p.phase}

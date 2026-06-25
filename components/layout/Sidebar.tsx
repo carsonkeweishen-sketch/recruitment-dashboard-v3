@@ -12,6 +12,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { label: "首页", href: "/", icon: "home", enabled: true },
+  { label: "权限调试", href: "/permissions-debug", icon: "shield", enabled: true },
   { label: "岗位管理", href: "/jobs", icon: "briefcase", enabled: false },
   { label: "候选人", href: "/candidates", icon: "users", enabled: false },
   { label: "面试反馈", href: "/interviews", icon: "chat", enabled: false },
@@ -24,6 +25,7 @@ const navItems: NavItem[] = [
 
 const iconMap: Record<string, string> = {
   home: "🏠",
+  shield: "🛡️",
   briefcase: "💼",
   users: "👥",
   chat: "💬",
@@ -38,9 +40,7 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside
-      className="flex h-screen w-[var(--sidebar-width)] flex-col border-r border-[var(--color-border)] bg-[var(--color-surface)]"
-    >
+    <aside className="flex h-screen w-[var(--sidebar-width)] flex-col border-r border-[var(--color-border)] bg-[var(--color-surface)]">
       {/* Logo */}
       <div className="flex h-[var(--topbar-height)] items-center gap-2 border-b border-[var(--color-border)] px-4">
         <span className="text-lg font-bold text-[var(--color-primary)]">RD</span>
@@ -51,7 +51,7 @@ export function Sidebar() {
 
       {/* Navigation */}
       <nav className="flex-1 overflow-auto px-2 py-3">
-        <div className="text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)] px-2 mb-2">
+        <div className="mb-2 px-2 text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">
           导航
         </div>
         <ul className="space-y-0.5">
@@ -70,10 +70,10 @@ export function Sidebar() {
                   {item.label}
                 </Link>
               ) : (
-                <span className="flex items-center gap-3 rounded-md px-3 py-2 text-sm text-[var(--color-text-tertiary)] cursor-not-allowed opacity-50">
+                <span className="flex cursor-not-allowed items-center gap-3 rounded-md px-3 py-2 text-sm text-[var(--color-text-tertiary)] opacity-50">
                   <span className="text-base">{iconMap[item.icon]}</span>
                   {item.label}
-                  <span className="ml-auto text-[10px] uppercase tracking-wider bg-[var(--color-surface-tertiary)] px-1.5 py-0.5 rounded">
+                  <span className="ml-auto rounded bg-[var(--color-surface-tertiary)] px-1.5 py-0.5 text-[10px] uppercase tracking-wider">
                     即将
                   </span>
                 </span>
@@ -85,8 +85,8 @@ export function Sidebar() {
 
       {/* Footer */}
       <div className="border-t border-[var(--color-border)] p-3">
-        <div className="text-xs text-[var(--color-text-tertiary)] text-center">
-          Phase 0 · 工程底座
+        <div className="text-center text-xs text-[var(--color-text-tertiary)]">
+          Phase 1 · 权限与角色
         </div>
       </div>
     </aside>
