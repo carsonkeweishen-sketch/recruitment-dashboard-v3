@@ -38,6 +38,10 @@ yarn-error.log*
 # vercel
 .vercel
 
+# playwright
+.playwright-cli/
+snap.yaml
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
