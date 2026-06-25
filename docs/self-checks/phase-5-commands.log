@@ -1,0 +1,100 @@
+# Phase 5 Commands Log
+# Branch: agent/workbuddy/phase-5
+
+=================================================================
+SECTION 1: Hardcode Check
+=================================================================
+$ grep -R "mockFeedback\|demoFeedback\|sampleFeedback\|fallbackFeedback" app components server
+(no output - exit 1)
+
+$ grep -R "const .*feedback.*= \[" app components
+(no output - exit 1)
+
+$ grep -R "候选人A\|测试反馈\|测试岗位\|测试业务" app components server
+(no output - exit 1)
+
+=================================================================
+SECTION 2: Adapter Isolation
+=================================================================
+$ grep -R "integrations/openai\|integrations/deepseek\|integrations/moka\|integrations/feishu" app components server/services server/repositories
+(no output - exit 1)
+
+=================================================================
+SECTION 3: Build Verification
+=================================================================
+$ pnpm prisma generate
+(success)
+
+$ pnpm typecheck
+> tsc --noEmit
+(exit 0 - 0 errors)
+
+$ pnpm lint
+> eslint . --ext .ts,.tsx
+(exit 0 - 0 errors, 0 warnings)
+
+$ pnpm build
+○ (Static) prerendered as static content
+ƒ (Dynamic) server-rendered on demand
+(exit 0 - PASS)
+
+=================================================================
+SECTION 4: API Test Results
+=================================================================
+
+4.1 POST /api/business-feedback (admin)
+  Request: {"jobId":"cmqt44ze2000azyqhghevqv4e","applicationId":"...","decision":"REJECT","reasonCode":"EXPERIENCE_MISMATCH","reasonText":"..."}
+  Response: 201, success=true, feedbackId=cmqtaj2qh0000seqhqsqjvkq3
+  ActivityLog: BUSINESS_FEEDBACK_CREATED ✅
+
+4.2 GET /api/jobs/:id/feedback-summary (admin)
+  Response: 200
+  feedbackCount=5, decisionStats={PASS:2, REJECT:3}, reasonStats={OTHER:1, EXPERIENCE_MISMATCH:2, SALARY_GAP:1}
+  profileSignals.calibrationNeeded=true
+  profileSignals.topReasonCode=EXPERIENCE_MISMATCH
+  profileSignals.suggestedCalibrationReason="连续 2 个候选人因「EXPERIENCE_MISMATCH」被拒，建议复核岗位画像"
+
+4.3 POST /api/jobs/:id/profile-calibrations (admin)
+  Request: {"sourceFeedbackIds":["...","..."],"calibrationReason":"test calibration"}
+  Response: 201, calibId=cmqtajl5v000aseqhg70mg8s7
+  ActivityLog: PROFILE_CALIBRATION_CREATED ✅
+
+4.4 PATCH /api/profile-calibrations/:id (admin, confirm)
+  Request: {"status":"confirmed"}
+  Response: 200, afterSnapshot._status="confirmed", _confirmedAt="2026-06-25T09:19:47.841Z"
+  ActivityLog: PROFILE_CALIBRATION_CONFIRMED ✅
+
+=================================================================
+SECTION 5: Permission Test Results
+=================================================================
+interviewer creates feedback → 403 "Permission denied: interviewer cannot create on candidates" ✅
+biz_owner creates unrelated feedback → 403 "Permission denied: business_owner cannot create on candidates" ✅
+recruiter confirms calibration → 403 "Permission denied: only admin/leader/hrbp/business_owner can confirm calibrations" ✅
+admin creates feedback → 201 ✅
+admin creates calibration → 201 ✅
+admin confirms calibration → 200 ✅
+
+=================================================================
+SECTION 6: Evidence Files
+=================================================================
+$ find docs/self-checks -name "phase-5*" | sort
+docs/self-checks/phase-5-api-responses.md
+docs/self-checks/phase-5-commands.log
+docs/self-checks/phase-5-report.md
+
+$ find screenshots/phase-5 -type f | sort
+screenshots/phase-5/business-feedback-create-modal.png
+screenshots/phase-5/business-feedback-timeline.png
+screenshots/phase-5/business-owner-feedback-view.png
+screenshots/phase-5/business-reason-stats.png
+screenshots/phase-5/feedback-empty.png
+screenshots/phase-5/feedback-error.png
+screenshots/phase-5/feedback-loading.png
+screenshots/phase-5/hrbp-department-feedback-view.png
+screenshots/phase-5/interviewer-permission-denied.png
+screenshots/phase-5/jobs-feedback-tab-success.png
+screenshots/phase-5/profile-calibration-confirmed.png
+screenshots/phase-5/profile-calibration-create-modal.png
+screenshots/phase-5/profile-calibration-history.png
+screenshots/phase-5/profile-signal-card.png
+screenshots/phase-5/recruiter-owned-feedback-view.png

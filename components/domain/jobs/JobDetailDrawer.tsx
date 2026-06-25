@@ -2,6 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { StatusBadge } from "@/components/ui/StatusBadge";
+import { BusinessFeedbackTimeline } from "@/components/domain/business-feedback/BusinessFeedbackTimeline";
+import { BusinessReasonStats } from "@/components/domain/business-feedback/BusinessReasonStats";
+import { ProfileSignalCard } from "@/components/domain/business-feedback/ProfileSignalCard";
+import { ProfileCalibrationPanel } from "@/components/domain/business-feedback/ProfileCalibrationPanel";
+import { BusinessFeedbackFormModal } from "@/components/domain/business-feedback/BusinessFeedbackFormModal";
+import { ProfileCalibrationFormModal } from "@/components/domain/business-feedback/ProfileCalibrationFormModal";
 
 interface JobDetail {
   id: string;
@@ -32,7 +38,18 @@ interface JobDetail {
 export function JobDetailDrawer({ jobId, onClose }: { jobId: string | null; onClose: () => void }) {
   const [job, setJob] = useState<JobDetail | null>(null);
   const [loading, setLoading] = useState(false);
-  const [tab, setTab] = useState<"overview" | "profile" | "funnel" | "activity">("overview");
+  const [tab, setTab] = useState<"overview" | "profile" | "funnel" | "activity" | "feedback">("overview");
+  // Phase 5: Business Feedback state
+  const [feedbackData, setFeedbackData] = useState<{
+    feedbacks: Array<{ id: string; decision: string; reasonCode: string | null; reasonText: string | null; reviewer: { id: string; name: string } | null; job: { id: string; title: string; jobCode: string | null } | null; createdAt: string }>;
+    decisionStats: Record<string, number>;
+    reasonStats: Record<string, number>;
+    profileSignals: { calibrationNeeded: boolean; topReasonCode: string | null; topReasonCount: number; rejectionRate: number; suggestedCalibrationReason: string | null } | null;
+    calibrations: Array<{ id: string; sourceFeedbackIds: string[]; calibrationReason: string | null; status: string; confirmedAt: string | null; createdAt: string }>;
+  } | null>(null);
+  const [feedbackLoading, setFeedbackLoading] = useState(false);
+  const [showFeedbackForm, setShowFeedbackForm] = useState(false);
+  const [showCalibrationForm, setShowCalibrationForm] = useState(false);
 
   useEffect(() => {
     if (!jobId) return;
@@ -53,6 +70,37 @@ export function JobDetailDrawer({ jobId, onClose }: { jobId: string | null; onCl
     return () => { cancelled = true; };
   }, [jobId]);
 
+  // Phase 5: Load feedback summary when feedback tab is active
+  useEffect(() => {
+    if (!jobId || tab !== "feedback") return;
+    let cancelled = false;
+    async function loadFeedback() {
+      setFeedbackLoading(true);
+      try {
+        const res = await fetch(`/api/jobs/${jobId}/feedback-summary`);
+        const d = await res.json();
+        if (!cancelled && d.success) setFeedbackData(d.data);
+      } catch {
+        if (!cancelled) setFeedbackData(null);
+      } finally {
+        if (!cancelled) setFeedbackLoading(false);
+      }
+    }
+    loadFeedback();
+    return () => { cancelled = true; };
+  }, [jobId, tab]);
+
+  async function refreshFeedback() {
+    if (!jobId) return;
+    setFeedbackLoading(true);
+    try {
+      const res = await fetch(`/api/jobs/${jobId}/feedback-summary`);
+      const d = await res.json();
+      if (d.success) setFeedbackData(d.data);
+    } catch { /* keep existing data */ }
+    finally { setFeedbackLoading(false); }
+  }
+
   if (!jobId) return null;
 
   return (
@@ -72,10 +120,10 @@ export function JobDetailDrawer({ jobId, onClose }: { jobId: string | null; onCl
           <>
             {/* Tabs */}
             <div className="flex border-b border-[var(--color-border)]">
-              {(["overview", "profile", "funnel", "activity"] as const).map((t) => (
+              {(["overview", "profile", "funnel", "feedback", "activity"] as const).map((t) => (
                 <button key={t} onClick={() => setTab(t)}
                   className={`px-4 py-2.5 text-sm font-medium transition-colors ${tab === t ? "border-b-2 border-[var(--color-primary)] text-[var(--color-primary)]" : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"}`}>
-                  {t === "overview" ? "概览" : t === "profile" ? "画像" : t === "funnel" ? "漏斗" : "动态"}
+                  {t === "overview" ? "概览" : t === "profile" ? "画像" : t === "funnel" ? "漏斗" : t === "feedback" ? "业务反馈" : "动态"}
                 </button>
               ))}
             </div>
@@ -85,11 +133,19 @@ export function JobDetailDrawer({ jobId, onClose }: { jobId: string | null; onCl
               {tab === "overview" && <OverviewTab job={job} />}
               {tab === "profile" && <ProfileTab job={job} />}
               {tab === "funnel" && <FunnelTab job={job} />}
+              {tab === "feedback" && <FeedbackTab job={job} feedbackData={feedbackData} loading={feedbackLoading} onRefresh={refreshFeedback} onShowFeedbackForm={() => setShowFeedbackForm(true)} onShowCalibrationForm={() => setShowCalibrationForm(true)} />}
               {tab === "activity" && <ActivityTab />}
             </div>
           </>
         )}
       </div>
+      {/* Phase 5 Modals */}
+      {showFeedbackForm && job && (
+        <BusinessFeedbackFormModal jobId={job.id} jobTitle={job.title} onClose={() => setShowFeedbackForm(false)} onSuccess={() => { setShowFeedbackForm(false); refreshFeedback(); }} />
+      )}
+      {showCalibrationForm && job && feedbackData && (
+        <ProfileCalibrationFormModal jobId={job.id} jobTitle={job.title} feedbackOptions={feedbackData.feedbacks} onClose={() => setShowCalibrationForm(false)} onSuccess={() => { setShowCalibrationForm(false); refreshFeedback(); }} />
+      )}
     </>
   );
 }
@@ -214,6 +270,64 @@ function FunnelTab({ job }: { job: JobDetail }) {
           </div>
         );
       })}
+    </div>
+  );
+}
+
+function FeedbackTab({ job: _job, feedbackData, loading, onRefresh, onShowFeedbackForm, onShowCalibrationForm }: {
+  job: JobDetail;
+  feedbackData: {
+    feedbacks: Array<{ id: string; decision: string; reasonCode: string | null; reasonText: string | null; reviewer: { id: string; name: string } | null; job: { id: string; title: string; jobCode: string | null } | null; createdAt: string }>;
+    decisionStats: Record<string, number>;
+    reasonStats: Record<string, number>;
+    profileSignals: { calibrationNeeded: boolean; topReasonCode: string | null; topReasonCount: number; rejectionRate: number; suggestedCalibrationReason: string | null } | null;
+    calibrations: Array<{ id: string; sourceFeedbackIds: string[]; calibrationReason: string | null; status: string; confirmedAt: string | null; createdAt: string }>;
+  } | null;
+  loading: boolean;
+  onRefresh: () => void;
+  onShowFeedbackForm: () => void;
+  onShowCalibrationForm: () => void;
+}) {
+  if (loading) return <div className="space-y-4">{[1, 2, 3].map((i) => <div key={i} className="h-16 animate-pulse rounded-lg bg-[var(--color-surface-tertiary)]" />)}</div>;
+
+  return (
+    <div className="space-y-5">
+      {/* Action buttons */}
+      <div className="flex gap-2">
+        <button onClick={onShowFeedbackForm} className="rounded-md bg-[var(--color-primary)] px-3 py-1.5 text-xs font-medium text-white hover:opacity-90">创建业务反馈</button>
+        <button onClick={onRefresh} className="rounded-md border border-[var(--color-border)] px-3 py-1.5 text-xs text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-secondary)]">刷新</button>
+      </div>
+
+      {!feedbackData && !loading && <div className="flex flex-col items-center justify-center py-8 text-center"><p className="text-sm text-[var(--color-text-secondary)]">加载反馈数据...</p></div>}
+
+      {feedbackData && (
+        <>
+          {/* Decision & Reason Stats */}
+          {(Object.keys(feedbackData.decisionStats).length > 0 || Object.keys(feedbackData.reasonStats).length > 0) && (
+            <BusinessReasonStats decisionStats={feedbackData.decisionStats} reasonStats={feedbackData.reasonStats} />
+          )}
+
+          {/* Profile Signal Card */}
+          <ProfileSignalCard signal={feedbackData.profileSignals} onCreateCalibration={onShowCalibrationForm} />
+
+          {/* Calibration History */}
+          {feedbackData.calibrations.length > 0 && (
+            <div>
+              <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-[var(--color-text-tertiary)]">画像校准历史</div>
+              <ProfileCalibrationPanel calibrations={feedbackData.calibrations} onConfirm={async (id) => {
+                await fetch(`/api/profile-calibrations/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "confirmed" }) });
+                onRefresh();
+              }} />
+            </div>
+          )}
+
+          {/* Feedback Timeline */}
+          <div>
+            <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-[var(--color-text-tertiary)]">反馈记录</div>
+            <BusinessFeedbackTimeline feedbacks={feedbackData.feedbacks} />
+          </div>
+        </>
+      )}
     </div>
   );
 }
