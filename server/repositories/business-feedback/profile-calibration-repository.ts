@@ -1,4 +1,4 @@
-// Phase 5: Profile Calibration Repository
+// Phase 5.1: Profile Calibration Repository (with structured status fields)
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
@@ -17,7 +17,7 @@ export interface CreateCalibrationInput {
 }
 
 export async function getCalibrationsByJob(jobId: string, scope: ScopeWhere) {
-  if (scope.scope === "DENY" || scope.scope === "RELATED" && scope.role === "interviewer") return [];
+  if (scope.scope === "DENY" || (scope.scope === "RELATED" && scope.role === "interviewer")) return [];
 
   const where: Record<string, unknown> = { jobId };
 
@@ -42,21 +42,17 @@ export async function getCalibrationById(id: string) {
 }
 
 export async function createCalibration(input: CreateCalibrationInput) {
-  // Store status in afterSnapshot as a workaround (Schema lacks status field)
-  const afterWithStatus = {
-    ...(input.afterSnapshot || {}),
-    _status: "draft",
-    _confirmedAt: null,
-  };
-
   return prisma.profileCalibration.create({
     data: {
       jobId: input.jobId,
       sourceFeedbackIds: input.sourceFeedbackIds,
       calibrationReason: input.calibrationReason,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       beforeSnapshot: (input.beforeSnapshot || {}) as any,
-      afterSnapshot: afterWithStatus as any,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      afterSnapshot: (input.afterSnapshot || {}) as any,
       createdBy: input.createdBy,
+      status: "draft",
     },
   });
 }
@@ -65,20 +61,16 @@ export async function confirmCalibration(id: string, confirmedBy: string) {
   const existing = await prisma.profileCalibration.findUnique({ where: { id } });
   if (!existing) return null;
 
-  const currentAfter = (existing.afterSnapshot as Record<string, unknown>) || {};
-  if (currentAfter._status === "confirmed") {
+  if (existing.status === "confirmed") {
     throw new Error("Calibration already confirmed");
   }
 
-  const updatedAfter = {
-    ...currentAfter,
-    _status: "confirmed",
-    _confirmedAt: new Date().toISOString(),
-    _confirmedBy: confirmedBy,
-  };
-
   return prisma.profileCalibration.update({
     where: { id },
-    data: { afterSnapshot: updatedAfter as unknown as Parameters<typeof prisma.profileCalibration.update>[0]["data"]["afterSnapshot"] },
+    data: {
+      status: "confirmed",
+      confirmedAt: new Date(),
+      confirmedBy,
+    },
   });
 }

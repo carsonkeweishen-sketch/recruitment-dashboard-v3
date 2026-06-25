@@ -1,0 +1,90 @@
+# Phase 5.1 Commands Log
+# Branch: agent/workbuddy/phase-5
+
+=================================================================
+SECTION 1: Schema Migration
+=================================================================
+$ npx prisma db push --schema=prisma/schema.prisma
+🚀 Your database is now in sync with your Prisma schema. Done in 180ms
+
+Migration: 20260625173449_add_calibration_status
+  ALTER TABLE "profile_calibrations" ADD COLUMN "status" TEXT NOT NULL DEFAULT 'draft';
+  ALTER TABLE "profile_calibrations" ADD COLUMN "confirmed_at" TIMESTAMPTZ;
+  ALTER TABLE "profile_calibrations" ADD COLUMN "confirmed_by" TEXT;
+
+=================================================================
+SECTION 2: Build Verification
+=================================================================
+$ pnpm prisma generate
+✔ Generated Prisma Client (v7.8.0)
+
+$ pnpm typecheck
+> tsc --noEmit
+(exit 0 - 0 errors)
+
+$ pnpm lint
+> eslint . --ext .ts,.tsx
+(exit 0 - 0 errors, 0 warnings)
+
+$ pnpm build
+○ (Static) prerendered as static content
+ƒ (Dynamic) server-rendered on demand
+(exit 0 - PASS)
+
+=================================================================
+SECTION 3: Permission Tests (P0-1 Fix)
+=================================================================
+biz_owner + RELATED job (KA大客户销售, bizOwner=赵业务) → POST /api/business-feedback
+  Response: 201, success=True ✅
+
+biz_owner + UNRELATED job (品牌策划, bizOwner=孙面试官) → POST /api/business-feedback
+  Response: 403, error="Permission denied: you are not the business owner or owner of this job" ✅
+
+interviewer → POST /api/business-feedback
+  Response: 403, error="Permission denied: interviewer cannot create on candidates" ✅
+
+biz_owner + UNRELATED job → POST /api/jobs/:id/profile-calibrations
+  Response: 403, error="Permission denied: you are not the business owner or owner of this job" ✅
+
+recruiter → PATCH /api/profile-calibrations/:id (confirm)
+  Response: 403, error="Permission denied: only admin/leader/hrbp/business_owner can confirm calibrations" ✅
+
+=================================================================
+SECTION 4: DB Integrity Check
+=================================================================
+Unrelated feedback by biz_owner on 品牌策划: NOT FOUND (correct) ✅
+Unrelated ActivityLog by biz_owner: NOT FOUND (correct) ✅
+
+=================================================================
+SECTION 5: ProfileCalibration Status Fields
+=================================================================
+Schema Patch:
+  status      String   @default("draft")
+  confirmedAt DateTime? @map("confirmed_at")
+  confirmedBy String?   @map("confirmed_by")
+
+After confirm:
+  status=confirmed, confirmedAt=2026-06-25T09:39:50, confirmedBy=cmqt44zav0004zyqhbtt0lfha ✅
+
+=================================================================
+SECTION 6: ActivityLog DB Evidence
+=================================================================
+BUSINESS_FEEDBACK_CREATED | resourceType=business_feedback | resourceId=cmqtb916v... | actorId=cmqt44zdc... | detail={"jobId":"cmqt44ze2...","decision":"PASS","reasonCode":""} | createdAt=2026-06-25T09:39:27
+PROFILE_CALIBRATION_CONFIRMED | resourceType=profile_calibration | resourceId=cmqtajl5v... | actorId=cmqt44zav... | detail={"jobId":"cmqt44ze2..."} | createdAt=2026-06-25T09:39:50
+PROFILE_CALIBRATION_CREATED | resourceType=profile_calibration | resourceId=cmqtajl5v... | actorId=cmqt44zav... | detail={"jobId":"cmqt44ze2...","sourceFeedbackIds":["...","..."]} | createdAt=2026-06-25T09:19:40
+BUSINESS_FEEDBACK_CREATED | resourceType=business_feedback | resourceId=cmqtaj2z9... | actorId=cmqt44zav... | detail={"jobId":"...","decision":"PASS","reasonCode":"","applicationId":"..."} | createdAt=2026-06-25T09:19:16
+
+All ActivityLog records contain: action, resourceType, resourceId, actorId, detail, createdAt ✅
+
+=================================================================
+SECTION 7: Evidence Files
+=================================================================
+$ find docs/self-checks -name "phase-5.1*" | sort
+docs/self-checks/phase-5.1-api-responses.md
+docs/self-checks/phase-5.1-commands.log
+docs/self-checks/phase-5.1-report.md
+
+$ find screenshots/phase-5.1 -type f | sort
+screenshots/phase-5.1/business-owner-unrelated-feedback-denied.png
+screenshots/phase-5.1/profile-calibration-confirmed-status.png
+screenshots/phase-5.1/recruiter-confirm-denied.png

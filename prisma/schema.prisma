@@ -301,16 +301,19 @@ model BusinessFeedback {
 }
 
 model ProfileCalibration {
-  id                String   @id @default(cuid())
+  id                String    @id @default(cuid())
   jobId             String
-  job               Job      @relation(fields: [jobId], references: [id])
-  beforeSnapshot    Json?    @map("before_snapshot")
-  afterSnapshot     Json?    @map("after_snapshot")
-  sourceFeedbackIds String[] @map("source_feedback_ids")
-  calibrationReason String?  @map("calibration_reason")
+  job               Job       @relation(fields: [jobId], references: [id])
+  beforeSnapshot    Json?     @map("before_snapshot")
+  afterSnapshot     Json?     @map("after_snapshot")
+  sourceFeedbackIds String[]  @map("source_feedback_ids")
+  calibrationReason String?   @map("calibration_reason")
   createdBy         String
-  createdAt         DateTime @default(now()) @map("created_at")
-  updatedAt         DateTime @updatedAt @map("updated_at")
+  status            String    @default("draft")
+  confirmedAt       DateTime? @map("confirmed_at")
+  confirmedBy       String?   @map("confirmed_by")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
 
   @@map("profile_calibrations")
 }

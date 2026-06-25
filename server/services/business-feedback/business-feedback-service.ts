@@ -1,4 +1,4 @@
-// Phase 5: Business Feedback Service
+// Phase 5.1: Business Feedback Service (with object-level ownership check)
 import type { Role } from "@/server/permissions/types";
 import { buildScopeWhere, requirePermission } from "@/server/permissions/check-permission";
 import {
@@ -8,6 +8,7 @@ import {
   getFeedbackStatsByJob,
 } from "@/server/repositories/business-feedback/business-feedback-repository";
 import { getCalibrationsByJob } from "@/server/repositories/business-feedback/profile-calibration-repository";
+import { requireJobOwnership } from "@/server/repositories/business-feedback/ownership-check";
 import type { CreateFeedbackInput } from "@/server/repositories/business-feedback/business-feedback-repository";
 
 export async function listFeedbacks(
@@ -15,7 +16,6 @@ export async function listFeedbacks(
   filters: { jobId?: string; applicationId?: string }
 ) {
   const scope = buildScopeWhere({ role, userId, departmentId }, "candidates");
-  // interviewer cannot access business feedback
   if (role === "interviewer") return [];
   return getFeedbacks({ scope, ...filters });
 }
@@ -28,19 +28,19 @@ export async function submitFeedback(
   role: Role, userId: string, departmentId: string | undefined,
   input: Omit<CreateFeedbackInput, "reviewerId">
 ) {
-  requirePermission({ role, userId, departmentId }, "candidates", "create");
-
-  // Business owner can only create for RELATED jobs
+  // business_owner uses "view" action for feedback (create is gated by ownership check)
   if (role === "business_owner") {
-    const scope = buildScopeWhere({ role, userId, departmentId }, "candidates");
-    if (scope.scope !== "RELATED") {
-      throw new Error("Permission denied: business_owner can only create feedback for related jobs");
-    }
+    requirePermission({ role, userId, departmentId }, "candidates", "view");
+  } else {
+    requirePermission({ role, userId, departmentId }, "candidates", "create");
   }
 
   if (role === "interviewer") {
     throw new Error("Permission denied: interviewer cannot create business feedback");
   }
+
+  // Phase 5.1: Object-level ownership check — must be related to the job
+  await requireJobOwnership(userId, input.jobId, role);
 
   return createFeedback({ ...input, reviewerId: userId });
 }
@@ -69,9 +69,10 @@ export async function getJobFeedbackSummary(
       id: c.id,
       sourceFeedbackIds: c.sourceFeedbackIds,
       calibrationReason: c.calibrationReason,
-      status: (c.afterSnapshot as Record<string, unknown>)?._status || "draft",
-      confirmedAt: (c.afterSnapshot as Record<string, unknown>)?._confirmedAt || null,
-      createdAt: c.createdAt,
+      status: c.status,
+      confirmedAt: c.confirmedAt?.toISOString() || null,
+      confirmedBy: c.confirmedBy,
+      createdAt: c.createdAt.toISOString(),
     })),
   };
 }
