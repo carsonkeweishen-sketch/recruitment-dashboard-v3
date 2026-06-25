@@ -184,7 +184,7 @@ async function main() {
     children.push(
       body(`📸 ${s}`),
       new Paragraph({
-        children: [new ImageRun({ data: imgBuf, transformation: { width: 550, height: 350 } })],
+        children: [new ImageRun({ type: "png", data: imgBuf, transformation: { width: 550, height: 350 } })],
         spacing: { after: 200 },
       })
     );
