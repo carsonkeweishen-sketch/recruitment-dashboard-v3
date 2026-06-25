@@ -1,4 +1,4 @@
-# Recruitment Dashboard v2 — 项目长期记忆
+# Recruitment Dashboard v3 — 项目长期记忆
 
 > 本文档用于跨对话上下文恢复。每次重大决策变更后更新。
 

@@ -1,4 +1,4 @@
-# Recruitment Dashboard v2 Starter Pack
+# Recruitment Dashboard v3 Starter Pack
 
 这是一套给 WorkBuddy / CodeBuddy 使用的 v2 重建启动资料包。
 

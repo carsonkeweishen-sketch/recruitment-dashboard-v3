@@ -1,4 +1,4 @@
-# Recruitment Dashboard v2 — 架构文档
+# Recruitment Dashboard v3 — 架构文档
 
 ## 技术栈
 

@@ -1,4 +1,4 @@
-# Recruitment Dashboard v2
+# Recruitment Dashboard v3
 
 智能招聘 AI 看板 — 招聘效率管理系统
 

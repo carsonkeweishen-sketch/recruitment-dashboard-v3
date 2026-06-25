@@ -1,10 +1,10 @@
 # Moka 系统边界
 
-> 本文档明确 Recruitment Dashboard v2 与 Moka ATS 的边界关系。
+> 本文档明确 Recruitment Dashboard v3 与 Moka ATS 的边界关系。
 
 ## 核心原则
 
-Recruitment Dashboard v2 **不替代** Moka，**不强绑定** Moka API。
+Recruitment Dashboard v3 **不替代** Moka，**不强绑定** Moka API。
 
 ## Moka 负责（我们不做的）
 

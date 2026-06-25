@@ -1,4 +1,4 @@
-# Recruitment Dashboard v2 — 环境搭建
+# Recruitment Dashboard v3 — 环境搭建
 
 ## 前置条件
 

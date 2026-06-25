@@ -2,7 +2,7 @@
 
 ## 当前任务
 
-启动 Recruitment Dashboard v2 的 Phase 0：工程底座与持久化机制。
+启动 Recruitment Dashboard v3 的 Phase 0：工程底座与持久化机制。
 
 本阶段只做工程底座，不做业务模块。
 
@@ -11,7 +11,7 @@
 ## 1. 项目名称
 
 ```text
-recruitment-dashboard-v2
+recruitment-dashboard-v3
 ```
 
 ---

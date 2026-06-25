@@ -4,7 +4,7 @@
 
 ---
 
-我们现在启动 Recruitment Dashboard v2，这是基于旧版完整经验的产品级重建，不是缩水版 MVP，也不是临时 Demo。
+我们现在启动 Recruitment Dashboard v3，这是基于旧版完整经验的产品级重建，不是缩水版 MVP，也不是临时 Demo。
 
 请先阅读我提供的文档包，尤其是：
 

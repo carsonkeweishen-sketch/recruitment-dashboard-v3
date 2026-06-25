@@ -1,6 +1,6 @@
 # Phase 路线图
 
-> Recruitment Dashboard v2 — Phase 0 到 Phase 13
+> Recruitment Dashboard v3 — Phase 0 到 Phase 13
 
 | Phase | 名称 | 状态 | 核心交付 |
 |-------|------|------|----------|
