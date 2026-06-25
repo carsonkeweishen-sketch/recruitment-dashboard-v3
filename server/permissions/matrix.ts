@@ -1,9 +1,9 @@
-// Phase 1: 权限矩阵定义
+// Phase 1.1: 权限矩阵定义 + 精细 action 控制
 
 import type { Role, Resource, Scope } from "./types";
 
 /**
- * 权限矩阵:
+ * 权限矩阵 (Scope 级别):
  *   key: resource
  *   value: Record<Role, Scope>
  *
@@ -14,133 +14,114 @@ import type { Role, Resource, Scope } from "./types";
  *   RELATED     - 与自己相关
  *   DENY        - 无权限
  */
-
 type MatrixMap = Record<Resource, Record<Role, Scope>>;
 
 export const permissionMatrix: MatrixMap = {
   dashboard: {
-    admin: "ALL",
-    leader: "ALL",
-    hrbp: "DEPARTMENT",
-    recruiter: "OWNED",
-    business_owner: "DEPARTMENT",
-    interviewer: "DENY",
+    admin: "ALL", leader: "ALL", hrbp: "DEPARTMENT",
+    recruiter: "OWNED", business_owner: "DEPARTMENT", interviewer: "DENY",
   },
   workbench: {
-    admin: "ALL",
-    leader: "ALL",
-    hrbp: "DEPARTMENT",
-    recruiter: "OWNED",
-    business_owner: "RELATED",
-    interviewer: "RELATED",
+    admin: "ALL", leader: "ALL", hrbp: "DEPARTMENT",
+    recruiter: "OWNED", business_owner: "RELATED", interviewer: "RELATED",
   },
   jobs: {
-    admin: "ALL",
-    leader: "ALL",
-    hrbp: "DEPARTMENT",
-    recruiter: "OWNED",
-    business_owner: "DEPARTMENT",
-    interviewer: "RELATED",
+    admin: "ALL", leader: "ALL", hrbp: "DEPARTMENT",
+    recruiter: "OWNED", business_owner: "DEPARTMENT", interviewer: "RELATED",
   },
   candidates: {
-    admin: "ALL",
-    leader: "ALL",
-    hrbp: "DEPARTMENT",
-    recruiter: "OWNED",
-    business_owner: "RELATED",
-    interviewer: "RELATED",
+    admin: "ALL", leader: "ALL", hrbp: "DEPARTMENT",
+    recruiter: "OWNED", business_owner: "RELATED", interviewer: "RELATED",
   },
   applications: {
-    admin: "ALL",
-    leader: "ALL",
-    hrbp: "DEPARTMENT",
-    recruiter: "OWNED",
-    business_owner: "RELATED",
-    interviewer: "RELATED",
+    admin: "ALL", leader: "ALL", hrbp: "DEPARTMENT",
+    recruiter: "OWNED", business_owner: "RELATED", interviewer: "RELATED",
   },
   interviews: {
-    admin: "ALL",
-    leader: "ALL",
-    hrbp: "DEPARTMENT",
-    recruiter: "OWNED",
-    business_owner: "RELATED",
-    interviewer: "RELATED",
+    admin: "ALL", leader: "ALL", hrbp: "DEPARTMENT",
+    recruiter: "OWNED", business_owner: "RELATED", interviewer: "RELATED",
   },
   actions: {
-    admin: "ALL",
-    leader: "ALL",
-    hrbp: "DEPARTMENT",
-    recruiter: "OWNED",
-    business_owner: "RELATED",
-    interviewer: "RELATED",
+    admin: "ALL", leader: "ALL", hrbp: "DEPARTMENT",
+    recruiter: "OWNED", business_owner: "RELATED", interviewer: "RELATED",
   },
   imports: {
-    admin: "ALL",
-    leader: "ALL",
-    hrbp: "DEPARTMENT",
-    recruiter: "DENY",
-    business_owner: "DENY",
-    interviewer: "DENY",
+    admin: "ALL", leader: "ALL", hrbp: "DEPARTMENT",
+    recruiter: "DENY", business_owner: "DENY", interviewer: "DENY",
   },
   offerRisks: {
-    admin: "ALL",
-    leader: "ALL",
-    hrbp: "DEPARTMENT",
-    recruiter: "OWNED",
-    business_owner: "RELATED",
-    interviewer: "DENY",
+    admin: "ALL", leader: "ALL", hrbp: "DEPARTMENT",
+    recruiter: "OWNED", business_owner: "RELATED", interviewer: "DENY",
   },
   reports: {
-    admin: "ALL",
-    leader: "ALL",
-    hrbp: "DEPARTMENT",
-    recruiter: "OWNED",
-    business_owner: "DEPARTMENT",
-    interviewer: "DENY",
+    admin: "ALL", leader: "ALL", hrbp: "DEPARTMENT",
+    recruiter: "OWNED", business_owner: "DEPARTMENT", interviewer: "DENY",
   },
   aiAssistant: {
-    admin: "ALL",
-    leader: "ALL",
-    hrbp: "DEPARTMENT",
-    recruiter: "OWNED",
-    business_owner: "DENY",
-    interviewer: "DENY",
+    admin: "ALL", leader: "ALL", hrbp: "DEPARTMENT",
+    recruiter: "OWNED", business_owner: "DENY", interviewer: "DENY",
   },
   interviewerEnablement: {
-    admin: "ALL",
-    leader: "ALL",
-    hrbp: "DEPARTMENT",
-    recruiter: "DEPARTMENT",
-    business_owner: "DEPARTMENT",
-    interviewer: "RELATED",
+    admin: "ALL", leader: "ALL", hrbp: "DEPARTMENT",
+    recruiter: "DEPARTMENT", business_owner: "DEPARTMENT", interviewer: "RELATED",
   },
   settings: {
-    admin: "ALL",
-    leader: "ALL",
-    hrbp: "DENY",
-    recruiter: "DENY",
-    business_owner: "DENY",
-    interviewer: "DENY",
+    admin: "ALL", leader: "ALL", hrbp: "DENY",
+    recruiter: "DENY", business_owner: "DENY", interviewer: "DENY",
   },
 };
 
 /**
- * Action 权限检查（基于 Scope 和 Action 语义）
+ * 精细 action 规则（resource × role 级别覆盖）
  *
- * 规则:
- *   - DENY scope → 所有 action 拒绝
- *   - confirm / generate / analyze / import / export → 仅 ALL/DEPARTMENT/OWNED
- *   - delete → 仅 ALL/OWNED
+ * 格式: `${resource}:${role}` → 允许的 action 白名单
+ * 不在白名单中的 action 由通用 Scope 规则处理。
+ * 只记录需要"收窄"的规则，不记录全量允许。
  */
-// denylist not needed — handled inline in hasPermission()
+type ActionOverrideKey = `${Resource}:${Role}`;
 
-// Scope 下可执行 confirm 的角色限制
-const confirmAllowed: Scope[] = ["ALL", "DEPARTMENT", "OWNED"];
-const generateAllowed: Scope[] = ["ALL", "DEPARTMENT", "OWNED"];
-const analyzeAllowed: Scope[] = ["ALL", "DEPARTMENT", "OWNED"];
-const importExportAllowed: Scope[] = ["ALL", "DEPARTMENT"];
-const deleteAllowed: Scope[] = ["ALL", "OWNED"];
+const actionOverrides: Partial<Record<ActionOverrideKey, string[]>> = {
+  // === reports ===
+  // recruiter: OWNED scope, 可 view+generate, 不可 confirm
+  "reports:recruiter": ["view", "generate"],
+  // business_owner: DEPARTMENT scope, 仅 view（不可 generate/confirm）
+  "reports:business_owner": ["view"],
 
+  // === imports ===
+  // admin/leader/hrbp: 仅 view+import（无 export/delete 等）
+  "imports:admin": ["view", "import"],
+  "imports:leader": ["view", "import"],
+  "imports:hrbp": ["view", "import"],
+
+  // === aiAssistant ===
+  // admin/leader/hrbp/recruiter: 仅 view+analyze
+  "aiAssistant:admin": ["view", "analyze"],
+  "aiAssistant:leader": ["view", "analyze"],
+  "aiAssistant:hrbp": ["view", "analyze"],
+  "aiAssistant:recruiter": ["view", "analyze"],
+
+  // === offerRisks ===
+  // admin/leader: view+create+update
+  "offerRisks:admin": ["view", "create", "update"],
+  "offerRisks:leader": ["view", "create", "update"],
+  // hrbp: DEPARTMENT scope, view+create+update
+  "offerRisks:hrbp": ["view", "create", "update"],
+  // recruiter: OWNED scope, view+create+update
+  "offerRisks:recruiter": ["view", "create", "update"],
+  // business_owner: RELATED scope, 仅 view
+  "offerRisks:business_owner": ["view"],
+
+  // === settings ===
+  "settings:admin": ["view", "create", "update", "delete"],
+  "settings:leader": ["view"],
+};
+
+/**
+ * 通用 Scope → Action 规则
+ *   RELATED: only view, update
+ *   OWNED/DEPARTMENT/ALL: 所有 action 允许（除非被 actionOverrides 收窄）
+ *   DENY: 无
+ */
 export function hasPermission(
   role: Role,
   resource: Resource,
@@ -149,18 +130,19 @@ export function hasPermission(
   const scope = permissionMatrix[resource]?.[role];
   if (scope === undefined || scope === "DENY") return false;
 
-  // RELATED: only view, update
+  // 1. 检查精细 override（resource × role 白名单）
+  const key: ActionOverrideKey = `${resource}:${role}`;
+  const allowed = actionOverrides[key];
+  if (allowed !== undefined) {
+    return allowed.includes(action);
+  }
+
+  // 2. 通用 Scope 规则
   if (scope === "RELATED") {
     return action === "view" || action === "update";
   }
 
-  // Confirm action restrictions
-  if (action === "confirm" && !confirmAllowed.includes(scope)) return false;
-  if (action === "generate" && !generateAllowed.includes(scope)) return false;
-  if (action === "analyze" && !analyzeAllowed.includes(scope)) return false;
-  if ((action === "import" || action === "export") && !importExportAllowed.includes(scope)) return false;
-  if (action === "delete" && !deleteAllowed.includes(scope)) return false;
-
+  // OWNED / DEPARTMENT / ALL: 允许所有 action
   return true;
 }
 

@@ -59,6 +59,40 @@
 - 调试入口: /permissions-debug
 - 权限由服务端 `requirePermission()` 强制执行
 
+## 开发态说明
+
+⚠️ Phase 1 的权限系统基于 cookie 的开发态会话：
+
+- **Role Switcher**: 仅开发环境可用，生产环境默认隐藏
+- **/permissions-debug**: 仅开发环境可访问，生产环境需 `NEXT_PUBLIC_ENABLE_PERMISSION_DEBUG=true`
+- **不是正式登录系统**：无 OAuth / 无密码 / 无用户注册
+- **后续 Phase 将替换为 NextAuth.js 真实认证**
+
+## 关键模块 Action 粒度
+
+### reports
+- admin/leader: view / generate / confirm
+- hrbp: view / generate / confirm（DEPARTMENT scope）
+- recruiter: view / generate（OWNED scope，不可 confirm）
+- business_owner: view only（DEPARTMENT scope）
+- interviewer: DENY
+
+### imports
+- admin/leader/hrbp: view / import
+- recruiter/business_owner/interviewer: DENY
+
+### aiAssistant
+- admin/leader: view / analyze
+- hrbp: view / analyze（DEPARTMENT scope）
+- recruiter: view / analyze（OWNED scope）
+- business_owner/interviewer: DENY
+
+### offerRisks
+- admin/leader/hrbp: view / create / update
+- recruiter: view / create / update（OWNED scope）
+- business_owner: view only（RELATED scope）
+- interviewer: DENY
+
 ## 文件结构
 
 ```

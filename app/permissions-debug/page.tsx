@@ -3,8 +3,19 @@ import type { Role, Resource } from "@/server/permissions/types";
 import { ROLE_LABELS, RESOURCE_LABELS, SCOPE_LABELS } from "@/server/permissions/types";
 import { getScopeFor } from "@/server/permissions/matrix";
 import { getAllowedActions } from "@/server/permissions/check-permission";
+import { PermissionDenied } from "@/components/ui/PermissionDenied";
 
 export default async function PermissionsDebugPage() {
+  // 生产环境保护：仅在开发环境或显式开启时可用
+  const isProduction = process.env.NODE_ENV === "production";
+  const isEnabled = process.env.NEXT_PUBLIC_ENABLE_PERMISSION_DEBUG === "true";
+
+  if (isProduction && !isEnabled) {
+    return (
+      <PermissionDenied message="权限调试面板仅开发环境可用。生产环境请设置 NEXT_PUBLIC_ENABLE_PERMISSION_DEBUG=true" />
+    );
+  }
+
   const session = await getSession();
   const role: Role = session.role;
 

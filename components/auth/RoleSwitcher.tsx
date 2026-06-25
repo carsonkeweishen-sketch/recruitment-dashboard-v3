@@ -7,10 +7,27 @@ import { ROLE_LABELS } from "@/server/permissions/types";
 
 const ROLES: Role[] = ["admin", "leader", "hrbp", "recruiter", "business_owner", "interviewer"];
 
+/**
+ * 开发态角色切换器。
+ *
+ * ⚠️ 这不是正式登录系统。
+ * - 基于 cookie 存储当前开发角色
+ * - 生产环境默认隐藏，需设置 NEXT_PUBLIC_ENABLE_PERMISSION_DEBUG=true
+ * - 后续 Phase 将替换为 NextAuth.js 真实认证
+ */
 export function RoleSwitcher({ currentRole }: { currentRole: Role }) {
   const [open, setOpen] = useState(false);
   const [role, setRole] = useState<Role>(currentRole);
   const router = useRouter();
+
+  // 生产环境且未显式开启时，不渲染
+  if (
+    typeof window !== "undefined" &&
+    process.env.NEXT_PUBLIC_ENABLE_PERMISSION_DEBUG !== "true" &&
+    process.env.NODE_ENV === "production"
+  ) {
+    return null;
+  }
 
   async function handleSwitch(newRole: Role) {
     setRole(newRole);
