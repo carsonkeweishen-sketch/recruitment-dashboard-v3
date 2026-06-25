@@ -23,7 +23,7 @@ export class OpenAIClient {
     return this.config ? "ready" : "not_configured";
   }
 
-  async chatCompletion(_req: ChatCompletionRequest): Promise<ClientResult<ChatCompletionResponse>> {
+  async chatCompletion(_request: ChatCompletionRequest): Promise<ClientResult<ChatCompletionResponse>> {
     if (!this.config) return { ok: false, errorCode: "not_configured", message: "OpenAI not configured" };
     // Phase 10: 实现真实 API 调用
     return { ok: false, errorCode: "not_configured", message: "OpenAI integration not yet implemented" };

@@ -25,12 +25,12 @@ export class MokaClient {
     return { ok: false, errorCode: "not_configured", message: "Moka integration not yet implemented" };
   }
 
-  async fetchCandidates(_jobExternalId: string): Promise<ClientResult<MokaCandidate[]>> {
+  async fetchCandidates(_jobId: string): Promise<ClientResult<MokaCandidate[]>> {
     if (!this.config) return { ok: false, errorCode: "not_configured", message: "Moka not configured" };
     return { ok: false, errorCode: "not_configured", message: "Moka integration not yet implemented" };
   }
 
-  async fetchApplications(_jobExternalId: string): Promise<ClientResult<MokaApplication[]>> {
+  async fetchApplications(_jobId: string): Promise<ClientResult<MokaApplication[]>> {
     if (!this.config) return { ok: false, errorCode: "not_configured", message: "Moka not configured" };
     return { ok: false, errorCode: "not_configured", message: "Moka integration not yet implemented" };
   }

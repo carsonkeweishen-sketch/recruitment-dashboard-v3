@@ -19,7 +19,7 @@ export class FeishuClient {
     return this.config ? "ready" : "not_configured";
   }
 
-  async sendMessage(_msg: FeishuMessage): Promise<ClientResult<void>> {
+  async sendMessage(_message: FeishuMessage): Promise<ClientResult<void>> {
     if (!this.config) return { ok: false, errorCode: "not_configured", message: "Feishu not configured" };
     return { ok: false, errorCode: "not_configured", message: "Feishu integration not yet implemented" };
   }

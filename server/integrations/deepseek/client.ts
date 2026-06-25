@@ -21,7 +21,7 @@ export class DeepSeekClient {
     return this.config ? "ready" : "not_configured";
   }
 
-  async chatCompletion(_req: ChatCompletionRequest): Promise<ClientResult<ChatCompletionResponse>> {
+  async chatCompletion(_request: ChatCompletionRequest): Promise<ClientResult<ChatCompletionResponse>> {
     if (!this.config) return { ok: false, errorCode: "not_configured", message: "DeepSeek not configured" };
     return { ok: false, errorCode: "not_configured", message: "DeepSeek integration not yet implemented" };
   }
