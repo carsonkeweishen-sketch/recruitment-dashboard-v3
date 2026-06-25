@@ -46,6 +46,7 @@ next-env.d.ts
 
 # internal data
 /private-data/
+prisma/seed.internal.ts
 *.pdf
 *.docx
 *.xlsx
