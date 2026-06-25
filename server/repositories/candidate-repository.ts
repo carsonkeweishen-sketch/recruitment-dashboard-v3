@@ -46,7 +46,14 @@ export async function getCandidates(params: CandidateListParams) {
   } else if (scope.scope === "OWNED" && scope.userId) {
     where.applications = { ...(where.applications as object ?? {}), some: { ...appWhere, ownerId: scope.userId } };
   } else if (scope.scope === "RELATED" && scope.userId) {
-    where.applications = { ...(where.applications as object ?? {}), some: { ...appWhere, OR: [{ ownerId: scope.userId }, { job: { businessOwnerId: scope.userId } }] } };
+    // RELATED semantics differ by role:
+    // - interviewer: only candidates they have been assigned to interview
+    // - business_owner: candidates whose application ownerId or job.businessOwnerId matches
+    if (scope.role === "interviewer") {
+      where.applications = { ...(where.applications as object ?? {}), some: { ...appWhere, interviews: { some: { interviewerId: scope.userId } } } };
+    } else {
+      where.applications = { ...(where.applications as object ?? {}), some: { ...appWhere, OR: [{ ownerId: scope.userId }, { job: { businessOwnerId: scope.userId } }] } };
+    }
   }
 
   return prisma.candidate.findMany({

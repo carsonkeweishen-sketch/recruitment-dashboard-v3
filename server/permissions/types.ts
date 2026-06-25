@@ -46,6 +46,7 @@ export interface ScopeWhere {
   scope: Scope;
   userId?: string;
   departmentId?: string;
+  role?: Role;
 }
 
 export const ROLE_LABELS: Record<Role, string> = {

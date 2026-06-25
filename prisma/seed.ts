@@ -144,6 +144,20 @@ async function main() {
         salaryMin: 10000, salaryMax: 20000,
       },
     }),
+    // Job 9: 招聘专员 — HRBP 部门验收数据
+    prisma.job.upsert({ where: { jobCode: "HR-001" }, update: {}, create: {
+      title: "招聘专员", jobCode: "HR-001", brandLine: "理然", departmentId: deptHR.id, level: "A3",
+      status: "open", priority: "normal",
+      ownerId: userHrbp.id, businessOwnerId: userHrbp.id,
+      location: "深圳", headcount: 1,
+      jdText: "负责全公司招聘流程支持，维护招聘渠道，协调面试安排。",
+      profileSummary: "2年以上招聘执行经验，熟悉快消/日化行业招聘优先。",
+      mustHave: { skill: "招聘全流程", tools: "BOSS直聘/猎聘", experience: "2年+" },
+      niceToHave: { industry: "快消/日化", cert: "人力资源管理师" },
+      targetCompanies: ["快消/日化行业", "互联网招聘平台"],
+      interviewFocus: ["招聘全流程理解", "候选人沟通", "面试评估", "渠道运营"],
+      salaryMin: 8000, salaryMax: 15000,
+    } }),
   ]);
 
   // === 4. Candidates (8 虚拟候选人) ===
@@ -156,6 +170,9 @@ async function main() {
     prisma.candidate.create({ data: { name: "顾清和", email: "gu.qinghe@example.com", phone: "13800000006", source: "猎头推荐", currentCompany: "联合利华", currentTitle: "品牌经理", resumeSummary: "5年品牌策划经验，主导过3个新品上市项目，预算管理2000万+。", tags: ["品牌", "快消", "新品上市"] } }),
     prisma.candidate.create({ data: { name: "沈知意", email: "shen.zhiyi@example.com", phone: "13800000007", source: "BOSS直聘", currentCompany: "科丝美诗", currentTitle: "OEM采购", resumeSummary: "4年OEM采购经验，管理华南区30+工厂资源，熟悉护肤品/彩妆品类。", tags: ["OEM", "采购", "美妆"] } }),
     prisma.candidate.create({ data: { name: "陆嘉宁", email: "lu.jianing@example.com", phone: "13800000008", source: "BOSS直聘", currentCompany: "美ONE", currentTitle: "主播", resumeSummary: "2年抖音直播经验，美妆赛道，场均在线500+，转化率8%。", tags: ["主播", "抖音", "美妆"] } }),
+    // Candidate 9: HRBP 部门验收数据
+    prisma.candidate.create({ data: { name: "苏敏", email: "su.min@example.com", phone: "13800000009", source: "猎聘", currentCompany: "蓝月亮", currentTitle: "招聘主管", resumeSummary: "5年快消行业招聘经验，年招聘量50+，擅长销售/市场岗位。", tags: ["招聘", "快消", "HR"] } }),
+    prisma.candidate.create({ data: { name: "吴启明", email: "wu.qiming@example.com", phone: "13800000010", source: "BOSS直聘", currentCompany: "完美日记", currentTitle: "HR专员", resumeSummary: "3年美妆行业HR经验，熟悉招聘全流程，有HR系统上线经验。", tags: ["HR", "美妆", "系统"] } }),
   ]);
 
   // === 5. Applications (8 投递) ===
@@ -168,6 +185,9 @@ async function main() {
     prisma.application.create({ data: { jobId: jobs[5].id, candidateId: candidates[5].id, stage: "offer_risk", status: "active", ownerId: userRecruiter.id, source: "猎头推荐", fitScore: 92 } }),
     prisma.application.create({ data: { jobId: jobs[6].id, candidateId: candidates[6].id, stage: "hr_screen", status: "active", ownerId: userRecruiter.id, source: "BOSS直聘", fitScore: 75 } }),
     prisma.application.create({ data: { jobId: jobs[7].id, candidateId: candidates[7].id, stage: "first_interview", status: "active", ownerId: userRecruiter.id, source: "BOSS直聘", fitScore: 82 } }),
+    // Applications 9-10: HRBP 部门验收数据
+    prisma.application.create({ data: { jobId: jobs[8].id, candidateId: candidates[8].id, stage: "hr_screen", status: "active", ownerId: userHrbp.id, source: "猎聘", fitScore: 80 } }),
+    prisma.application.create({ data: { jobId: jobs[8].id, candidateId: candidates[9].id, stage: "sourced", status: "active", ownerId: userHrbp.id, source: "BOSS直聘", fitScore: 75 } }),
   ]);
 
   // === 6. Interviews + Feedback ===

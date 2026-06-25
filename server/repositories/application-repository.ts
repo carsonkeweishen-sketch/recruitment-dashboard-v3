@@ -34,7 +34,14 @@ export async function getApplications(params: ApplicationListParams) {
   } else if (scope.scope === "OWNED" && scope.userId) {
     where.ownerId = scope.userId;
   } else if (scope.scope === "RELATED" && scope.userId) {
-    where.OR = [{ ownerId: scope.userId }, { job: { businessOwnerId: scope.userId } }];
+    // RELATED semantics differ by role:
+    // - interviewer: only applications where they have been assigned to interview
+    // - business_owner: applications where ownerId or job.businessOwnerId matches
+    if (scope.role === "interviewer") {
+      where.interviews = { some: { interviewerId: scope.userId } };
+    } else {
+      where.OR = [{ ownerId: scope.userId }, { job: { businessOwnerId: scope.userId } }];
+    }
   }
 
   return prisma.application.findMany({

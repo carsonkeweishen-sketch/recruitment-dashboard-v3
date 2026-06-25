@@ -1,0 +1,137 @@
+# Phase 4.4.1 Commands Log
+# Branch: agent/workbuddy/phase-4.4
+# Purpose: Role Scope Clarification & HRBP Seed Evidence
+
+=================================================================
+SECTION 1: Fix Verification - Interviewer RELATED Scope
+=================================================================
+Before fix (Phase 4.4): interviewer saw 5 candidates via businessOwnerId
+After fix (Phase 4.4.1): interviewer sees 2 candidates via Interview.interviewerId
+
+Code change in candidate-repository.ts line 48-49:
+  OLD: OR: [{ ownerId: scope.userId }, { job: { businessOwnerId: scope.userId } }]
+  NEW (interviewer): interviews: { some: { interviewerId: scope.userId } }
+
+Code change in application-repository.ts line 37:
+  OLD: where.OR = [{ ownerId: scope.userId }, { job: { businessOwnerId: scope.userId } }];
+  NEW (interviewer): where.interviews = { some: { interviewerId: scope.userId } };
+
+=================================================================
+SECTION 2: Fix Verification - HRBP Seed Data
+=================================================================
+Added via direct DB insert:
+  - Job: 招聘专员 (HR-001), departmentId=人力资源部 (cmqt4167c0001jsqh47jzx52k)
+  - Candidate 1: 苏敏 (su.min@example.com), 蓝月亮, 招聘主管
+  - Candidate 2: 吴启明 (wu.qiming@example.com), 完美日记, HR专员
+  - Application 1: 苏敏 → 招聘专员, hr_screen
+  - Application 2: 吴启明 → 招聘专员, sourced
+
+=================================================================
+SECTION 3: Six-Role Permission Test (Real Numbers)
+=================================================================
+$ curl -s -b "rd_dev_role=<role>; rd_dev_user_id=<uid>; rd_dev_dept_id=<did>" "http://localhost:3000/api/candidates"
+$ curl -s -b "rd_dev_role=<role>; rd_dev_user_id=<uid>; rd_dev_dept_id=<did>" "http://localhost:3000/api/applications"
+
+Results:
+admin        | ALL        | candidates=10 | applications=10
+leader       | ALL        | candidates=10 | applications=10
+hrbp         | DEPARTMENT | candidates=2  | applications=2   ← FIXED: was 0
+recruiter    | OWNED      | candidates=8  | applications=8
+business_owner| RELATED   | candidates=3  | applications=3
+interviewer  | RELATED    | candidates=2  | applications=2   ← FIXED: was 5
+
+=================================================================
+SECTION 4: Interviewer Traceability Evidence
+=================================================================
+DB Query: Interview.findMany({ where: { interviewerId: 孙面试官 } })
+
+interviewId=cmqt44zhe000yzyqhjz32bguj
+  candidateId=cmqt44zfb000kzyqhhevphgrl
+  candidateName=陈书妍
+  applicationId=cmqt44zga000szyqhddb8u1is
+  jobTitle=媒介投放
+  interviewerId=cmqt44zdt0009zyqhnpi53sy1
+  round=business_first
+  whyVisible=Interview.interviewerId matches current user
+
+interviewId=cmqt44zhs0010zyqh78h4eceh
+  candidateId=cmqt44zfc000mzyqh7i0rv81z
+  candidateName=赵明远
+  applicationId=cmqt44zgb000uzyqhpf4cfugs
+  jobTitle=内容编辑
+  interviewerId=cmqt44zdt0009zyqhnpi53sy1
+  round=business_first
+  whyVisible=Interview.interviewerId matches current user
+
+Total interviews assigned: 2
+Each traceable to Interview.interviewerId === current user ✅
+
+=================================================================
+SECTION 5: HRBP DEPARTMENT Scope Evidence
+=================================================================
+hrbpUserId=cmqt44zcb0006zyqh896spolz
+departmentId=cmqt4167c0001jsqh47jzx52k
+departmentName=人力资源部
+candidatesCount=2
+applicationsCount=2
+
+Candidates visible:
+  吴启明 | 招聘专员 | sourced
+  苏敏 | 招聘专员 | hr_screen
+
+Applications visible:
+  吴启明 -> 招聘专员 | stage=sourced
+  苏敏 -> 招聘专员 | stage=hr_screen
+
+Proof of server-side department filtering:
+  candidate-repository.ts line 45:
+    where.applications = { some: { job: { departmentId: scope.departmentId } } }
+  application-repository.ts line 33:
+    where.job = { departmentId: scope.departmentId }
+
+Not frontend filtering ✅
+Not seeing full list (admin sees 10, hrbp sees 2) ✅
+Not always 0 ✅
+
+=================================================================
+SECTION 6: Contact Privacy Verification
+=================================================================
+admin on 林可: email=lin.ke@example.com, phone=13800000001 → VISIBLE ✅
+biz_owner on 林可: email=None, phone=None → MASKED ✅
+interviewer on 陈书妍: email=None, phone=None → MASKED ✅
+
+Code: app/api/candidates/[id]/route.ts line 18:
+  const showContact = scope === "ALL" || scope === "DEPARTMENT" || scope === "OWNED";
+  email: showContact ? candidate.email : null
+  phone: showContact ? candidate.phone : null
+
+UI: F component with permissionRequired → "无权限查看" when null
+
+=================================================================
+SECTION 7: Build & Git Evidence
+=================================================================
+$ pnpm typecheck
+> tsc --noEmit
+(exit 0)
+
+$ pnpm lint
+> eslint . --ext .ts,.tsx
+(exit 0)
+
+$ pnpm build
+○ (Static) prerendered as static content
+ƒ (Dynamic) server-rendered on demand
+(exit 0, PASS)
+
+=================================================================
+SECTION 8: Evidence Files
+=================================================================
+$ find docs/self-checks -name "phase-4.4.1*" | sort
+docs/self-checks/phase-4.4.1-commands.log
+docs/self-checks/phase-4.4.1-report.md
+
+$ find screenshots/phase-4.4.1 -type f | sort
+screenshots/phase-4.4.1/biz-owner-contact-hidden.png
+screenshots/phase-4.4.1/hrbp-candidates-visible.png
+screenshots/phase-4.4.1/interviewer-contact-hidden.png
+screenshots/phase-4.4.1/interviewer-related-candidates.png

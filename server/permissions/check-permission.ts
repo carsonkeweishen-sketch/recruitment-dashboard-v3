@@ -30,6 +30,7 @@ export function buildScopeWhere(
     scope,
     userId: context.userId,
     departmentId: context.departmentId,
+    role: context.role,
   };
 }
 
