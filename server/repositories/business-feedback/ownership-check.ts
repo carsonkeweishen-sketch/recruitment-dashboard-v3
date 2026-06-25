@@ -28,9 +28,10 @@ export async function requireJobOwnership(
   if (role === "admin" || role === "leader") return job;
 
   // business_owner: only if job.businessOwnerId === userId
+  // Note: ownerId is the HR/recruiter owner — business_owner does NOT inherit recruiter scope
   if (role === "business_owner") {
-    if (job.businessOwnerId !== userId && job.ownerId !== userId) {
-      throw new JobOwnershipError("Permission denied: you are not the business owner or owner of this job");
+    if (job.businessOwnerId !== userId) {
+      throw new JobOwnershipError("Permission denied: you are not the business owner of this job");
     }
     return job;
   }
@@ -60,7 +61,9 @@ export async function requireCalibrationOwnership(
   if (role === "admin" || role === "leader") return;
 
   if (role === "business_owner") {
-    if (cal.job.businessOwnerId !== userId && cal.job.ownerId !== userId && cal.createdBy !== userId) {
+    // business_owner only: calibration must belong to a job they own as businessOwner
+    // OR they created the calibration themselves
+    if (cal.job.businessOwnerId !== userId && cal.createdBy !== userId) {
       throw new JobOwnershipError("Permission denied: you are not related to this calibration");
     }
   }

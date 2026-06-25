@@ -1,0 +1,75 @@
+# Phase 5.1.1 Commands Log
+
+=================================================================
+SECTION 1: Ownership Semantics Verification
+=================================================================
+DB query: Job.ownerId vs Job.businessOwnerId mapping
+
+KA大客户销售   | ownerId=n7dsk3ir (王招聘 role=recruiter)      | bizOwnerId=6dao7vbr (赵业务 role=business_owner)
+采购资源开发    | ownerId=n7dsk3ir (王招聘 role=recruiter)      | bizOwnerId=6dao7vbr (赵业务 role=business_owner)
+媒介投放       | ownerId=n7dsk3ir (王招聘 role=recruiter)      | bizOwnerId=npi53sy1 (孙面试官 role=interviewer)
+直播场控       | ownerId=n7dsk3ir (王招聘 role=recruiter)      | bizOwnerId=npi53sy1 (孙面试官 role=interviewer)
+内容编辑       | ownerId=n7dsk3ir (王招聘 role=recruiter)      | bizOwnerId=npi53sy1 (孙面试官 role=interviewer)
+品牌策划       | ownerId=n7dsk3ir (王招聘 role=recruiter)      | bizOwnerId=npi53sy1 (孙面试官 role=interviewer)
+OEM采购       | ownerId=n7dsk3ir (王招聘 role=recruiter)      | bizOwnerId=6dao7vbr (赵业务 role=business_owner)
+抖音主播       | ownerId=n7dsk3ir (王招聘 role=recruiter)      | bizOwnerId=npi53sy1 (孙面试官 role=interviewer)
+招聘专员       | ownerId=896spolz (张HRBP role=hrbp)           | bizOwnerId=896spolz (张HRBP role=hrbp)
+
+Conclusion:
+- ownerId = 招聘负责人 (HR/recruiter owner) — ALL jobs owned by 王招聘(recruiter)
+- businessOwnerId = 业务负责人 (Business owner) — distributed by business line
+- business_owner should NOT inherit recruiter's ownerId scope
+
+=================================================================
+SECTION 2: Code Fix
+=================================================================
+File: server/repositories/business-feedback/ownership-check.ts
+
+Line 32 (requireJobOwnership):
+  OLD: if (job.businessOwnerId !== userId && job.ownerId !== userId)
+  NEW: if (job.businessOwnerId !== userId)
+
+Line 64 (requireCalibrationOwnership):
+  OLD: if (cal.job.businessOwnerId !== userId && cal.job.ownerId !== userId && cal.createdBy !== userId)
+  NEW: if (cal.job.businessOwnerId !== userId && cal.createdBy !== userId)
+
+=================================================================
+SECTION 3: Permission Test Results
+=================================================================
+biz_owner + RELATED (KA大客户, bizOwner=赵业务):
+  POST /api/business-feedback → 201, success=True ✅
+
+biz_owner + UNRELATED (品牌策划, ownerId=王招聘, bizOwnerId=孙面试官):
+  POST /api/business-feedback → 403, error="not the business owner of this job" ✅
+
+recruiter OWNED scope:
+  GET /api/candidates → 8 candidates ✅
+
+interviewer:
+  POST /api/business-feedback → 403 ✅
+
+=================================================================
+SECTION 4: DB Integrity
+=================================================================
+Unrelated feedback by 赵业务 on 品牌策划: NOT FOUND ✅
+No ActivityLog for denied request ✅
+Recruiter candidate count (ownerId-based): 8 ✅
+
+=================================================================
+SECTION 5: Build Verification
+=================================================================
+$ pnpm typecheck
+> tsc --noEmit
+(exit 0)
+
+$ pnpm lint
+> eslint . --ext .ts,.tsx
+(exit 0)
+
+$ pnpm build
+○ (Static) prerendered as static content
+ƒ (Dynamic) server-rendered on demand
+(exit 0 - PASS)
+
+$ git status --short
+(clean)
