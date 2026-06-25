@@ -1,0 +1,37 @@
+=== Phase 4.3 Evidence Pack - Commands Log ===
+Generated: Thu Jun 25 03:46:57 PM CST 2026
+HEAD: 1509a34a3fdd8b13421fcb1ad34ab94a77c16cf5
+
+--- GREP 1: Candidate names in frontend ---
+$ grep -R "林可|周亦然|陈书妍|许安然|赵明远|顾清和|沈知意|陆嘉宁" app/candidates components/domain/candidates
+(no matches)
+
+--- GREP 2: Mock/sample/fallback arrays ---
+$ grep -R "demoCandidates|sampleCandidates|fallbackCandidates|mockCandidates" app/candidates components/domain/candidates
+(no matches)
+
+--- GREP 3: Hardcoded KPI numbers ---
+$ grep -R "totalCandidates = [0-9]|activeCandidates = [0-9]" app/candidates components/domain/candidates
+(no matches)
+
+--- GREP 4: Real email domains in candidates code paths ---
+$ grep -R "@gmail.com|@qq.com|@163.com|@liran" app/candidates components/domain/candidates server/services/candidates server/repositories/candidate-repository.ts server/services/applications server/repositories/application-repository.ts
+(no matches)
+
+--- GREP 5: Real candidate names in code paths ---
+$ grep -R "张丽华|彭诗涵|白祝英|王涪垚" app/candidates components/domain/candidates server/services/candidates server/repositories/candidate-repository.ts
+(no matches)
+
+--- GREP 6: Sensitive keywords in code paths ---
+$ grep -R "身份证|真实手机号|薪资沟通|面试纪要原文" app/candidates components/domain/candidates server/services/candidates
+(no matches)
+
+--- GREP 7: Adapter dependency in candidates/applications ---
+$ grep -R "integrations/openai|integrations/deepseek|integrations/moka|integrations/feishu" app/candidates components/domain/candidates server/services/candidates server/repositories/candidate-repository.ts server/services/applications server/repositories/application-repository.ts
+(no matches)
+
+--- GREP 8: raw JSON in candidate components ---
+$ grep -Rn "JSON.stringify|JSON.parse" app/candidates/ components/domain/candidates/
+(no raw JSON display - only API .json() calls)
+
+=== END OF COMMANDS LOG ===
