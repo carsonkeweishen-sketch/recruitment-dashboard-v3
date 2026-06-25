@@ -1,0 +1,89 @@
+# Phase 6 Commands Log
+# Branch: agent/workbuddy/phase-6
+
+=================================================================
+SECTION 1: Schema Check
+=================================================================
+No Schema changes. Existing Interview + InterviewFeedback models are sufficient.
+
+=================================================================
+SECTION 2: Hardcode Check
+=================================================================
+$ grep -R "mockInterview\|demoInterview\|sampleInterview\|fallbackInterview" app components server
+(no output - exit 1)
+
+$ grep -R "候选人A\|测试面试\|王招聘\|赵业务\|孙面试官\|张HRBP\|陈总\|李总监" app components server
+(no output - exit 1)
+
+=================================================================
+SECTION 3: Adapter Isolation
+=================================================================
+$ grep -R "integrations/openai\|integrations/deepseek\|integrations/moka\|integrations/feishu" app components server/services server/repositories
+(no output - exit 1)
+
+=================================================================
+SECTION 4: Build Verification
+=================================================================
+$ pnpm prisma generate
+✔ Generated Prisma Client (v7.8.0)
+
+$ pnpm typecheck
+> tsc --noEmit
+(exit 0 - 0 errors)
+
+$ pnpm lint
+> eslint . --ext .ts,.tsx
+(exit 0 - 0 errors, 0 warnings)
+
+$ pnpm build
+○ (Static) prerendered as static content
+ƒ (Dynamic) server-rendered on demand
+(exit 0 - PASS)
+
+=================================================================
+SECTION 5: API Test Results
+=================================================================
+
+5.1 GET /api/interviews (admin)
+  Response: 200, interviews=3, metrics={totalInterviews:3, feedbackSubmittedCount:3, feedbackPendingCount:0, feedbackOnTimeRate:0}
+
+5.2 GET /api/interviews/:id (admin)
+  Response: 200, candidate=陈书妍, round=business_first, feedback=yes
+
+5.3 POST /api/interviews/:id/feedback (interviewer - own)
+  Request: {scores:6 dimensions, overallRecommendation:"HIRE", evidenceText:"...", riskNotes:"..."}
+  Response: 201, feedbackQualityScore=76
+  ActivityLog: INTERVIEW_FEEDBACK_SUBMITTED ✅
+
+5.4 POST /api/interviews/:id/feedback (interviewer - unrelated)
+  Response: 403, error="Permission denied: you can only submit feedback for your own interviews"
+
+5.5 POST /api/interviews/:id/feedback (biz_owner)
+  Response: 403, error="Permission denied: only the assigned interviewer, admin, or leader can submit feedback"
+
+=================================================================
+SECTION 6: Permission Tests
+=================================================================
+interviewer submit own interview feedback → 201 ✅
+interviewer submit unrelated interview feedback → 403 ✅
+biz_owner submit feedback → 403 ✅
+admin view all interviews → 200 ✅
+business_owner view interviews → 200 ✅
+hrbp view department interviews → 200 ✅
+
+=================================================================
+SECTION 7: Evidence Files
+=================================================================
+$ find screenshots/phase-6 -type f | sort
+screenshots/phase-6/business-owner-interview-view.png
+screenshots/phase-6/feedback-empty.png
+screenshots/phase-6/feedback-error.png
+screenshots/phase-6/feedback-loading.png
+screenshots/phase-6/feedback-quality-signals.png
+screenshots/phase-6/hrbp-department-interview-view.png
+screenshots/phase-6/interview-detail-drawer-overview.png
+screenshots/phase-6/interview-feedback-form.png
+screenshots/phase-6/interview-risk-signals.png
+screenshots/phase-6/interviewer-permission-denied.png
+screenshots/phase-6/interviewer-submit-denied-unrelated.png
+screenshots/phase-6/interviews-page-success.png
