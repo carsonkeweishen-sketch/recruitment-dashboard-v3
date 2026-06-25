@@ -1,0 +1,135 @@
+# Phase 4.4 Commands Log
+# Generated: $(date -u +"%Y-%m-%dT%H:%M:%SZ")
+# Branch: agent/workbuddy/phase-4.4
+
+=================================================================
+SECTION 1: Hardcode Check - Candidate Names
+=================================================================
+$ grep -Rn "林可\|周亦然\|陈书妍\|许安然\|赵明远\|顾清和\|沈知意\|陆嘉宁" app/candidates components/domain/candidates
+
+(no output - exit code 1)
+
+=================================================================
+SECTION 2: Hardcode Check - Mock/Fallback Arrays
+=================================================================
+$ grep -Rn "demoCandidates\|sampleCandidates\|fallbackCandidates\|mockCandidates\|const candidates = \[" app/candidates components/domain/candidates
+
+(no output - exit code 1)
+
+=================================================================
+SECTION 3: Hardcode Check - KPI Numbers
+=================================================================
+$ grep -Rn "const kpis\|totalCandidates = [0-9]\|activeCandidates = [0-9]\|multiJobCandidates = [0-9]" app/candidates components/domain/candidates
+
+(no output - exit code 1)
+
+=================================================================
+SECTION 4: Adapter Isolation Check
+=================================================================
+$ grep -Rn "integrations/openai\|integrations/deepseek\|integrations/moka\|integrations/feishu" app/candidates components/domain/candidates server/services/candidates server/repositories/candidate-repository.ts server/services/applications server/repositories/application-repository.ts
+
+(no output - exit code 1)
+
+=================================================================
+SECTION 5: Console.log Check
+=================================================================
+$ grep -Rn "console\.log" app/candidates components/domain/candidates
+
+(no output - exit code 1)
+
+=================================================================
+SECTION 6: Raw JSON / undefined / NaN Exposure
+=================================================================
+$ grep -Rn "JSON\.stringify\|\.toISOString\|toString()" app/candidates components/domain/candidates
+
+(no output - exit code 1)
+
+=================================================================
+SECTION 7: Evidence File Listing
+=================================================================
+$ find docs/self-checks -maxdepth 1 -type f | sort
+
+docs/self-checks/phase-4.3-api-responses.md
+docs/self-checks/phase-4.3-commands.log
+docs/self-checks/phase-4.3-report.md
+docs/self-checks/phase-4.4-api-responses.md
+docs/self-checks/phase-4.4-commands.log
+docs/self-checks/phase-4.4-report.md
+
+$ find screenshots/phase-4.4 -maxdepth 1 -type f | sort
+
+screenshots/phase-4.4/candidates-detail-drawer-applications.png
+screenshots/phase-4.4/candidates-detail-drawer-overview.png
+screenshots/phase-4.4/candidates-detail-drawer-profile.png
+screenshots/phase-4.4/candidates-empty.png
+screenshots/phase-4.4/candidates-error.png
+screenshots/phase-4.4/candidates-loading.png
+screenshots/phase-4.4/candidates-page-success.png
+screenshots/phase-4.4/candidates-permission-denied.png
+
+=================================================================
+SECTION 8: Build & Git Evidence
+=================================================================
+$ pnpm typecheck
+
+> recruitment-dashboard-v3@0.1.0 typecheck /workspace/recruitment-dashboard
+> tsc --noEmit
+
+(exit code 0 - no errors)
+
+$ pnpm lint
+
+> recruitment-dashboard-v3@0.1.0 lint /workspace/recruitment-dashboard
+> eslint . --ext .ts,.tsx
+
+(exit code 0 - no errors, no warnings)
+
+$ pnpm build
+
+├ ƒ /api/candidates
+├ ƒ /api/candidates/[id]
+├ ƒ /api/applications
+├ ƒ /api/applications/[id]
+├ ƒ /api/jobs
+├ ƒ /api/jobs/[id]
+├ ƒ /api/permissions
+├ ○ /candidates
+├ ○ /jobs
+└ ○ /permissions-debug
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+(exit code 0 - PASS)
+
+$ git status
+(clean working tree after commit)
+
+$ git log --oneline --decorate -5
+<will be populated at commit time>
+
+$ git tag --sort=-creatordate | head -10
+<will be populated at commit time>
+
+=================================================================
+SECTION 9: Permission Test Commands (Cookie-Based)
+=================================================================
+All API tests use cookies with REAL database IDs from seed:
+
+  admin:        role=admin         uid=cmqt44zav0004zyqhbtt0lfha did=cmqt4167b0000jsqhvkv6eora
+  leader:       role=leader        uid=cmqt44zbp0005zyqh93j9ybfv did=cmqt4167b0000jsqhvkv6eora
+  hrbp:         role=hrbp          uid=cmqt44zcb0006zyqh896spolz did=cmqt4167c0001jsqh47jzx52k
+  recruiter:    role=recruiter     uid=cmqt44zcq0007zyqhn7dsk3ir did=cmqt4167c0001jsqh47jzx52k
+  business_owner: role=business_owner uid=cmqt44zdc0008zyqh6dao7vbr did=cmqt44z9o0002zyqhl63hcpu6
+  interviewer:  role=interviewer   uid=cmqt44zdt0009zyqhnpi53sy1 did=cmqt4167c0002jsqhbgqj6byq
+
+Example curl:
+  curl -s -b "rd_dev_role=admin; rd_dev_user_id=cmqt44zav0004zyqhbtt0lfha; rd_dev_dept_id=cmqt4167b0000jsqhvkv6eora" "http://localhost:3000/api/candidates"
+
+=================================================================
+SECTION 10: Minimal Code Fix
+=================================================================
+File: components/domain/candidates/CandidateDetailDrawer.tsx
+Change: F component now accepts permissionRequired prop.
+When permissionRequired=true and value===null, displays "无权限查看" instead of "—".
+Applied to 手机 (phone) and 邮箱 (email) fields.

@@ -66,8 +66,8 @@ function OverviewTab({ c }: { c: CandidateDetail }) {
         <F label="当前公司" value={c.currentCompany} />
         <F label="当前岗位" value={c.currentTitle} />
         <F label="投递数" value={`${c.applicationCount} (活跃 ${c.activeApplicationCount})`} />
-        <F label="手机" value={c.phone} />
-        <F label="邮箱" value={c.email} />
+        <F label="手机" value={c.phone} permissionRequired />
+        <F label="邮箱" value={c.email} permissionRequired />
         <F label="创建时间" value={c.createdAt ? new Date(c.createdAt).toLocaleDateString("zh-CN") : "—"} />
         <F label="最近更新" value={c.updatedAt ? new Date(c.updatedAt).toLocaleDateString("zh-CN") : "—"} />
       </div>
@@ -75,8 +75,9 @@ function OverviewTab({ c }: { c: CandidateDetail }) {
     </div>
   );
 }
-function F({ label, value }: { label: string; value?: string | null }) {
-  return <div><div className="text-xs text-[var(--color-text-tertiary)]">{label}</div><div className="mt-0.5 text-sm text-[var(--color-text-primary)]">{value ?? "—"}</div></div>;
+function F({ label, value, permissionRequired }: { label: string; value?: string | null; permissionRequired?: boolean }) {
+  const displayValue = permissionRequired && value === null ? "无权限查看" : (value ?? "—");
+  return <div><div className="text-xs text-[var(--color-text-tertiary)]">{label}</div><div className={`mt-0.5 text-sm ${permissionRequired && value === null ? "text-[var(--color-text-tertiary)]" : "text-[var(--color-text-primary)]"}`}>{displayValue}</div></div>;
 }
 
 function ApplicationsTab({ c }: { c: CandidateDetail }) {
