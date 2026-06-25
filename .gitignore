@@ -45,7 +45,8 @@ next-env.d.ts
 /app/generated/prisma
 
 # internal data
-/private-data/
+/private-data/*
+!/private-data/README.md
 prisma/seed.internal.ts
 *.pdf
 *.docx

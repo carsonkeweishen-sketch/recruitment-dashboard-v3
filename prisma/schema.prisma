@@ -6,14 +6,438 @@ datasource db {
   provider = "postgresql"
 }
 
-// Phase 0: 最小表，仅用于验证数据库连接
-// 完整数据模型将在 Phase 2 建立
-model User {
+// ============================================================
+// Enums — Phase 2 Core
+// ============================================================
+
+enum Role {
+  admin
+  leader
+  hrbp
+  recruiter
+  business_owner
+  interviewer
+}
+
+enum ApplicationStage {
+  sourced
+  hr_screen
+  business_screen
+  first_interview
+  second_interview
+  final_interview
+  offer_risk
+  pre_onboarding
+  hired
+  rejected
+  withdrawn
+  closed
+}
+
+enum InterviewRound {
+  hr_initial
+  business_first
+  business_second
+  ceo_final
+  cross_function
+}
+
+enum OverallRecommendation {
+  STRONG_HIRE
+  HIRE
+  HOLD
+  NO_HIRE
+  STRONG_NO_HIRE
+}
+
+enum OfferRiskType {
+  SALARY_GAP
+  COMPETING_OFFER
+  DECISION_DELAY
+  START_DATE_UNCERTAIN
+  COMMITMENT_UNRESOLVED
+  PRE_ONBOARDING_SILENCE
+  EXPECTATION_MISMATCH
+}
+
+enum ActionSignal {
+  LOW_EFFECTIVE_CANDIDATES
+  STALLED_HR_SCREEN
+  STALLED_BUSINESS_SCREEN
+  FEEDBACK_OVERDUE
+  EVIDENCE_INSUFFICIENT
+  SCORE_INCONSISTENT
+  CALIBRATION_NEEDED
+  CANDIDATE_REDIRECT
+  OFFER_RISK_HIGH
+  COMMITMENT_OVERDUE
+}
+
+enum AiAnalysisType {
+  resume_analysis
+  candidate_recommendation
+  interview_performance
+  interviewer_quality
+  job_bottleneck
+  ai_qa
+}
+
+enum ReportType {
+  weekly_recruiting_review
+  job_review
+  department_review
+}
+
+enum BusinessDecision {
+  PASS
+  REJECT
+  HOLD
+  REDIRECT
+}
+
+enum BusinessReasonCode {
+  EXPERIENCE_MISMATCH
+  INDUSTRY_MISMATCH
+  LEVEL_TOO_LOW
+  LEVEL_TOO_HIGH
+  SALARY_MISMATCH
+  MOTIVATION_RISK
+  STABILITY_RISK
+  COMMUNICATION_RISK
+  PROFILE_NOT_CLEAR
+  OTHER
+}
+
+enum RiskLevel {
+  low
+  medium
+  high
+  critical
+}
+
+enum CommitmentType {
+  SALARY_REVIEW
+  TEAM_RESOURCE
+  ONBOARDING_SUPPORT
+  ROLE_SCOPE
+  PROBATION_TRANSFER
+}
+
+enum ReportStatus {
+  draft
+  confirmed
+  archived
+}
+
+// ============================================================
+// Models — Phase 2 Core
+// ============================================================
+
+model Department {
   id        String   @id @default(cuid())
-  email     String   @unique
   name      String
+  code      String   @unique
+  parentId  String?
+  parent    Department?   @relation("DepartmentHierarchy", fields: [parentId], references: [id])
+  children  Department[]  @relation("DepartmentHierarchy")
+  users     User[]
+  jobs      Job[]
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  @@map("departments")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  role         Role     @default(interviewer)
+  departmentId String?
+  department   Department? @relation(fields: [departmentId], references: [id])
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  ownedJobs        Job[]             @relation("JobOwner")
+  businessJobs     Job[]             @relation("JobBusinessOwner")
+  applications     Application[]     @relation("ApplicationOwner")
+  interviews       Interview[]       @relation("Interviewer")
+  businessFeedbacks BusinessFeedback[]
+  actionItems      ActionItem[]      @relation("ActionAssignee")
+  offerRisks       OfferRisk[]       @relation("OfferRiskOwner")
+  activityLogs     ActivityLog[]
+  aiAnalysisLogs   AiAnalysisLog[]
+
   @@map("users")
+}
+
+model Job {
+  id              String           @id @default(cuid())
+  title           String
+  departmentId    String
+  department      Department       @relation(fields: [departmentId], references: [id])
+  level           String?
+  status          String           @default("open")
+  priority        String           @default("normal")
+  ownerId         String
+  owner           User             @relation("JobOwner", fields: [ownerId], references: [id])
+  businessOwnerId String?
+  businessOwner   User?            @relation("JobBusinessOwner", fields: [businessOwnerId], references: [id])
+  location        String?
+  headcount       Int              @default(1)
+  jdText          String?
+  profileSummary  String?
+  mustHave        Json?
+  niceToHave      Json?
+  salaryMin       Int?
+  salaryMax       Int?
+  createdAt       DateTime         @default(now()) @map("created_at")
+  updatedAt       DateTime         @updatedAt @map("updated_at")
+
+  applications         Application[]
+  businessFeedbacks    BusinessFeedback[]
+  profileCalibrations  ProfileCalibration[]
+
+  @@map("jobs")
+}
+
+model Candidate {
+  id              String   @id @default(cuid())
+  name            String
+  email           String?
+  phone           String?
+  source          String?
+  currentCompany  String?  @map("current_company")
+  currentTitle    String?  @map("current_title")
+  resumeSummary   String?  @map("resume_summary")
+  tags            String[]
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  applications Application[]
+
+  @@map("candidates")
+}
+
+model Application {
+  id              String           @id @default(cuid())
+  jobId           String
+  job             Job              @relation(fields: [jobId], references: [id])
+  candidateId     String
+  candidate       Candidate        @relation(fields: [candidateId], references: [id])
+  stage           ApplicationStage @default(sourced)
+  status          String           @default("active")
+  ownerId         String?
+  owner           User?            @relation("ApplicationOwner", fields: [ownerId], references: [id])
+  source          String?
+  fitScore        Int?             @map("fit_score")
+  lastActivityAt  DateTime?        @map("last_activity_at")
+  createdAt       DateTime         @default(now()) @map("created_at")
+  updatedAt       DateTime         @updatedAt @map("updated_at")
+
+  interviews       Interview[]
+  offerRisks       OfferRisk[]
+  offerCommitments OfferCommitment[]
+  actionItems      ActionItem[]
+
+  @@map("applications")
+}
+
+model Interview {
+  id            String         @id @default(cuid())
+  applicationId String
+  application   Application    @relation(fields: [applicationId], references: [id])
+  round         InterviewRound
+  interviewerId String
+  interviewer   User           @relation("Interviewer", fields: [interviewerId], references: [id])
+  scheduledAt   DateTime?      @map("scheduled_at")
+  completedAt   DateTime?      @map("completed_at")
+  status        String         @default("scheduled")
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+
+  feedbacks InterviewFeedback[]
+
+  @@map("interviews")
+}
+
+model InterviewFeedback {
+  id                    String               @id @default(cuid())
+  interviewId           String
+  interview             Interview            @relation(fields: [interviewId], references: [id])
+  overallRecommendation OverallRecommendation? @map("overall_recommendation")
+  scores                Json?
+  strengths             String?
+  concerns              String?
+  evidence              String?
+  suggestedFollowUps    String[]             @map("suggested_follow_ups")
+  submittedAt           DateTime?            @map("submitted_at")
+  createdAt             DateTime             @default(now()) @map("created_at")
+  updatedAt             DateTime             @updatedAt @map("updated_at")
+
+  @@map("interview_feedbacks")
+}
+
+model BusinessFeedback {
+  id            String   @id @default(cuid())
+  jobId         String
+  job           Job      @relation(fields: [jobId], references: [id])
+  applicationId String?
+  reviewerId    String
+  reviewer      User     @relation(fields: [reviewerId], references: [id])
+  decision      String
+  reasonCode    String?  @map("reason_code")
+  reasonText    String?  @map("reason_text")
+  evidence      String?
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@map("business_feedbacks")
+}
+
+model ProfileCalibration {
+  id                String   @id @default(cuid())
+  jobId             String
+  job               Job      @relation(fields: [jobId], references: [id])
+  beforeSnapshot    Json?    @map("before_snapshot")
+  afterSnapshot     Json?    @map("after_snapshot")
+  sourceFeedbackIds String[] @map("source_feedback_ids")
+  calibrationReason String?  @map("calibration_reason")
+  createdBy         String
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  @@map("profile_calibrations")
+}
+
+model ActionItem {
+  id           String       @id @default(cuid())
+  title        String
+  description  String?
+  sourceType   String       @map("source_type")
+  sourceId     String?      @map("source_id")
+  sourceSignal ActionSignal @map("source_signal")
+  assignedRole Role         @map("assigned_role")
+  assignedId   String?
+  assignee     User?        @relation("ActionAssignee", fields: [assignedId], references: [id])
+  status       String       @default("open")
+  priority     String       @default("medium")
+  dueAt        DateTime?    @map("due_at")
+  applicationId String?
+  application  Application? @relation(fields: [applicationId], references: [id])
+  createdAt    DateTime     @default(now()) @map("created_at")
+  updatedAt    DateTime     @updatedAt @map("updated_at")
+  completedAt  DateTime?    @map("completed_at")
+
+  @@map("action_items")
+}
+
+model OfferRisk {
+  id            String        @id @default(cuid())
+  applicationId String
+  application   Application   @relation(fields: [applicationId], references: [id])
+  riskType      OfferRiskType @map("risk_type")
+  level         String        @default("medium")
+  description   String?
+  ownerId       String?
+  owner         User?         @relation("OfferRiskOwner", fields: [ownerId], references: [id])
+  status        String        @default("open")
+  dueAt         DateTime?     @map("due_at")
+  resolvedAt    DateTime?     @map("resolved_at")
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+
+  @@map("offer_risks")
+}
+
+model OfferCommitment {
+  id             String   @id @default(cuid())
+  applicationId  String
+  application    Application @relation(fields: [applicationId], references: [id])
+  commitmentType String   @map("commitment_type")
+  description    String?
+  ownerId        String?
+  status         String   @default("pending")
+  dueAt          DateTime? @map("due_at")
+  completedAt    DateTime? @map("completed_at")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@map("offer_commitments")
+}
+
+model AiAnalysisLog {
+  id                     String         @id @default(cuid())
+  analysisType           AiAnalysisType @map("analysis_type")
+  resourceType           String         @map("resource_type")
+  resourceId             String         @map("resource_id")
+  userId                 String
+  user                   User           @relation(fields: [userId], references: [id])
+  inputHash              String?        @map("input_hash")
+  promptName             String?        @map("prompt_name")
+  promptVersion          String?        @map("prompt_version")
+  provider               String?
+  model                  String?
+  confidence             Float?
+  outputJson             Json?          @map("output_json")
+  sanitizedInputSnapshot Json?          @map("sanitized_input_snapshot")
+  isFallback             Boolean        @default(false) @map("is_fallback")
+  isConfirmed            Boolean        @default(false) @map("is_confirmed")
+  confirmedBy            String?        @map("confirmed_by")
+  confirmedAt            DateTime?      @map("confirmed_at")
+  createdAt              DateTime       @default(now()) @map("created_at")
+
+  @@map("ai_analysis_logs")
+}
+
+model ReportSnapshot {
+  id               String       @id @default(cuid())
+  reportType       ReportType   @map("report_type")
+  scopeType        String       @map("scope_type")
+  scopeId          String?      @map("scope_id")
+  periodStart      DateTime     @map("period_start")
+  periodEnd        DateTime     @map("period_end")
+  title            String
+  status           String       @default("draft")
+  metricsSnapshot  Json?      @map("metrics_snapshot")
+  sectionsSnapshot Json?      @map("sections_snapshot")
+  insightSnapshot  Json?      @map("insight_snapshot")
+  generatedBy      String?
+  confirmedBy      String?    @map("confirmed_by")
+  confirmedAt      DateTime?  @map("confirmed_at")
+  createdAt        DateTime   @default(now()) @map("created_at")
+  updatedAt        DateTime   @updatedAt @map("updated_at")
+
+  @@map("report_snapshots")
+}
+
+model ImportBatch {
+  id                 String   @id @default(cuid())
+  fileName           String   @map("file_name")
+  fileType           String   @map("file_type")
+  status             String   @default("pending")
+  totalRows          Int      @default(0) @map("total_rows")
+  validRows          Int      @default(0) @map("valid_rows")
+  errorRows          Int      @default(0) @map("error_rows")
+  mappingSnapshot    Json?    @map("mapping_snapshot")
+  validationSnapshot Json?    @map("validation_snapshot")
+  createdBy          String?
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  @@map("import_batches")
+}
+
+model ActivityLog {
+  id           String   @id @default(cuid())
+  actorId      String   @map("actor_id")
+  actor        User     @relation(fields: [actorId], references: [id])
+  action       String
+  resourceType String   @map("resource_type")
+  resourceId   String   @map("resource_id")
+  detail       Json?
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@map("activity_logs")
 }
