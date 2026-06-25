@@ -1,6 +1,6 @@
 // Phase 5.1: Profile Calibration Service (with object-level ownership check)
 import type { Role } from "@/server/permissions/types";
-import { requirePermission } from "@/server/permissions/check-permission";
+import { buildScopeWhere, requirePermission } from "@/server/permissions/check-permission";
 import {
   createCalibration,
   confirmCalibration,
@@ -30,6 +30,15 @@ export async function submitCalibration(
 
   // Phase 5.1: Object-level ownership check
   await requireJobOwnership(userId, input.jobId, role);
+
+  // Phase 5.2: Validate sourceFeedbackIds belong to job and are visible
+  const { getFeedbackByIdWithScope } = await import("@/server/repositories/business-feedback/business-feedback-repository");
+  const scope = buildScopeWhere({ role, userId, departmentId }, "candidates");
+  for (const fid of input.sourceFeedbackIds) {
+    const fb = await getFeedbackByIdWithScope(fid, scope);
+    if (!fb) throw new Error(`Source feedback ${fid} not found or access denied`);
+    if (fb.jobId !== input.jobId) throw new Error(`Source feedback ${fid} does not belong to job ${input.jobId}`);
+  }
 
   return createCalibration({ ...input, createdBy: userId });
 }

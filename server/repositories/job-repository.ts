@@ -70,3 +70,32 @@ export async function getJobById(id: string) {
     },
   });
 }
+
+export async function getJobByIdWithScope(id: string, scope: ScopeWhere) {
+  if (scope.scope === "DENY") return null;
+  const where: Record<string, unknown> = { id };
+
+  if (scope.scope === "DEPARTMENT" && scope.departmentId) {
+    where.departmentId = scope.departmentId;
+  } else if (scope.scope === "OWNED" && scope.userId) {
+    where.OR = [{ ownerId: scope.userId }, { businessOwnerId: scope.userId }];
+  } else if (scope.scope === "RELATED" && scope.userId) {
+    if (scope.role === "interviewer") {
+      where.applications = { some: { interviews: { some: { interviewerId: scope.userId } } } };
+    } else {
+      where.OR = [{ ownerId: scope.userId }, { businessOwnerId: scope.userId }];
+    }
+  }
+
+  return prisma.job.findFirst({
+    where,
+    include: {
+      department: { select: { id: true, name: true } },
+      owner: { select: { id: true, name: true } },
+      businessOwner: { select: { id: true, name: true } },
+      applications: {
+        select: { id: true, stage: true, status: true, candidate: { select: { id: true, name: true } } },
+      },
+    },
+  });
+}

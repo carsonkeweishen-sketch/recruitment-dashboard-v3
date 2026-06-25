@@ -1,6 +1,6 @@
 import type { Role } from "@/server/permissions/types";
 import { buildScopeWhere } from "@/server/permissions/check-permission";
-import { getApplications, getApplicationById } from "@/server/repositories/application-repository";
+import { getApplications, getApplicationById, getApplicationByIdWithScope } from "@/server/repositories/application-repository";
 import type { ApplicationListParams } from "@/server/repositories/application-repository";
 
 export async function listApplications(
@@ -11,6 +11,9 @@ export async function listApplications(
   return getApplications({ scope, ...filters });
 }
 
-export async function getApplicationDetail(id: string) {
-  return getApplicationById(id);
+export async function getApplicationDetail(id: string, role?: Role, userId?: string, departmentId?: string) {
+  const scope = role ? buildScopeWhere({ role, userId, departmentId }, "applications") : undefined;
+  return scope
+    ? getApplicationByIdWithScope(id, scope)
+    : getApplicationById(id);
 }

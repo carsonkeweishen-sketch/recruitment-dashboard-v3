@@ -82,3 +82,33 @@ export async function getCandidateById(id: string) {
     },
   });
 }
+
+export async function getCandidateByIdWithScope(id: string, scope: ScopeWhere) {
+  if (scope.scope === "DENY") return null;
+  const where: Record<string, unknown> = { id };
+
+  if (scope.scope === "DEPARTMENT" && scope.departmentId) {
+    where.applications = { some: { job: { departmentId: scope.departmentId } } };
+  } else if (scope.scope === "OWNED" && scope.userId) {
+    where.applications = { some: { ownerId: scope.userId } };
+  } else if (scope.scope === "RELATED" && scope.userId) {
+    if (scope.role === "interviewer") {
+      where.applications = { some: { interviews: { some: { interviewerId: scope.userId } } } };
+    } else {
+      where.applications = { some: { OR: [{ ownerId: scope.userId }, { job: { businessOwnerId: scope.userId } }] } };
+    }
+  }
+
+  return prisma.candidate.findFirst({
+    where,
+    include: {
+      applications: {
+        include: {
+          job: { select: { id: true, title: true, jobCode: true, department: { select: { name: true } }, level: true } },
+          owner: { select: { id: true, name: true } },
+        },
+        orderBy: { updatedAt: "desc" },
+      },
+    },
+  });
+}

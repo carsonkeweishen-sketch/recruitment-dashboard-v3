@@ -1,16 +1,18 @@
 // Phase 5: Profile Calibration Detail API (GET + PATCH confirm)
 import { getSession } from "@/server/auth/session";
-import { getCalibrationById } from "@/server/repositories/business-feedback/profile-calibration-repository";
+import { getCalibrationByIdWithScope } from "@/server/repositories/business-feedback/profile-calibration-repository";
 import { confirmCalibrationAction } from "@/server/services/business-feedback/profile-calibration-service";
 import { logProfileCalibrationConfirmed } from "@/server/services/business-feedback/activity-log-helper";
+import { buildScopeWhere } from "@/server/permissions/check-permission";
 
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const _session = await getSession();
+  const session = await getSession();
   const { id } = await params;
-  const calibration = await getCalibrationById(id);
+  const scope = buildScopeWhere(session, "candidates");
+  const calibration = await getCalibrationByIdWithScope(id, scope);
   if (!calibration) return Response.json({ success: false, error: "Not found" }, { status: 404 });
   return Response.json({ success: true, data: calibration });
 }

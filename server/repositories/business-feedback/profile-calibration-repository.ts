@@ -41,6 +41,21 @@ export async function getCalibrationById(id: string) {
   });
 }
 
+export async function getCalibrationByIdWithScope(id: string, scope: ScopeWhere) {
+  if (scope.scope === "DENY" || (scope.scope === "RELATED" && scope.role === "interviewer")) return null;
+  const where: Record<string, unknown> = { id };
+
+  if (scope.scope === "DEPARTMENT" && scope.departmentId) {
+    where.job = { departmentId: scope.departmentId };
+  } else if (scope.scope === "OWNED" && scope.userId) {
+    where.OR = [{ job: { ownerId: scope.userId } }, { createdBy: scope.userId }];
+  } else if (scope.scope === "RELATED" && scope.userId) {
+    where.OR = [{ job: { businessOwnerId: scope.userId } }, { createdBy: scope.userId }];
+  }
+
+  return prisma.profileCalibration.findFirst({ where });
+}
+
 export async function createCalibration(input: CreateCalibrationInput) {
   return prisma.profileCalibration.create({
     data: {

@@ -65,3 +65,29 @@ export async function getApplicationById(id: string) {
     },
   });
 }
+
+export async function getApplicationByIdWithScope(id: string, scope: ScopeWhere) {
+  if (scope.scope === "DENY") return null;
+  const where: Record<string, unknown> = { id };
+
+  if (scope.scope === "DEPARTMENT" && scope.departmentId) {
+    where.job = { departmentId: scope.departmentId };
+  } else if (scope.scope === "OWNED" && scope.userId) {
+    where.OR = [{ ownerId: scope.userId }, { job: { ownerId: scope.userId } }];
+  } else if (scope.scope === "RELATED" && scope.userId) {
+    if (scope.role === "interviewer") {
+      where.interviews = { some: { interviewerId: scope.userId } };
+    } else {
+      where.OR = [{ ownerId: scope.userId }, { job: { businessOwnerId: scope.userId } }];
+    }
+  }
+
+  return prisma.application.findFirst({
+    where,
+    include: {
+      candidate: { select: { id: true, name: true, currentCompany: true, currentTitle: true, source: true, tags: true } },
+      job: { select: { id: true, title: true, jobCode: true, department: { select: { name: true } }, level: true } },
+      owner: { select: { id: true, name: true } },
+    },
+  });
+}

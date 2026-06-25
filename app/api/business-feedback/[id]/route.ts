@@ -6,9 +6,9 @@ export async function GET(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const _session = await getSession();
+  const session = await getSession();
   const { id } = await params;
-  const feedback = await getFeedback(id);
+  const feedback = await getFeedback(id, session.role, session.userId, session.departmentId);
   if (!feedback) return Response.json({ success: false, error: "Not found" }, { status: 404 });
   return Response.json({ success: true, data: feedback });
 }

@@ -11,7 +11,7 @@ export async function GET(
   requirePermission(session, "candidates", "view");
 
   const { id } = await params;
-  const candidate = await getCandidateDetail(id);
+  const candidate = await getCandidateDetail(id, session.role, session.userId, session.departmentId);
   if (!candidate) return Response.json({ success: false, error: "Not found" }, { status: 404 });
 
   const scope = getScopeFor(session.role, "candidates");

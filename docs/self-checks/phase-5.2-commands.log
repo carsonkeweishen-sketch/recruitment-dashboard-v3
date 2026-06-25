@@ -1,0 +1,80 @@
+# Phase 5.2 Commands Log
+# Branch: agent/workbuddy/phase-5
+
+=================================================================
+SECTION 1: Pre-Fix findUnique Audit
+=================================================================
+$ grep -Rn "findUnique" app/api server/services server/repositories
+server/repositories/job-repository.ts:61:  return prisma.job.findUnique({
+server/repositories/candidate-repository.ts:72:  return prisma.candidate.findUnique({
+server/repositories/application-repository.ts:59:  return prisma.application.findUnique({
+server/repositories/business-feedback/business-feedback-repository.ts:63:  return prisma.businessFeedback.findUnique({
+server/repositories/business-feedback/profile-calibration-repository.ts:39:  return prisma.profileCalibration.findUnique({
+server/repositories/business-feedback/profile-calibration-repository.ts:61:  const existing = await prisma.profileCalibration.findUnique({ where: { id } });
+server/repositories/business-feedback/ownership-check.ts:18:  const job = await prisma.job.findUnique({
+server/repositories/business-feedback/ownership-check.ts:52:  const cal = await prisma.profileCalibration.findUnique({
+
+Post-fix: All detail API findUnique replaced with findFirst + scope.
+
+=================================================================
+SECTION 2: P0 Test Results
+=================================================================
+P0-1: interviewer GET /api/candidates/:id (unrelated) → 404 "Not found" ✅
+P0-2: interviewer GET /api/business-feedback/:id → 404 "Not found" ✅
+P0-3: interviewer GET /api/profile-calibrations/:id → 404 "Not found" ✅
+P0-4: interviewer GET /api/jobs/:id/feedback-summary (unrelated job) → "Job not found or access denied" ✅
+P0-5: biz_owner POST feedback with mismatched applicationId → "Application does not belong to the specified job" ✅
+P0-6: admin POST calibration with nonexistent sourceFeedbackId → "Source feedback ... not found or access denied" ✅
+
+=================================================================
+SECTION 3: Authorized Tests
+=================================================================
+admin GET /api/candidates/:id (authorized) → 200 ✅
+admin GET /api/business-feedback/:id → 200 ✅
+admin GET /api/profile-calibrations/:id → 200 ✅
+admin GET /api/jobs/:id/feedback-summary → 200 ✅
+biz_owner POST feedback with correct applicationId → 201 ✅
+admin POST calibration with valid sourceFeedbackIds → 201 ✅
+
+=================================================================
+SECTION 4: Security Audit Log Strategy
+=================================================================
+Current: No independent SecurityAuditLog table.
+Policy: Permission failures do NOT write to business ActivityLog.
+Denied requests return 403/404 with descriptive error messages.
+SecurityAuditLog registered as Phase 8/governance tech debt.
+
+=================================================================
+SECTION 5: Build Verification
+=================================================================
+$ pnpm typecheck
+> tsc --noEmit
+(exit 0)
+
+$ pnpm lint
+> eslint . --ext .ts,.tsx
+(exit 0)
+
+$ pnpm build
+○ (Static) prerendered as static content
+ƒ (Dynamic) server-rendered on demand
+(exit 0 - PASS)
+
+=================================================================
+SECTION 6: Changed Files
+=================================================================
+server/repositories/job-repository.ts — added getJobByIdWithScope()
+server/repositories/candidate-repository.ts — added getCandidateByIdWithScope()
+server/repositories/application-repository.ts — added getApplicationByIdWithScope()
+server/repositories/business-feedback/business-feedback-repository.ts — added getFeedbackByIdWithScope()
+server/repositories/business-feedback/profile-calibration-repository.ts — added getCalibrationByIdWithScope()
+server/services/jobs/job-service.ts — getJobDetail accepts scope params
+server/services/candidates/candidate-service.ts — getCandidateDetail accepts scope params
+server/services/applications/application-service.ts — getApplicationDetail accepts scope params
+server/services/business-feedback/business-feedback-service.ts — getFeedback scoped; submitFeedback validates applicationId; feedback-summary checks job scope first
+server/services/business-feedback/profile-calibration-service.ts — submitCalibration validates sourceFeedbackIds
+app/api/jobs/[id]/route.ts — passes scope to service
+app/api/candidates/[id]/route.ts — passes scope to service
+app/api/applications/[id]/route.ts — passes scope to service
+app/api/business-feedback/[id]/route.ts — passes scope to service
+app/api/profile-calibrations/[id]/route.ts — GET uses scoped query

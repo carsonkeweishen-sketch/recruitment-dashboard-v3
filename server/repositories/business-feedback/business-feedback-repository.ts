@@ -69,6 +69,28 @@ export async function getFeedbackById(id: string) {
   });
 }
 
+export async function getFeedbackByIdWithScope(id: string, scope: ScopeWhere) {
+  if (scope.scope === "DENY") return null;
+  const where: Record<string, unknown> = { id };
+
+  if (scope.scope === "DEPARTMENT" && scope.departmentId) {
+    where.job = { departmentId: scope.departmentId };
+  } else if (scope.scope === "OWNED" && scope.userId) {
+    where.OR = [{ job: { ownerId: scope.userId } }, { reviewerId: scope.userId }];
+  } else if (scope.scope === "RELATED" && scope.userId) {
+    if (scope.role === "interviewer") return null;
+    where.OR = [{ job: { businessOwnerId: scope.userId } }, { reviewerId: scope.userId }];
+  }
+
+  return prisma.businessFeedback.findFirst({
+    where,
+    include: {
+      job: { select: { id: true, title: true, jobCode: true, department: { select: { name: true } } } },
+      reviewer: { select: { id: true, name: true } },
+    },
+  });
+}
+
 export async function createFeedback(input: CreateFeedbackInput) {
   return prisma.businessFeedback.create({
     data: {

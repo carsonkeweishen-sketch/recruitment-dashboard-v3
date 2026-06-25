@@ -10,7 +10,7 @@ export async function GET(
   requirePermission(session, "jobs", "view");
 
   const { id } = await params;
-  const job = await getJobDetail(id);
+  const job = await getJobDetail(id, session.role, session.userId, session.departmentId);
 
   if (!job) {
     return Response.json({ success: false, error: "Job not found" }, { status: 404 });
