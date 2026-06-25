@@ -13,7 +13,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { label: "首页", href: "/", icon: "home", enabled: true },
   { label: "权限调试", href: "/permissions-debug", icon: "shield", enabled: true },
-  { label: "岗位管理", href: "/jobs", icon: "briefcase", enabled: false },
+  { label: "岗位管理", href: "/jobs", icon: "briefcase", enabled: true },
   { label: "候选人", href: "/candidates", icon: "users", enabled: false },
   { label: "面试反馈", href: "/interviews", icon: "chat", enabled: false },
   { label: "协同任务", href: "/actions", icon: "check", enabled: false },
@@ -86,7 +86,7 @@ export function Sidebar() {
       {/* Footer */}
       <div className="border-t border-[var(--color-border)] p-3">
         <div className="text-center text-xs text-[var(--color-text-tertiary)]">
-          Phase 1 · 权限与角色
+          Phase 3.1 · 岗位管理
         </div>
       </div>
     </aside>
