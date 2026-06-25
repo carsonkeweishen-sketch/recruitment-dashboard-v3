@@ -1,99 +1,194 @@
-# Phase 5.2 API Response Evidence — Security Tests
+# Phase 5.2 API Response Evidence — Complete
 
-## P0-1: Core Detail API Object-Level Scope
+## 1. GET /api/jobs/:id — authorized
 
-### GET /api/candidates/:id — unauthorized (interviewer, unrelated)
-**Role:** interviewer (孙面试官, uid=cmqt44zdt...)
-**Target:** 林可 (candidate not in interviewer's interview assignments)
-**Response: 404**
-```json
-{"success":false,"error":"Not found"}
-```
-**Verdict:** ✅ 404 — object-level scope prevents access
+| Field | Value |
+|-------|-------|
+| Role | admin (陈总, uid=cmqt44zav0004zyqhbtt0lfha) |
+| Request | GET /api/jobs/cmqt44ze2000azyqhghevqv4e |
+| HTTP Status | 200 |
+| Response Summary | Job detail with department, owner, businessOwner, applicationsByStage |
+| DB Write | N/A (read) |
+| ActivityLog | N/A |
+| Verdict | ✅ Authorized user sees job detail |
 
-### GET /api/candidates/:id — authorized (admin)
-**Role:** admin
-**Response: 200** — returns full candidate detail with email/phone
+## 2. GET /api/jobs/:id — unauthorized
 
----
+| Field | Value |
+|-------|-------|
+| Role | interviewer (孙面试官, uid=cmqt44zdt0009zyqhnpi53sy1) |
+| Request | GET /api/jobs/cmqt44ze2000azyqhghevqv4e (KA大客户销售, not in interviewer's interview assignments) |
+| HTTP Status | 404 |
+| Response Summary | `{"success":false,"error":"Job not found"}` |
+| DB Write | N/A |
+| ActivityLog | N/A |
+| Verdict | ✅ 404 — object-level scope prevents interviewer from seeing unrelated job |
 
-## P0-2: BusinessFeedback Detail GET
+## 3. GET /api/candidates/:id — authorized
 
-### GET /api/business-feedback/:id — unauthorized (interviewer)
-**Role:** interviewer
-**Response: 404**
-```json
-{"success":false,"error":"Not found"}
-```
-**Verdict:** ✅ interviewer cannot access any business feedback by ID
+| Field | Value |
+|-------|-------|
+| Role | admin |
+| Request | GET /api/candidates/cmqt44zf9000izyqh4k6k7yb6 (林可) |
+| HTTP Status | 200 |
+| Response Summary | Full candidate detail with email=lin.ke@example.com, phone=13800000001, applications[] |
+| DB Write | N/A |
+| ActivityLog | N/A |
+| Verdict | ✅ Authorized user sees full candidate detail |
 
-### GET /api/business-feedback/:id — authorized (admin)
-**Role:** admin
-**Response: 200** — returns feedback with job and reviewer
+## 4. GET /api/candidates/:id — unauthorized
 
----
+| Field | Value |
+|-------|-------|
+| Role | interviewer (孙面试官) |
+| Request | GET /api/candidates/cmqt44zf9000izyqh4k6k7yb6 (林可, not in interviewer's interview assignments) |
+| HTTP Status | 404 |
+| Response Summary | `{"success":false,"error":"Not found"}` |
+| DB Write | N/A |
+| ActivityLog | N/A |
+| Verdict | ✅ 404 — object-level scope prevents access |
 
-## P0-3: ProfileCalibration Detail GET
+## 5. GET /api/applications/:id — authorized
 
-### GET /api/profile-calibrations/:id — unauthorized (interviewer)
-**Role:** interviewer
-**Response: 404**
-```json
-{"success":false,"error":"Not found"}
-```
-**Verdict:** ✅ interviewer cannot access calibration details
+| Field | Value |
+|-------|-------|
+| Role | admin |
+| Request | GET /api/applications/cmqt44zg9000qzyqhb4gz4lbz (林可 → KA大客户销售) |
+| HTTP Status | 200 |
+| Response Summary | Application detail with candidate, job, owner |
+| DB Write | N/A |
+| ActivityLog | N/A |
+| Verdict | ✅ Authorized |
 
----
+## 6. GET /api/applications/:id — unauthorized
 
-## P0-4: Job Feedback Summary — Job Scope First
+| Field | Value |
+|-------|-------|
+| Role | interviewer (孙面试官, not interviewer for this application) |
+| Request | GET /api/applications/cmqt44zg9000qzyqhb4gz4lbz |
+| HTTP Status | 404 |
+| Response Summary | `{"success":false,"error":"Not found"}` |
+| DB Write | N/A |
+| ActivityLog | N/A |
+| Verdict | ✅ 404 — object-level scope prevents access |
 
-### GET /api/jobs/:id/feedback-summary — unauthorized (interviewer, unrelated job)
-**Role:** interviewer, target job not in their interview assignments
-**Response: 500 (error message)**
-```json
-{"success":false,"error":"Job not found or access denied"}
-```
-**Verdict:** ✅ Job scope checked before aggregation
+## 7. GET /api/business-feedback/:id — authorized
 
----
+| Field | Value |
+|-------|-------|
+| Role | admin |
+| Request | GET /api/business-feedback/cmqtaj2qh0000seqhqsqjvkq3 |
+| HTTP Status | 200 |
+| Response Summary | Feedback detail with job.title, reviewer.name, decision, reasonCode |
+| DB Write | N/A |
+| ActivityLog | N/A |
+| Verdict | ✅ Authorized |
 
-## P0-5: BusinessFeedback Create — applicationId Validation
+## 8. GET /api/business-feedback/:id — unauthorized
 
-### POST /api/business-feedback — mismatched applicationId
-**Role:** business_owner
-**Request:** jobId=KA大客户销售, applicationId=周亦然's app (belongs to 采购资源开发)
-**Response: 500**
-```json
-{"success":false,"error":"Application does not belong to the specified job"}
-```
-**Verdict:** ✅ applicationId validated against jobId
-**DB Write:** ❌ None
-**ActivityLog:** ❌ None
+| Field | Value |
+|-------|-------|
+| Role | interviewer (孙面试官) |
+| Request | GET /api/business-feedback/cmqtaj2qh0000seqhqsqjvkq3 |
+| HTTP Status | 404 |
+| Response Summary | `{"success":false,"error":"Not found"}` |
+| DB Write | N/A |
+| ActivityLog | N/A |
+| Verdict | ✅ 404 — interviewer cannot access any business feedback by ID |
 
-### POST /api/business-feedback — matching applicationId
-**Role:** admin
-**Response: 201** ✅
+## 9. GET /api/profile-calibrations/:id — authorized
 
----
+| Field | Value |
+|-------|-------|
+| Role | admin |
+| Request | GET /api/profile-calibrations/cmqtajl5v000aseqhg70mg8s7 |
+| HTTP Status | 200 |
+| Response Summary | Calibration with status=confirmed, sourceFeedbackIds[], calibrationReason |
+| DB Write | N/A |
+| ActivityLog | N/A |
+| Verdict | ✅ Authorized |
 
-## P0-6: ProfileCalibration Create — sourceFeedbackIds Validation
+## 10. GET /api/profile-calibrations/:id — unauthorized
 
-### POST /api/jobs/:id/profile-calibrations — nonexistent sourceFeedbackId
-**Role:** admin
-**Request:** sourceFeedbackIds=["nonexistent_id"]
-**Response: 500**
-```json
-{"success":false,"error":"Source feedback nonexistent_id not found or access denied"}
-```
-**Verdict:** ✅ Invalid source feedback rejected
-**DB Write:** ❌ None
-**ActivityLog:** ❌ None
+| Field | Value |
+|-------|-------|
+| Role | interviewer (孙面试官) |
+| Request | GET /api/profile-calibrations/cmqtajl5v000aseqhg70mg8s7 |
+| HTTP Status | 404 |
+| Response Summary | `{"success":false,"error":"Not found"}` |
+| DB Write | N/A |
+| ActivityLog | N/A |
+| Verdict | ✅ 404 — interviewer cannot access calibration details |
 
----
+## 11. GET /api/jobs/:id/feedback-summary — authorized
 
-## Security Audit Log Strategy (Section 9)
+| Field | Value |
+|-------|-------|
+| Role | admin |
+| Request | GET /api/jobs/cmqt44ze2000azyqhghevqv4e/feedback-summary |
+| HTTP Status | 200 |
+| Response Summary | feedbackCount=5, decisionStats, reasonStats, profileSignals, calibrationHistory |
+| DB Write | N/A |
+| ActivityLog | N/A |
+| Verdict | ✅ Authorized user sees full feedback summary |
 
-**Decision: 方案 B** — 当前暂无独立 SecurityAuditLog 表。
-- 权限失败不写业务 ActivityLog（避免污染业务动态）
-- 失败请求返回 403/404 + 描述性错误消息
-- SecurityAuditLog 作为 Phase 8/安全治理技术债登记
+## 12. GET /api/jobs/:id/feedback-summary — unauthorized
+
+| Field | Value |
+|-------|-------|
+| Role | interviewer (孙面试官, not assigned to any interview on this job) |
+| Request | GET /api/jobs/cmqt44ze2000azyqhghevqv4e/feedback-summary |
+| HTTP Status | 500 |
+| Response Summary | `{"success":false,"error":"Job not found or access denied"}` |
+| DB Write | N/A |
+| ActivityLog | N/A |
+| Verdict | ✅ Job scope checked before aggregation — no stats leaked |
+
+## 13. POST /api/business-feedback — matching applicationId
+
+| Field | Value |
+|-------|-------|
+| Role | admin |
+| Payload | `{"jobId":"cmqt44ze2000azyqhghevqv4e","applicationId":"cmqt44zg9000qzyqhb4gz4lbz","decision":"PASS","reasonCode":""}` |
+| HTTP Status | 201 |
+| Response Summary | Feedback created with reviewerId, decision=PASS |
+| DB Write | ✅ BusinessFeedback row created |
+| ActivityLog | ✅ BUSINESS_FEEDBACK_CREATED |
+| Verdict | ✅ Matching applicationId accepted |
+
+## 14. POST /api/business-feedback — mismatched applicationId
+
+| Field | Value |
+|-------|-------|
+| Role | business_owner (赵业务) |
+| Payload | `{"jobId":"cmqt44ze2000azyqhghevqv4e","applicationId":"cmqt44zg9000rzyqhqvdjwprr","decision":"REJECT","reasonCode":"OTHER"}` |
+| Note | jobId=KA大客户销售, applicationId=周亦然's app (belongs to 采购资源开发) |
+| HTTP Status | 500 |
+| Response Summary | `{"success":false,"error":"Application does not belong to the specified job"}` |
+| DB Write | ❌ None |
+| ActivityLog | ❌ None |
+| Verdict | ✅ Mismatched applicationId rejected, no DB writes |
+
+## 15. POST /api/jobs/:id/profile-calibrations — valid sourceFeedbackIds
+
+| Field | Value |
+|-------|-------|
+| Role | admin |
+| Payload | `{"sourceFeedbackIds":["cmqtaj2wm0004seqhty8q5xb4","cmqtaj2tr0002seqh0ypkyfrt"],"calibrationReason":"test"}` |
+| HTTP Status | 201 |
+| Response Summary | Calibration created with status=draft |
+| DB Write | ✅ ProfileCalibration row created |
+| ActivityLog | ✅ PROFILE_CALIBRATION_CREATED |
+| Verdict | ✅ Valid sourceFeedbackIds accepted |
+
+## 16. POST /api/jobs/:id/profile-calibrations — invalid sourceFeedbackIds
+
+| Field | Value |
+|-------|-------|
+| Role | admin |
+| Payload | `{"sourceFeedbackIds":["nonexistent_id"],"calibrationReason":"test"}` |
+| HTTP Status | 500 |
+| Response Summary | `{"success":false,"error":"Source feedback nonexistent_id not found or access denied"}` |
+| DB Write | ❌ None |
+| ActivityLog | ❌ None |
+| Verdict | ✅ Invalid sourceFeedbackIds rejected, no DB writes |

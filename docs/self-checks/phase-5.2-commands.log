@@ -78,3 +78,77 @@ app/api/candidates/[id]/route.ts — passes scope to service
 app/api/applications/[id]/route.ts — passes scope to service
 app/api/business-feedback/[id]/route.ts — passes scope to service
 app/api/profile-calibrations/[id]/route.ts — GET uses scoped query
+
+=================================================================
+SECTION 7: Build Verification (Raw Output)
+=================================================================
+$ pnpm prisma generate
+✔ Generated Prisma Client (v7.8.0) to ./node_modules/.pnpm/@prisma+client@7.8.0...
+
+$ pnpm typecheck
+> recruitment-dashboard-v3@0.1.0 typecheck /workspace/recruitment-dashboard
+> tsc --noEmit
+(exit 0 — 0 errors)
+
+$ pnpm lint
+> recruitment-dashboard-v3@0.1.0 lint /workspace/recruitment-dashboard
+> eslint . --ext .ts,.tsx
+(exit 0 — 0 errors, 0 warnings)
+
+$ pnpm build
+├ ƒ /api/applications
+├ ƒ /api/applications/[id]
+├ ƒ /api/business-feedback
+├ ƒ /api/business-feedback/[id]
+├ ƒ /api/candidates
+├ ƒ /api/candidates/[id]
+├ ƒ /api/jobs
+├ ƒ /api/jobs/[id]
+├ ƒ /api/jobs/[id]/feedback-summary
+├ ƒ /api/jobs/[id]/profile-calibrations
+├ ƒ /api/permissions
+├ ƒ /api/profile-calibrations/[id]
+├ ○ /candidates
+├ ○ /jobs
+└ ○ /permissions-debug
+○ (Static) prerendered as static content
+ƒ (Dynamic) server-rendered on demand
+(exit 0 — PASS)
+
+$ git status --short
+(clean)
+
+$ git log --oneline --decorate -5
+ede6800 (HEAD -> agent/workbuddy/phase-5, tag: workbuddy-phase-5.2, origin/agent/workbuddy/phase-5) workbuddy phase-5.2: close feedback object scope security gaps
+e9e1413 (tag: workbuddy-phase-5.1.1) workbuddy phase-5.1.1: clarify business owner ownership rule
+bb06fe7 (tag: workbuddy-phase-5.1) workbuddy phase-5.1: harden feedback permissions and calibration status
+b321d66 (tag: workbuddy-phase-5) workbuddy phase-5: add business feedback and profile calibration
+89b8cfb (origin/agent/workbuddy/phase-4.4, agent/workbuddy/phase-4.4) hygiene: add playwright temp files to .gitignore
+
+=================================================================
+SECTION 8: Post-Fix findUnique Audit
+=================================================================
+$ grep -Rn "findUnique" app/api server/services server/repositories
+
+server/repositories/business-feedback/ownership-check.ts:18:  const job = await prisma.job.findUnique({
+server/repositories/business-feedback/ownership-check.ts:52:  const cal = await prisma.profileCalibration.findUnique({
+
+Remaining findUnique calls:
+- ownership-check.ts: internal validation queries (not exposed as API)
+- profile-calibration-repository.ts confirmCalibration: internal lookup before update
+
+All API-facing detail queries now use findFirst + scope. ✅
+
+$ grep -Rn "getFeedbackById" app/api server/services server/repositories
+server/services/business-feedback/business-feedback-service.ts:7:  getFeedbackByIdWithScope,
+server/services/business-feedback/business-feedback-service.ts:27:  return getFeedbackByIdWithScope(id, scope);
+server/repositories/business-feedback/business-feedback-repository.ts:62:export async function getFeedbackById(id: string) {
+server/repositories/business-feedback/business-feedback-repository.ts:73:export async function getFeedbackByIdWithScope(id: string, scope: ScopeWhere) {
+
+$ grep -Rn "getCalibrationById" app/api server/services server/repositories
+app/api/profile-calibrations/[id]/route.ts:3:import { getCalibrationByIdWithScope } from "@/server/repositories/business-feedback/profile-calibration-repository";
+server/services/business-feedback/profile-calibration-service.ts:7:  getCalibrationById,
+server/repositories/business-feedback/profile-calibration-repository.ts:38:export async function getCalibrationById(id: string) {
+server/repositories/business-feedback/profile-calibration-repository.ts:44:export async function getCalibrationByIdWithScope(id: string, scope: ScopeWhere) {
+
+API routes now use getXxxByIdWithScope variants. ✅
