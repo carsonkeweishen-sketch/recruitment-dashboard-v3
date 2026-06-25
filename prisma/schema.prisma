@@ -174,7 +174,9 @@ model User {
 
 model Job {
   id              String           @id @default(cuid())
+  jobCode         String?          @unique @map("job_code")
   title           String
+  brandLine       String?          @map("brand_line")
   departmentId    String
   department      Department       @relation(fields: [departmentId], references: [id])
   level           String?
@@ -190,6 +192,8 @@ model Job {
   profileSummary  String?
   mustHave        Json?
   niceToHave      Json?
+  targetCompanies Json?            @map("target_companies")
+  interviewFocus  Json?            @map("interview_focus")
   salaryMin       Int?
   salaryMax       Int?
   createdAt       DateTime         @default(now()) @map("created_at")
