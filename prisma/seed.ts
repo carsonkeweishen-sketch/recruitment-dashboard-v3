@@ -17,24 +17,24 @@ async function main() {
 
   // === 1. Departments ===
   const depts = await Promise.all([
-    prisma.department.create({ data: { name: "管理层", code: "MGMT" } }),
-    prisma.department.create({ data: { name: "人力资源部", code: "HR" } }),
-    prisma.department.create({ data: { name: "品牌营销部", code: "BRAND" } }),
-    prisma.department.create({ data: { name: "电商运营部", code: "ECOMM" } }),
-    prisma.department.create({ data: { name: "供应链/采购部", code: "SCM" } }),
-    prisma.department.create({ data: { name: "销售/KA渠道", code: "SALES" } }),
-    prisma.department.create({ data: { name: "内容/媒介部", code: "CONTENT" } }),
+    prisma.department.upsert({ where: { code: "MGMT" }, update: {}, create: { name: "管理层", code: "MGMT" } }),
+    prisma.department.upsert({ where: { code: "HR" }, update: {}, create: { name: "人力资源部", code: "HR" } }),
+    prisma.department.upsert({ where: { code: "BRAND" }, update: {}, create: { name: "品牌营销部", code: "BRAND" } }),
+    prisma.department.upsert({ where: { code: "ECOMM" }, update: {}, create: { name: "电商运营部", code: "ECOMM" } }),
+    prisma.department.upsert({ where: { code: "SCM" }, update: {}, create: { name: "供应链/采购部", code: "SCM" } }),
+    prisma.department.upsert({ where: { code: "SALES" }, update: {}, create: { name: "销售/KA渠道", code: "SALES" } }),
+    prisma.department.upsert({ where: { code: "CONTENT" }, update: {}, create: { name: "内容/媒介部", code: "CONTENT" } }),
   ]);
   const [deptMgmt, deptHR, deptBrand, deptEcomm, deptScm, deptSales, deptContent] = depts;
 
   // === 2. Users (6 roles) ===
   const users = await Promise.all([
-    prisma.user.create({ data: { name: "陈总", email: "chen.zong@example.com", role: "admin", departmentId: deptMgmt.id } }),
-    prisma.user.create({ data: { name: "李总监", email: "li.director@example.com", role: "leader", departmentId: deptMgmt.id } }),
-    prisma.user.create({ data: { name: "张HRBP", email: "zhang.hrbp@example.com", role: "hrbp", departmentId: deptHR.id } }),
-    prisma.user.create({ data: { name: "王招聘", email: "wang.recruiter@example.com", role: "recruiter", departmentId: deptHR.id } }),
-    prisma.user.create({ data: { name: "赵业务", email: "zhao.biz@example.com", role: "business_owner", departmentId: deptSales.id } }),
-    prisma.user.create({ data: { name: "孙面试官", email: "sun.interviewer@example.com", role: "interviewer", departmentId: deptBrand.id } }),
+    prisma.user.upsert({ where: { email: "chen.zong@example.com" }, update: {}, create: { name: "陈总", email: "chen.zong@example.com", role: "admin", departmentId: deptMgmt.id } }),
+    prisma.user.upsert({ where: { email: "li.director@example.com" }, update: {}, create: { name: "李总监", email: "li.director@example.com", role: "leader", departmentId: deptMgmt.id } }),
+    prisma.user.upsert({ where: { email: "zhang.hrbp@example.com" }, update: {}, create: { name: "张HRBP", email: "zhang.hrbp@example.com", role: "hrbp", departmentId: deptHR.id } }),
+    prisma.user.upsert({ where: { email: "wang.recruiter@example.com" }, update: {}, create: { name: "王招聘", email: "wang.recruiter@example.com", role: "recruiter", departmentId: deptHR.id } }),
+    prisma.user.upsert({ where: { email: "zhao.biz@example.com" }, update: {}, create: { name: "赵业务", email: "zhao.biz@example.com", role: "business_owner", departmentId: deptSales.id } }),
+    prisma.user.upsert({ where: { email: "sun.interviewer@example.com" }, update: {}, create: { name: "孙面试官", email: "sun.interviewer@example.com", role: "interviewer", departmentId: deptBrand.id } }),
   ]);
   const [, userLeader, userHrbp, userRecruiter, userBiz, userInterviewer] = users;
 
@@ -289,4 +289,5 @@ main()
   })
   .finally(async () => {
     await prisma.$disconnect();
+    await pool.end();
   });
