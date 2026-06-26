@@ -48,6 +48,9 @@ export function ResolveActionModal({ action, onClose, onSuccess }: Props) {
               className="w-full rounded-md border border-[var(--color-border)] px-3 py-2 text-sm" />
           </div>
           {error && <div className="rounded-md bg-red-50 p-3 text-sm text-red-600">{error}</div>}
+          <div className="rounded-md bg-blue-50 p-3 text-xs text-blue-700">
+            解决该行动项仅关闭当前跟进事项，不会自动改变候选人阶段或岗位状态。处理说明会记录在活动时间线中，便于后续复盘。
+          </div>
         </div>
         <div className="flex justify-end gap-3 border-t border-[var(--color-border)] px-6 py-4">
           <button onClick={onClose} className="rounded-md border border-[var(--color-border)] px-4 py-2 text-sm text-[var(--color-text-secondary)]">取消</button>

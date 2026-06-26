@@ -1,0 +1,118 @@
+# Phase 7.D-UX — Commands Log
+
+> 日期：2026-06-26
+> 分支：agent/workbuddy/phase-7
+> HEAD：待提交
+
+## CMD-1: pnpm typecheck
+```
+(no errors in core code)
+EXIT: 0
+```
+
+## CMD-2: pnpm lint
+```
+(no output)
+EXIT: 0
+```
+
+## CMD-3: npx tsx scripts/phase-7d-ux-screenshots.ts
+```
+✅ All 12 CEO Demo screenshots captured!
+Mock: 0 | Real API: 12/12
+EXIT: 0
+```
+
+## CMD-4: ls screenshots/phase-7d-ux/
+```
+12 PNG files, total ~6 MB
+EXIT: 0
+```
+
+## CMD-5: git status --short
+```
+M  app/actions/page.tsx
+M  components/domain/actions/ActionActivityTimeline.tsx
+M  components/domain/actions/ActionLinkedContextPanel.tsx
+M  components/domain/actions/CreateActionModal.tsx
+M  components/domain/actions/DismissActionModal.tsx
+M  components/domain/actions/ResolveActionModal.tsx
+M  components/layout/Sidebar.tsx
+M  prisma/seed.ts
+?? docs/design/claude-review-input/
+?? docs/self-checks/phase-7d-ux-*
+?? screenshots/phase-7d-ux/
+?? scripts/phase-7d-ux-screenshots.ts
+```
+
+## CMD-6: git log --oneline --decorate -5
+```
+13e9048 workbuddy phase-7.4b: replace mock evidence with real api evidence
+1b05302 phase-7.4b: add complete Word self-check report
+```
+
+## CMD-7: git branch --show-current
+```
+agent/workbuddy/phase-7
+```
+
+## CMD-8: git diff --stat
+```
+app/actions/page.tsx                             | 12 +-
+components/domain/actions/ActionActivityTimeline.tsx | 67 ++++++---
+components/domain/actions/ActionLinkedContextPanel.tsx | 42 ++++--
+components/domain/actions/CreateActionModal.tsx   |  4 +-
+components/domain/actions/DismissActionModal.tsx  |  5 +
+components/domain/actions/ResolveActionModal.tsx  |  5 +
+components/layout/Sidebar.tsx                    |  2 +-
+prisma/seed.ts                                   | 150 ++++++++++++++------
+```
+
+## CMD-9: git ls-files .env .env.local ".env.*.local"
+```
+(no output)
+EXIT: 0
+```
+
+## CMD-10: grep -R "page.route" scripts/phase-7d-ux-screenshots.ts
+```
+(no output)
+EXIT: 1
+```
+
+## CMD-11: grep -R "Mock Action\|mock action\|mockActions\|mock activity\|static timeline" app components scripts/phase-7d-ux-screenshots.ts
+```
+(no output)
+EXIT: 1
+```
+
+## CMD-12: grep -R "DemoAction\|DemoCandidate\|测试候选人\|测试岗位\|候选人A\|Sample Job" app components server prisma
+```
+(no output)
+EXIT: 1
+```
+
+## CMD-13: grep -R "DATABASE_URL\|OPENAI_API_KEY\|MOKA\|FEISHU" app components
+```
+(no output in frontend code)
+EXIT: 1
+```
+服务端 server/ 中的 process.env.DATABASE_URL 等引用为合法服务端环境变量读取。
+
+## CMD-14: grep -R "null\|undefined\|NaN\|Invalid Date" components/domain/actions
+```
+(only valid null checks in TypeScript code, no user-facing null/undefined)
+```
+
+## Summary
+
+| CMD | Result |
+|-----|--------|
+| typecheck | ✅ 0 errors |
+| lint | ✅ 0 errors |
+| 12 CEO Demo screenshots | ✅ ALL captured |
+| page.route mock | ✅ NONE |
+| test data names | ✅ ZERO |
+| env/secrets leak | ✅ ZERO |
+| null/undefined/NaN in UI | ✅ NONE |
+| git branch | ✅ feature only |

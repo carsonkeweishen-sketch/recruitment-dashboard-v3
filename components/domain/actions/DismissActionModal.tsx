@@ -48,6 +48,9 @@ export function DismissActionModal({ action, onClose, onSuccess }: Props) {
               className="w-full rounded-md border border-[var(--color-border)] px-3 py-2 text-sm" />
           </div>
           {error && <div className="rounded-md bg-red-50 p-3 text-sm text-red-600">{error}</div>}
+          <div className="rounded-md bg-gray-50 p-3 text-xs text-gray-600">
+            忽略不会删除记录，忽略原因会记录在活动时间线中，便于后续复盘与审计。
+          </div>
         </div>
         <div className="flex justify-end gap-3 border-t border-[var(--color-border)] px-6 py-4">
           <button onClick={onClose} className="rounded-md border border-[var(--color-border)] px-4 py-2 text-sm text-[var(--color-text-secondary)]">取消</button>

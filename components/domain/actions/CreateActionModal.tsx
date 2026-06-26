@@ -24,7 +24,7 @@ export function CreateActionModal({ onClose, onSuccess }: Props) {
 
   const handleSubmit = async () => {
       /* noop */
-    if (!title.trim()) { setError("标题不能为空"); return; }
+    if (!title.trim()) { setError("请输入行动项标题"); return; }
     setError("");
     setSubmitting(true);
     try {
@@ -44,7 +44,7 @@ export function CreateActionModal({ onClose, onSuccess }: Props) {
       <div className="fixed inset-0 bg-black/30" onClick={onClose} />
       <div className="relative z-10 w-full max-w-md rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] shadow-lg">
         <div className="flex items-center justify-between border-b border-[var(--color-border)] px-6 py-4">
-          <h2 className="text-lg font-semibold text-[var(--color-text-primary)]">创建行动项</h2>
+          <h2 className="text-lg font-semibold text-[var(--color-text-primary)]">新建行动项</h2>
           <button onClick={onClose} className="rounded-md p-1 text-[var(--color-text-tertiary)] hover:bg-[var(--color-surface-tertiary)]">✕</button>
         </div>
         <div className="space-y-4 px-6 py-4">

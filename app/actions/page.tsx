@@ -56,13 +56,13 @@ export default function ActionsPage() {
   const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(""), 3000); };
 
   const handleResolveSuccess = () => {
-    setResolveTarget(null); setSelectedId(null); refresh(); showToast("行动已标记为已解决");
+    setResolveTarget(null); setSelectedId(null); refresh(); showToast("行动项已标记为已解决，处理说明已记录");
   };
   const handleDismissSuccess = () => {
-    setDismissTarget(null); setSelectedId(null); refresh(); showToast("行动已忽略");
+    setDismissTarget(null); setSelectedId(null); refresh(); showToast("行动项已忽略，忽略原因已记录");
   };
   const handleCreateSuccess = () => {
-    setShowCreate(false); refresh(); showToast("行动已创建");
+    setShowCreate(false); refresh(); showToast("行动项已创建，已分配负责人");
   };
 
   if (loading) return <LoadingSkeleton />;
@@ -79,15 +79,15 @@ export default function ActionsPage() {
 
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">行动中心</h1>
-          <p className="mt-1 text-sm text-[var(--color-text-secondary)]">集中处理招聘过程中的待办、风险跟进和跨角色协同事项</p>
+          <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">招聘风险行动中心</h1>
+          <p className="mt-1 text-sm text-[var(--color-text-secondary)]">集中跟进反馈催办、候选人风险、Offer 风险、流程卡点等招聘关键事项</p>
         </div>
         <div className="flex gap-2">
           <button onClick={() => setShowCreate(true)} className="rounded-md bg-[var(--color-primary)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--color-primary-hover)]">
-            创建 Action
+            新建行动项
           </button>
           <button disabled title="将在后续阶段支持规则生成" className="cursor-not-allowed rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2 text-sm font-medium text-[var(--color-text-tertiary)]">
-            生成规则 Action
+            规则生成
           </button>
         </div>
       </div>

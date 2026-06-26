@@ -254,33 +254,168 @@ async function main() {
     },
   });
 
-  // === 8. ActionItems ===
-  await prisma.actionItem.create({
+  // === 8. ActionItems (CEO Demo 数据) ===
+  // 覆盖 10 种业务场景，禁止测试感名称
+  
+  // 按创建时间排序，确保 ActivityLog 时间线合理
+  const now = new Date();
+  const daysAgo = (n: number) => new Date(now.getTime() - n * 86400000);
+  const hoursAgo = (n: number) => new Date(now.getTime() - n * 3600000);
+
+  const _action1 = await prisma.actionItem.create({
     data: {
-      title: "KA大客户销售岗位候选人不足，需拓展渠道",
-      description: "当前有效候选人仅3人，目标8人。",
+      title: "KA大客户销售岗位候选人不足，需拓展招聘渠道",
+      description: "当前有效候选人仅 3 人，目标 8 人。BOSS直聘主动投递量下降 30%，猎头渠道暂停推荐。",
       category: "process_blocker", priority: "high", status: "open",
       sourceType: "job_pipeline", sourceRefId: jobs[0].id,
-      createdById: userRecruiter.id,
-      ownerId: userRecruiter.id,
-      jobId: jobs[0].id,
-      applicationId: apps[0].id,
-    },
-  });
-  await prisma.actionItem.create({
-    data: {
-      title: "品牌策划Offer风险：竞品Offer",
-      description: "顾清和已收到竞品Offer，需加速决策。",
-      category: "offer_risk", priority: "high", status: "open",
-      sourceType: "offer_risk", sourceRefId: apps[5].id,
-      createdById: userHrbp.id,
-      ownerId: userHrbp.id,
-      jobId: jobs[5]?.id || jobs[0].id,
-      applicationId: apps[5].id,
+      sourceSummary: "岗位发布 14 天，候选人漏斗顶部不足。BOSS直聘活跃度下降 30%，猎头渠道暂停推荐，需启动内推与社交招聘。",
+      createdById: userRecruiter.id, ownerId: userRecruiter.id,
+      jobId: jobs[0].id, candidateId: candidates[0].id, applicationId: apps[0].id,
+      dueAt: daysAgo(3), // 已逾期 3 天
+      createdAt: daysAgo(14),
     },
   });
 
-  // === 9. OfferRisks ===
+  const _action2 = await prisma.actionItem.create({
+    data: {
+      title: "品牌策划候选人面临竞品 Offer 风险，需加速决策",
+      description: "候选人顾清和已收到联合利华品牌经理 Offer，薪资差距约 15%。终面已完成但尚未发 Offer，竞品要求 48 小时内答复。",
+      category: "offer_risk", priority: "urgent", status: "open",
+      sourceType: "offer_risk", sourceRefId: apps[5].id,
+      sourceSummary: "终面通过 5 天未发 Offer，候选人已收到竞品 Offer。联合利华品牌经理岗位，薪资高出 15%，要求 48 小时内答复。",
+      createdById: userHrbp.id, ownerId: userHrbp.id,
+      jobId: jobs[5]?.id || jobs[0].id, candidateId: candidates[5].id, applicationId: apps[5].id,
+      interviewId: interview3.id,
+      dueAt: hoursAgo(12), // 今天到期
+      createdAt: daysAgo(5),
+    },
+  });
+
+  const _action3 = await prisma.actionItem.create({
+    data: {
+      title: "媒介投放一面反馈已超时 5 天，需催办面试官",
+      description: "面试官孙面试官 6 月 20 日完成一面但尚未提交面评，已超过 SLA 48 小时。候选人陈书妍仍在等待反馈。",
+      category: "feedback_followup", priority: "high", status: "open",
+      sourceType: "interview_feedback", sourceRefId: interview1.id,
+      sourceSummary: "一面完成时间 6 月 20 日，当前已超时 5 天。SLA 要求 48 小时内提交面评，面试官可能遗忘或对评价标准不确定。",
+      createdById: userRecruiter.id, ownerId: userRecruiter.id,
+      jobId: jobs[2].id, candidateId: candidates[2].id, applicationId: apps[2].id,
+      interviewId: interview1.id,
+      dueAt: daysAgo(3), // 已逾期 3 天
+      createdAt: daysAgo(5),
+    },
+  });
+
+  const _action4 = await prisma.actionItem.create({
+    data: {
+      title: "采购资源开发岗位画像需与业务重新校准",
+      description: "业务方反馈采购岗位 JD 与市场实际不符，候选人面试后反馈岗位职责描述偏差较大。",
+      category: "job_calibration", priority: "medium", status: "open",
+      sourceType: "business_feedback", sourceRefId: apps[1].id,
+      sourceSummary: "业务反馈：市场采购岗位薪资普遍高出预算 20%，且 JD 偏重供应商管理但实际需要更多成本分析能力。",
+      createdById: userBiz.id, ownerId: userHrbp.id,
+      jobId: jobs[1].id, candidateId: candidates[1].id, applicationId: apps[1].id,
+      dueAt: daysAgo(-3), // 3 天后到期
+      createdAt: daysAgo(2),
+    },
+  });
+
+  const _action5 = await prisma.actionItem.create({
+    data: {
+      title: "二面反馈证据不足，需补充具体项目追问记录",
+      description: "内容编辑候选人赵明远二面通过但反馈仅含概括性评价，缺少对关键能力的项目证据。",
+      category: "candidate_risk_followup", priority: "medium", status: "in_progress",
+      sourceType: "feedback_quality", sourceRefId: interview2.id,
+      sourceSummary: "二面反馈质量分低于 60，评价偏概括（'文案功底好'），缺少具体项目证据与行为面试记录。需面试官补充追问。",
+      createdById: userHrbp.id, ownerId: userRecruiter.id,
+      jobId: jobs[4].id, candidateId: candidates[4].id, applicationId: apps[4].id,
+      interviewId: interview2.id,
+      dueAt: daysAgo(-1), // 明天到期
+      createdAt: daysAgo(3),
+    },
+  });
+
+  const _action6 = await prisma.actionItem.create({
+    data: {
+      title: "抖音主播岗位连续 7 天无有效候选人，需重新评估渠道策略",
+      description: "ECOMM-002 抖音主播岗位上线 7 天仅收到 2 份简历，均不符合硬性要求。",
+      category: "process_blocker", priority: "high", status: "open",
+      sourceType: "job_pipeline", sourceRefId: jobs[7].id,
+      sourceSummary: "岗位上线 7 天，BOSS直聘曝光量正常但转化率极低。可能原因：薪资范围偏低（8-15K）或 JD 吸引力不足。",
+      createdById: userRecruiter.id, ownerId: userRecruiter.id,
+      jobId: jobs[7].id,
+      dueAt: daysAgo(-2), // 2 天后到期
+      createdAt: daysAgo(7),
+    },
+  });
+
+  // 手动创建的 Action
+  const _action7 = await prisma.actionItem.create({
+    data: {
+      title: "安排业务总监参与 KA 销售终面",
+      description: "KA 大客户销售岗位需要业务总监参与终面评估候选人的渠道资源与谈判能力。",
+      category: "manual", priority: "medium", status: "open",
+      sourceType: "manual",
+      sourceSummary: "招聘专员手动创建，协调业务总监日程安排终面。",
+      createdById: userRecruiter.id, ownerId: userRecruiter.id,
+      jobId: jobs[0].id, candidateId: candidates[0].id,
+      dueAt: daysAgo(-5), // 5 天后到期
+      createdAt: daysAgo(1),
+    },
+  });
+
+  // 已解决的 Action
+  const _action8 = await prisma.actionItem.create({
+    data: {
+      title: "业务面反馈逾期 3 天，已完成催办",
+      description: "KA 销售岗位业务面反馈逾期，已联系业务负责人赵业务补充反馈。",
+      category: "business_feedback", priority: "medium", status: "resolved",
+      sourceType: "business_feedback", sourceRefId: apps[0].id,
+      sourceSummary: "业务面完成后 3 天未收到反馈，已通过企业微信催办并确认。",
+      createdById: userHrbp.id, ownerId: userHrbp.id,
+      jobId: jobs[0].id, applicationId: apps[0].id,
+      resolutionNote: "已联系业务负责人赵业务，确认候选人林可通过业务面，反馈已补充至系统。",
+      resolvedAt: daysAgo(1),
+      resolvedById: userHrbp.id,
+      createdAt: daysAgo(5),
+    },
+  });
+
+  // 已忽略的 Action
+  const _action9 = await prisma.actionItem.create({
+    data: {
+      title: "直播场控岗位需求已合并至电商运营部统一招聘",
+      description: "该岗位与电商运营部现有直播运营岗位职责重叠，已由电商运营部统一负责。",
+      category: "data_quality", priority: "low", status: "dismissed",
+      sourceType: "system_rule",
+      sourceSummary: "系统检测到与 ECOMM-001 直播场控岗位重复，触发合并建议。",
+      createdById: userRecruiter.id, ownerId: userRecruiter.id,
+      jobId: jobs[3].id,
+      dismissedReason: "该岗位已合并至电商运营部直播运营岗位统一招聘，由王招聘统筹负责。",
+      resolvedAt: daysAgo(3),
+      resolvedById: userRecruiter.id,
+      createdAt: daysAgo(8),
+    },
+  });
+
+  // === 9. ActivityLogs for CEO Demo Actions ===
+  // 为已解决/已忽略的 Action 补充 ActivityLog
+  await prisma.activityLog.createMany({
+    data: [
+      // Action 8 (resolved) 的 Activity
+      { actorId: userHrbp.id, action: "ACTION_CREATED", resourceType: "action_item", resourceId: _action8.id,
+        detail: { category: _action8.category, priority: _action8.priority, sourceType: _action8.sourceType, sourceSummary: _action8.sourceSummary } },
+      { actorId: userHrbp.id, action: "ACTION_RESOLVED", resourceType: "action_item", resourceId: _action8.id,
+        detail: { resolutionNote: _action8.resolutionNote } },
+      // Action 9 (dismissed) 的 Activity
+      { actorId: userRecruiter.id, action: "ACTION_CREATED", resourceType: "action_item", resourceId: _action9.id,
+        detail: { category: _action9.category, priority: _action9.priority, sourceType: _action9.sourceType, sourceSummary: _action9.sourceSummary } },
+      { actorId: userRecruiter.id, action: "ACTION_DISMISSED", resourceType: "action_item", resourceId: _action9.id,
+        detail: { dismissedReason: _action9.dismissedReason } },
+    ],
+  });
+
+  // === 10. OfferRisks ===
   await prisma.offerRisk.create({
     data: {
       applicationId: apps[5].id, riskType: "COMPETING_OFFER", level: "critical",
@@ -311,7 +446,7 @@ async function main() {
   console.log(`   ${depts.length} departments, ${users.length} users, ${jobs.length} jobs`);
   console.log(`   ${candidates.length} candidates, ${apps.length} applications`);
   console.log(`   3 interviews, 3 feedbacks, 2 business feedbacks`);
-  console.log(`   2 action items, 2 offer risks, 5 activity logs`);
+  console.log(`   9 action items (7 open + 1 resolved + 1 dismissed), 2 offer risks, 9 activity logs`);
 }
 
 main()
