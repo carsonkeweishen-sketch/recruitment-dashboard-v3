@@ -1,0 +1,106 @@
+# Phase 7.D-Final Lock — Commands Log
+
+> 日期：2026-06-27 | 分支：agent/workbuddy/phase-7
+
+## CMD-1: pnpm prisma generate
+```
+✔ Generated Prisma Client (v7.8.0)
+EXIT: 0
+```
+
+## CMD-2: pnpm typecheck
+```
+(no output)
+EXIT: 0
+```
+
+## CMD-3: pnpm lint
+```
+(no output)
+EXIT: 0
+```
+
+## CMD-4: pnpm build
+```
+├ ○ /actions
+├ ○ /candidates
+├ ○ /interviews
+├ ○ /jobs
+└ ○ /permissions-debug
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+EXIT: 0
+```
+
+## CMD-5: ls screenshots/phase-7d-final/
+```
+12 PNG files, total ~6 MB
+EXIT: 0
+```
+
+## CMD-6: git status --short
+```
+(clean after commit)
+```
+
+## CMD-7: git log --oneline --decorate -5
+```
+da7ab1e workbuddy phase-7d: add Word self-check report
+855ad9b workbuddy phase-7d: polish action center ux for ceo demo
+13e9048 workbuddy phase-7.4b: replace mock evidence with real api evidence
+```
+
+## CMD-8: git branch --show-current
+```
+agent/workbuddy/phase-7
+```
+
+## CMD-9: git ls-files .env .env.local ".env.*.local"
+```
+(no output)
+EXIT: 0
+```
+
+## CMD-10: grep -R "page.route" scripts/phase-7d-ux-screenshots.ts app components
+```
+(no output)
+EXIT: 1
+```
+
+## CMD-11: grep -R "Mock Action\|mock action\|mockActions\|mock activity\|static timeline" app components
+```
+(no output)
+EXIT: 1
+```
+
+## CMD-12: grep -R "DemoAction\|DemoCandidate\|测试候选人\|测试岗位\|候选人A\|Sample Job" app components server prisma
+```
+(no output)
+EXIT: 1
+```
+
+## CMD-13: grep -R "undefined\|NaN\|Invalid Date" app/components/domain/actions
+```
+(no output)
+EXIT: 1
+```
+
+## CMD-14: grep -R "DATABASE_URL\|OPENAI_API_KEY\|MOKA\|FEISHU" app components
+```
+(no output)
+EXIT: 1
+```
+
+## Summary
+
+| CMD | Result |
+|-----|--------|
+| typecheck | ✅ 0 errors |
+| lint | ✅ 0 errors |
+| build | ✅ PASS |
+| 12 Final Lock screenshots | ✅ |
+| page.route mock | ✅ NONE |
+| test data names | ✅ ZERO |
+| null/undefined/NaN in UI | ✅ NONE |
+| env/secrets leak | ✅ ZERO |
+| git branch | ✅ feature only |

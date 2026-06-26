@@ -60,18 +60,7 @@ async function main() {
 
   const adminCookies = `rd_dev_role=admin; rd_dev_user_id=${USERS.admin.id}`;
 
-  // Create a fresh test action for resolve/dismiss tests
-  async function apiPost(path: string, body: Record<string, unknown>) {
-    const fetch = (await import("node-fetch")).default || globalThis.fetch;
-    const res = await fetch(`${BASE_URL}${path}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Cookie: adminCookies },
-      body: JSON.stringify(body),
-    });
-    return res.json();
-  }
-
-  // We'll do API calls via page.evaluate to use browser's fetch with cookies
+  // API calls via page.evaluate (browser's fetch with cookies)
   async function apiCall(method: string, path: string, body?: Record<string, unknown>) {
     return page.evaluate(
       async ({ method, path, body }) => {
