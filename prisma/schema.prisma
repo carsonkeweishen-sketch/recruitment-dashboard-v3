@@ -165,7 +165,8 @@ model User {
   interviews       Interview[]       @relation("Interviewer")
   interviewFeedbacks InterviewFeedback[] @relation("FeedbackInterviewer")
   businessFeedbacks BusinessFeedback[]
-  actionItems      ActionItem[]      @relation("ActionAssignee")
+  ownedActions     ActionItem[]      @relation("ActionOwner")
+  createdActions   ActionItem[]      @relation("ActionCreator")
   offerRisks       OfferRisk[]       @relation("OfferRiskOwner")
   activityLogs     ActivityLog[]
   aiAnalysisLogs   AiAnalysisLog[]
@@ -203,6 +204,7 @@ model Job {
   applications         Application[]
   businessFeedbacks    BusinessFeedback[]
   profileCalibrations  ProfileCalibration[]
+  actions              ActionItem[]
 
   @@map("jobs")
 }
@@ -221,6 +223,7 @@ model Candidate {
   updatedAt       DateTime @updatedAt @map("updated_at")
 
   applications Application[]
+  actions      ActionItem[]
 
   @@map("candidates")
 }
@@ -263,6 +266,7 @@ model Interview {
   updatedAt     DateTime       @updatedAt @map("updated_at")
 
   feedbacks InterviewFeedback[]
+  actions   ActionItem[]
 
   @@map("interviews")
 }
@@ -324,23 +328,40 @@ model ProfileCalibration {
 }
 
 model ActionItem {
-  id           String       @id @default(cuid())
-  title        String
-  description  String?
-  sourceType   String       @map("source_type")
-  sourceId     String?      @map("source_id")
-  sourceSignal ActionSignal @map("source_signal")
-  assignedRole Role         @map("assigned_role")
-  assignedId   String?
-  assignee     User?        @relation("ActionAssignee", fields: [assignedId], references: [id])
-  status       String       @default("open")
-  priority     String       @default("medium")
-  dueAt        DateTime?    @map("due_at")
-  applicationId String?
-  application  Application? @relation(fields: [applicationId], references: [id])
-  createdAt    DateTime     @default(now()) @map("created_at")
-  updatedAt    DateTime     @updatedAt @map("updated_at")
-  completedAt  DateTime?    @map("completed_at")
+  id              String      @id @default(cuid())
+  title           String
+  description     String?
+  category        String      @default("manual")
+  priority        String      @default("medium")
+  status          String      @default("open")
+
+  ownerId         String?
+  owner           User?       @relation("ActionOwner", fields: [ownerId], references: [id])
+  createdById     String
+  createdBy       User        @relation("ActionCreator", fields: [createdById], references: [id])
+
+  jobId           String?
+  job             Job?        @relation(fields: [jobId], references: [id])
+  candidateId     String?
+  candidate       Candidate?  @relation(fields: [candidateId], references: [id])
+  applicationId   String?
+  application     Application? @relation(fields: [applicationId], references: [id])
+  interviewId     String?
+  interview       Interview?  @relation(fields: [interviewId], references: [id])
+  feedbackId      String?
+
+  sourceType      String      @map("source_type")
+  sourceRefId     String?     @map("source_ref_id")
+  sourceSummary   String?     @map("source_summary")
+
+  dueAt           DateTime?   @map("due_at")
+  resolvedAt      DateTime?   @map("resolved_at")
+  resolvedById    String?
+  resolutionNote  String?     @map("resolution_note")
+  dismissedReason String?    @map("dismissed_reason")
+
+  createdAt       DateTime    @default(now()) @map("created_at")
+  updatedAt       DateTime    @updatedAt @map("updated_at")
 
   @@map("action_items")
 }

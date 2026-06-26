@@ -257,17 +257,25 @@ async function main() {
   // === 8. ActionItems ===
   await prisma.actionItem.create({
     data: {
-      title: "KA大客户销售岗位候选人不足，需拓展渠道", description: "当前有效候选人仅3人，目标8人。",
-      sourceType: "job", sourceId: jobs[0].id, sourceSignal: "LOW_EFFECTIVE_CANDIDATES",
-      assignedRole: "recruiter", assignedId: userRecruiter.id, status: "open", priority: "high",
+      title: "KA大客户销售岗位候选人不足，需拓展渠道",
+      description: "当前有效候选人仅3人，目标8人。",
+      category: "process_blocker", priority: "high", status: "open",
+      sourceType: "job_pipeline", sourceRefId: jobs[0].id,
+      createdById: userRecruiter.id,
+      ownerId: userRecruiter.id,
+      jobId: jobs[0].id,
       applicationId: apps[0].id,
     },
   });
   await prisma.actionItem.create({
     data: {
-      title: "品牌策划Offer风险：竞品Offer", description: "顾清和已收到竞品Offer，需加速决策。",
-      sourceType: "application", sourceId: apps[5].id, sourceSignal: "OFFER_RISK_HIGH",
-      assignedRole: "hrbp", assignedId: userHrbp.id, status: "open", priority: "critical",
+      title: "品牌策划Offer风险：竞品Offer",
+      description: "顾清和已收到竞品Offer，需加速决策。",
+      category: "offer_risk", priority: "high", status: "open",
+      sourceType: "offer_risk", sourceRefId: apps[5].id,
+      createdById: userHrbp.id,
+      ownerId: userHrbp.id,
+      jobId: jobs[5]?.id || jobs[0].id,
       applicationId: apps[5].id,
     },
   });
