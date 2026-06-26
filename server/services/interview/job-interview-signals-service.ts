@@ -6,13 +6,13 @@ import { buildScopeWhere, requirePermission } from "@/server/permissions/check-p
 import { getJobByIdWithScope } from "@/server/repositories/job-repository";
 import { getFeedbacksByJobId } from "@/server/repositories/interview/interview-feedback-repository";
 import { PrismaClient } from "@prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { Pool } from "pg";
 
 // Reuse the same PrismaClient pattern as repositories — single pool instance
 let _prisma: PrismaClient | null = null;
 function getPrisma(): PrismaClient {
   if (!_prisma) {
-    const { PrismaPg } = require("@prisma/adapter-pg");
-    const { Pool } = require("pg");
     const pool = new Pool({
       connectionString: process.env.DATABASE_URL,
       max: 5,
