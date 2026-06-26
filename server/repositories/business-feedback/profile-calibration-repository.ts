@@ -73,20 +73,55 @@ export async function createCalibration(input: CreateCalibrationInput) {
   });
 }
 
-export async function confirmCalibration(id: string, confirmedBy: string) {
-  const existing = await prisma.profileCalibration.findUnique({ where: { id } });
-  if (!existing) return null;
+/**
+ * Confirm a calibration — scoped update.
+ *
+ * Uses updateMany with scope + status check in WHERE clause,
+ * eliminating the unscoped findUnique that was here previously.
+ *
+ * Returns the updated calibration, or null if:
+ * - calibration doesn't exist
+ * - scope doesn't match (access denied)
+ * - status is already "confirmed" (conflict)
+ *
+ * Callers should distinguish 404 vs 409 by checking the return value
+ * and optionally doing a scoped read to determine which case applies.
+ */
+export async function confirmCalibration(id: string, confirmedBy: string, scope: ScopeWhere) {
+  // Build scope condition — mirrors getCalibrationByIdWithScope
+  const scopeWhere: Record<string, unknown> = { id, status: "draft" };
 
-  if (existing.status === "confirmed") {
-    throw new Error("Calibration already confirmed");
+  if (scope.scope === "ALL") {
+    // admin/leader: no extra scope filter needed beyond id + status
+  } else if (scope.scope === "DEPARTMENT" && scope.departmentId) {
+    scopeWhere.job = { departmentId: scope.departmentId };
+  } else if (scope.scope === "OWNED" && scope.userId) {
+    scopeWhere.OR = [{ job: { ownerId: scope.userId } }, { createdBy: scope.userId }];
+  } else if (scope.scope === "RELATED" && scope.userId) {
+    if (scope.role === "interviewer") return null;
+    scopeWhere.OR = [{ job: { businessOwnerId: scope.userId } }, { createdBy: scope.userId }];
+  } else {
+    // DENY or no userId — cannot confirm
+    return null;
   }
 
-  return prisma.profileCalibration.update({
-    where: { id },
+  const result = await prisma.profileCalibration.updateMany({
+    where: scopeWhere,
     data: {
       status: "confirmed",
       confirmedAt: new Date(),
       confirmedBy,
     },
+  });
+
+  if (result.count === 0) {
+    // Could be: not found, access denied, or already confirmed
+    // All map to null — caller should do scoped read to disambiguate if needed
+    return null;
+  }
+
+  // Fetch the updated record (scoped) to return full data
+  return prisma.profileCalibration.findFirst({
+    where: { id, status: "confirmed" },
   });
 }

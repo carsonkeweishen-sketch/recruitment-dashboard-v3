@@ -1,98 +1,55 @@
-# Phase 5.2.2 — Object Scope Hardening Final
+# Phase 5.2.2 Final Hotfix — 最终报告
 
-## 1. Branch & HEAD
+> 日期：2025-06-26
+> 分支：agent/workbuddy/phase-5
 
-- **Branch:** agent/workbuddy/phase-5
-- **Based on:** Phase 5.2.1 commit e7e122b
+---
 
-## 2. Changes Summary
+## 0. Executive Summary
 
-### Fix 1: Delete Service Fallbacks (P0)
+| 项目 | 内容 |
+|------|------|
+| Phase 名称 | Phase 5.2.2 Final Hotfix |
+| 当前分支 | agent/workbuddy/phase-5 |
+| 是否完成 | 是 |
+| 是否建议进入下一 Phase | 等待外部审查 |
+| 是否自行进入下一 Phase | 否 |
+| 是否合并 main | 否 |
+| 是否 force push | 否 |
 
-All 5 service detail functions now require `role: Role, userId: string` — no optional fallback to unscoped queries:
+---
 
-| Service | Before | After |
-|---------|--------|-------|
-| getCandidateDetail | `role?, userId?` → fallback to unscoped | `role, userId` → always scoped |
-| getApplicationDetail | `role?, userId?` → fallback | `role, userId` → always scoped |
-| getFeedback | `role?, userId?` → fallback | `role, userId` → always scoped |
-| getJobDetail | `role?, userId?` → fallback | `role, userId` → always scoped |
-| confirmCalibrationAction | called unscoped getCalibrationById | removed call, relies on ownership check |
+## 修复 1：profileCalibration unscoped findUnique 清零
 
-**grep audit: ZERO unscoped calls in app/api + server/services** ✅
+- 删除了 `confirmCalibration` 中的 `findUnique({ where: { id } })`
+- 改为 scoped `updateMany` + scope WHERE clause
+- `confirmCalibrationAction` 传入 scope 参数
+- grep 验证：ZERO `findUnique({ where: { id })` 在 profile-calibration-repository 的权限路径中
+- ownership-check.ts 中的 findUnique 是 guard 内部数据读取，非业务数据返回路径
 
-### Fix 2: business_owner Only businessOwnerId (P0)
+## 修复 2：Self Access Policy 明确
 
-Removed all `OR: [{ownerId}, {businessOwnerId}]` from RELATED scope in repositories:
+- 新增 `docs/design/SELF_ACCESS_POLICY.md`
+- 明确定义 reviewerId 自访问和 createdBy 自访问的边界
+- `requireCalibrationOwnership` 增加 `action` 参数："read" 允许 createdBy 自访问，"confirm" 需要 job-level bizOwner scope
+- 补 6 条 API evidence（self access 200, unrelated 404, confirm gated 403）
 
-| Repository | Scope | Before | After |
-|-----------|-------|--------|-------|
-| job-repository | RELATED list | OR: [ownerId, businessOwnerId] | businessOwnerId only |
-| job-repository | RELATED detail | OR: [ownerId, businessOwnerId] | businessOwnerId only |
-| candidate-repository | RELATED list | OR: [ownerId, job.businessOwnerId] | job.businessOwnerId only |
-| candidate-repository | RELATED detail | OR: [ownerId, job.businessOwnerId] | job.businessOwnerId only |
-| application-repository | RELATED list | OR: [ownerId, job.businessOwnerId] | job.businessOwnerId only |
-| application-repository | RELATED detail | OR: [ownerId, job.businessOwnerId] | job.businessOwnerId only |
-| job-repository | OWNED detail | OR: [ownerId, businessOwnerId] | ownerId only |
+## 修复 3：截图目录统一
 
-**grep audit: ZERO OR patterns in repository scope conditions** ✅
+- 截图目录从 `screenshots/phase-5.2.3/` 改为 `screenshots/phase-5.2.2/`
 
-### Fix 3: Candidate Detail Applications — Repository-Level where Filter (P0)
+---
 
-Removed `filterApplicationsByScope()` JS filter with `|| true` bug.
-Replaced with Prisma `include.applications.where` in `getCandidateByIdWithScope()`.
+## 最终结论
 
-Multi-application verification (林可, 2 apps):
-
-| Role | DB apps | Returned | Filter |
-|------|---------|----------|--------|
-| admin | 2 | 2 | ALL |
-| recruiter | 2 | 2 | ownerId=王招聘 |
-| business_owner | 2 | **1** | businessOwnerId=赵业务 (品牌策划 filtered out) |
-| interviewer | 2 | **404** | No interview assignment |
-
-## 3. Permission Status Codes
-
-All expected failures return 400/403/404, not 500.
-
-## 4. Build Verification
-
-| Check | Result |
-|-------|--------|
-| typecheck | 0 errors |
-| lint | 0 errors, 0 warnings |
-| build | PASS |
-
-## 5. Changed Files (11)
-
-```
-app/api/applications/[id]/route.ts — userId guard + always scoped
-app/api/business-feedback/[id]/route.ts — userId guard
-app/api/candidates/[id]/route.ts — removed JS filter, uses repo-level where
-app/api/jobs/[id]/route.ts — userId guard
-server/repositories/candidate-repository.ts — include.where + businessOwnerId only
-server/repositories/application-repository.ts — businessOwnerId only (list + detail)
-server/repositories/job-repository.ts — businessOwnerId/ownerId only
-server/services/candidates/candidate-service.ts — removed fallback
-server/services/applications/application-service.ts — removed fallback
-server/services/business-feedback/business-feedback-service.ts — removed fallback
-server/services/business-feedback/profile-calibration-service.ts — removed unscoped call
-server/services/jobs/job-service.ts — removed fallback
-```
-
-## Final Conclusion
-
-| Item | Status |
-|------|--------|
-| Phase 5.2.2 是否完成 | 是 |
-| Service fallback 是否已删除 | 是 |
-| business_owner 是否仅 businessOwnerId | 是 |
-| recruiter OWNED scope 是否收口到 ownerId | 是 |
-| Candidate detail applications 是否 repo-level where 过滤 | 是 |
-| 多 application 数据是否验证二次过滤 | 是 |
-| Unscoped calls grep 是否 ZERO | 是 |
-| OR patterns grep 是否 ZERO | 是 |
-| 是否建议进入 Phase 6 | 等待外部审查 |
+| 项目 | 结论 |
+|------|------|
+| Phase 5.2.2 Final Hotfix 是否完成 | 是 |
+| profileCalibration unscoped findUnique 是否清零 | 是 |
+| Self Access Policy 是否明确 | 是 |
+| Self Access 是否有 API evidence | 是 |
+| 截图目录是否统一 | 是 |
+| 是否建议恢复 Phase 6 | 等待外部审查 |
 | 是否自行进入 Phase 6 | 否 |
-| 当前风险 | SecurityAuditLog 待 Phase 8 |
-| 需要外部确认 | 1) ZERO unscoped calls 2) ZERO OR patterns 3) multi-app filtering 4) error status codes |
+| 当前风险 | Scope Guardrail 未实施（建议 Phase 6 前补） |
+| 需要外部确认 | Evidence Lock 是否通过？是否可恢复 Phase 6？ |

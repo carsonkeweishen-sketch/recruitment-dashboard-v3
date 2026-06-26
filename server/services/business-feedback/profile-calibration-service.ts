@@ -4,6 +4,7 @@ import { buildScopeWhere, requirePermission } from "@/server/permissions/check-p
 import {
   createCalibration,
   confirmCalibration,
+  getCalibrationByIdWithScope,
 } from "@/server/repositories/business-feedback/profile-calibration-repository";
 import { requireJobOwnership, requireCalibrationOwnership } from "@/server/repositories/business-feedback/ownership-check";
 import type { CreateCalibrationInput } from "@/server/repositories/business-feedback/profile-calibration-repository";
@@ -52,8 +53,27 @@ export async function confirmCalibrationAction(
 
   requirePermission({ role, userId, departmentId }, "candidates", "update");
 
-  // Phase 5.1: Object-level ownership check
-  await requireCalibrationOwnership(userId, calibrationId, role);
+  // Build scope for scoped confirmCalibration call
+  const scope = buildScopeWhere({ role, userId, departmentId }, "candidates");
 
-  return confirmCalibration(calibrationId, userId);
+  // Phase 5.1: Object-level ownership check (confirm requires job-level bizOwner scope)
+  await requireCalibrationOwnership(userId, calibrationId, role, "confirm");
+
+  // Phase 5.2.3: Scoped confirm — uses updateMany with scope WHERE clause
+  const result = await confirmCalibration(calibrationId, userId, scope);
+
+  if (!result) {
+    // Determine whether it's 404 (not found/access denied) or 409 (already confirmed)
+    // by doing a scoped read
+    const existing = await getCalibrationByIdWithScope(calibrationId, scope);
+    if (!existing) {
+      throw new Error("Not found or access denied");
+    }
+    if (existing.status === "confirmed") {
+      throw new Error("Calibration already confirmed");
+    }
+    throw new Error("Not found or access denied");
+  }
+
+  return result;
 }

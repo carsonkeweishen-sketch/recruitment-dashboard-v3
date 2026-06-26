@@ -43,11 +43,14 @@ export async function requireJobOwnership(
 
 /**
  * Check if a business_owner can access a specific calibration.
+ *
+ * @param action - "read" allows createdBy self-access; "confirm" requires job-level bizOwner scope
  */
 export async function requireCalibrationOwnership(
   userId: string,
   calibrationId: string,
-  role: string
+  role: string,
+  action: "read" | "confirm" = "read"
 ): Promise<void> {
   const cal = await prisma.profileCalibration.findUnique({
     where: { id: calibrationId },
@@ -61,10 +64,20 @@ export async function requireCalibrationOwnership(
   if (role === "admin" || role === "leader") return;
 
   if (role === "business_owner") {
-    // business_owner only: calibration must belong to a job they own as businessOwner
-    // OR they created the calibration themselves
-    if (cal.job.businessOwnerId !== userId && cal.createdBy !== userId) {
-      throw new JobOwnershipError("Permission denied: you are not related to this calibration");
+    // business_owner: calibration must belong to a job they own as businessOwner
+    const hasJobScope = cal.job.businessOwnerId === userId;
+    const isCreator = cal.createdBy === userId;
+
+    if (action === "confirm") {
+      // confirm requires job-level bizOwner scope — createdBy alone is insufficient
+      if (!hasJobScope) {
+        throw new JobOwnershipError("Permission denied: you must be the business owner of this job to confirm calibrations");
+      }
+    } else {
+      // read: allows createdBy self-access
+      if (!hasJobScope && !isCreator) {
+        throw new JobOwnershipError("Permission denied: you are not related to this calibration");
+      }
     }
   }
 }
