@@ -100,3 +100,54 @@ export async function logInterviewFeedbackSubmitted(params: {
     },
   });
 }
+
+// ============================================================
+// Phase 7: Action activity logs
+// ============================================================
+
+async function logActionEvent(params: {
+  actorId: string;
+  action: string;
+  actionId: string;
+  category: string;
+  priority: string;
+  ownerId?: string;
+  jobId?: string;
+  candidateId?: string;
+  applicationId?: string;
+  interviewId?: string;
+  sourceType: string;
+  sourceRefId?: string;
+}) {
+  await prisma.activityLog.create({
+    data: {
+      actorId: params.actorId,
+      action: params.action,
+      resourceType: "action_item",
+      resourceId: params.actionId,
+      detail: {
+        category: params.category,
+        priority: params.priority,
+        ownerId: params.ownerId,
+        jobId: params.jobId,
+        candidateId: params.candidateId,
+        applicationId: params.applicationId,
+        interviewId: params.interviewId,
+        sourceType: params.sourceType,
+        sourceRefId: params.sourceRefId,
+      },
+    },
+  });
+}
+
+export async function logActionCreated(params: Omit<Parameters<typeof logActionEvent>[0], "action">) {
+  return logActionEvent({ ...params, action: "ACTION_CREATED" });
+}
+
+export async function logActionResolved(params: Omit<Parameters<typeof logActionEvent>[0], "action">) {
+  return logActionEvent({ ...params, action: "ACTION_RESOLVED" });
+}
+
+export async function logActionDismissed(params: Omit<Parameters<typeof logActionEvent>[0], "action">) {
+  return logActionEvent({ ...params, action: "ACTION_DISMISSED" });
+}
