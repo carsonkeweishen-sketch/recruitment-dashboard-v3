@@ -24,8 +24,8 @@ export function ActionDetailDrawer({ actionId, onClose, onResolve, onDismiss }: 
   const [error, setError] = useState<string | null>(null);
   const [tab, setTab] = useState<"overview" | "linked" | "activity">("overview");
 
-  // eslint-disable-next-line
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
     setError(null);
     fetchActionDetail(actionId)
