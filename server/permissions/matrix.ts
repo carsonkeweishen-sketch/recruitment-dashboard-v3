@@ -114,6 +114,10 @@ const actionOverrides: Partial<Record<ActionOverrideKey, string[]>> = {
   // === settings ===
   "settings:admin": ["view", "create", "update", "delete"],
   "settings:leader": ["view"],
+
+  // === interviews ===
+  // interviewer: RELATED scope, 可 view+create (create = submit feedback)
+  "interviews:interviewer": ["view", "create"],
 };
 
 /**

@@ -1,0 +1,1 @@
+{"success":true,"data":{"accessible":true,"interviewerId":"cmqunojpw000c0brnlizkxkpf","scope":"RELATED","feedbackCount":3,"onTimeRate":0,"avgFeedbackQualityScore":80,"evidenceSufficiencyRate":33,"riskNotesCoverageRate":33,"suggestions":["反馈证据充分度偏低，建议加强项目细节追问，引导候选人用 STAR 方法回答","风险点记录覆盖不足，建议在每次反馈中记录待验证项或潜在顾虑","反馈及时性有提升空间，建议在面试结束后 24 小时内完成反馈提交","反馈质量整体较好，结构化程度高，继续保持"]}}

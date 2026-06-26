@@ -29,6 +29,14 @@ export async function submitInterviewFeedback(
   const scope = buildScopeWhere({ role, userId, departmentId }, "interviews");
   guardWriteScope(scope);
 
+  // Only interviewer role can submit feedback (not admin/leader/recruiter/biz_owner)
+  if (role !== "interviewer") {
+    throw new InterviewFeedbackError(
+      "Only the assigned interviewer can submit feedback",
+      403
+    );
+  }
+
   // Validate the interview exists and user has access
   const interview = await getInterviewByIdWithScope(input.interviewId, scope);
   if (!interview) {
