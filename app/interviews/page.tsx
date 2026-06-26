@@ -4,11 +4,12 @@ import { useState, useEffect, useCallback } from "react";
 import { InterviewList } from "@/components/domain/interviews/InterviewList";
 import { InterviewDetailDrawer } from "@/components/domain/interviews/InterviewDetailDrawer";
 import { InterviewFeedbackForm } from "@/components/domain/interviews/InterviewFeedbackForm";
-import { MetricCard } from "@/components/ui/MetricCard";
 import { LoadingSkeleton } from "@/components/ui/LoadingSkeleton";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PermissionDenied } from "@/components/ui/PermissionDenied";
+import { ProductShell } from "@/components/ui/product-shell";
+import { KpiCard } from "@/components/ui/kpi-card";
 
 interface InterviewData {
   id: string;
@@ -107,67 +108,44 @@ export default function InterviewsPage() {
   if (error) return <ErrorState title={error} onRetry={() => fetchData(statusFilter)} />;
 
   return (
-    <div className="flex flex-col gap-6 p-6">
-      {/* Page Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">面试管理</h1>
-        <p className="mt-1 text-sm text-[var(--color-text-secondary)]">
-          查看面试安排、反馈状态、面试质量和候选人表现风险
-        </p>
-      </div>
-
-      {/* KPI Cards */}
-      {metrics && (
-        <div className="grid grid-cols-5 gap-4">
-          <MetricCard
-            title="待反馈面试"
-            value={String(metrics.feedbackPendingCount)}
-            subtitle={metrics.feedbackPendingCount > 3 ? "↑ 需关注" : "→ 正常"}
-          />
-          <MetricCard
-            title="已提交反馈"
-            value={String(metrics.feedbackSubmittedCount)}
-          />
-          <MetricCard
-            title="逾期反馈"
-            value={String(metrics.overdueFeedbackCount)}
-            subtitle={metrics.overdueFeedbackCount > 0 ? "↑ 有逾期" : "→ 无逾期"}
-          />
-          <MetricCard
-            title="平均反馈质量分"
-            value={String(metrics.avgFeedbackQualityScore)}
-          />
-          <MetricCard
-            title="反馈及时率"
-            value={`${metrics.feedbackOnTimeRate}%`}
-          />
+    <ProductShell
+      title="面试管理"
+      description="查看面试安排、反馈状态、面试质量和候选人表现风险"
+      kpiRow={
+        metrics ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+            <KpiCard label="待反馈面试" value={metrics.feedbackPendingCount} trendDirection={metrics.feedbackPendingCount > 3 ? "up" : "flat"} />
+            <KpiCard label="已提交反馈" value={metrics.feedbackSubmittedCount} />
+            <KpiCard label="逾期反馈" value={metrics.overdueFeedbackCount} trendDirection={metrics.overdueFeedbackCount > 0 ? "up" : "flat"} />
+            <KpiCard label="平均反馈质量分" value={metrics.avgFeedbackQualityScore} />
+            <KpiCard label="反馈及时率" value={`${metrics.feedbackOnTimeRate}%`} />
+          </div>
+        ) : undefined
+      }
+      filterBar={
+        <div className="flex items-center gap-3">
+          <div className="flex rounded-lg border border-[var(--color-border)] p-0.5">
+            {[
+              { value: "all", label: "全部" },
+              { value: "scheduled", label: "待面试" },
+              { value: "completed", label: "已完成" },
+            ].map((opt) => (
+              <button
+                key={opt.value}
+                onClick={() => setStatusFilter(opt.value)}
+                className={`rounded-md px-3 py-1.5 text-sm transition-colors ${
+                  statusFilter === opt.value
+                    ? "bg-[var(--color-primary)] text-white"
+                    : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
         </div>
-      )}
-
-      {/* Filters */}
-      <div className="flex items-center gap-3">
-        <div className="flex rounded-lg border border-[var(--color-border)] p-0.5">
-          {[
-            { value: "all", label: "全部" },
-            { value: "scheduled", label: "待面试" },
-            { value: "completed", label: "已完成" },
-          ].map((opt) => (
-            <button
-              key={opt.value}
-              onClick={() => setStatusFilter(opt.value)}
-              className={`rounded-md px-3 py-1.5 text-sm transition-colors ${
-                statusFilter === opt.value
-                  ? "bg-[var(--color-primary)] text-white"
-                  : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
-              }`}
-            >
-              {opt.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Interview List */}
+      }
+    >
       {interviews.length === 0 ? (
         <EmptyState
           title="暂无面试记录"
@@ -182,7 +160,6 @@ export default function InterviewsPage() {
         />
       )}
 
-      {/* Detail Drawer */}
       {selectedInterview && (
         <InterviewDetailDrawer
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -192,7 +169,6 @@ export default function InterviewsPage() {
         />
       )}
 
-      {/* Feedback Form Modal */}
       {showFeedbackForm && selectedInterview && (
         <InterviewFeedbackForm
           interviewId={selectedInterview.id}
@@ -203,6 +179,6 @@ export default function InterviewsPage() {
           onCancel={() => setShowFeedbackForm(false)}
         />
       )}
-    </div>
+    </ProductShell>
   );
 }

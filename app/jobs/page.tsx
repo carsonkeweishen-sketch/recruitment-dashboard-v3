@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { JobKpiCards } from "@/components/domain/jobs/JobKpiCards";
 import { JobFilters } from "@/components/domain/jobs/JobFilters";
 import { JobList } from "@/components/domain/jobs/JobList";
 import { JobDetailDrawer } from "@/components/domain/jobs/JobDetailDrawer";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { PermissionDenied } from "@/components/ui/PermissionDenied";
 import { LoadingSkeleton } from "@/components/ui/LoadingSkeleton";
+import { ProductShell } from "@/components/ui/product-shell";
+import { KpiCard } from "@/components/ui/kpi-card";
 
 interface JobItem {
   id: string;
@@ -61,21 +62,21 @@ export default function JobsPage() {
   if (error) return <ErrorState title="加载失败" description={error} onRetry={() => fetchJobs(filters)} />;
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-lg font-semibold text-[var(--color-text-primary)]">岗位管理</h2>
-        <p className="mt-1 text-sm text-[var(--color-text-secondary)]">查看岗位 JD、画像、负责人和招聘进展</p>
-      </div>
-
-      {!loading && (
-        <JobKpiCards total={jobs.length} highPriority={highPriority} activeRecruiting={activeRecruiting} profileComplete={profileComplete} />
-      )}
-
-      <JobFilters onFilter={setFilters} departments={departments} brandLines={brandLines} />
-
+    <ProductShell
+      title="岗位"
+      description="查看岗位 JD、画像、负责人和招聘进展"
+      kpiRow={
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <KpiCard label="在招岗位" value={jobs.length} href="/jobs" />
+          <KpiCard label="高优先级" value={highPriority} trendDirection={highPriority > 3 ? "up" : "flat"} />
+          <KpiCard label="招聘中" value={activeRecruiting} />
+          <KpiCard label="画像完整" value={profileComplete} />
+        </div>
+      }
+      filterBar={<JobFilters onFilter={setFilters} departments={departments} brandLines={brandLines} />}
+    >
       {loading ? <LoadingSkeleton /> : <JobList jobs={jobs} onSelect={setSelectedJobId} />}
-
       <JobDetailDrawer jobId={selectedJobId} onClose={() => setSelectedJobId(null)} />
-    </div>
+    </ProductShell>
   );
 }

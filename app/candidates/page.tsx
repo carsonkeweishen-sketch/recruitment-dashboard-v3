@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { CandidateKpiCards } from "@/components/domain/candidates/CandidateKpiCards";
 import { CandidateFilters } from "@/components/domain/candidates/CandidateFilters";
 import { CandidateList } from "@/components/domain/candidates/CandidateList";
 import { CandidateDetailDrawer } from "@/components/domain/candidates/CandidateDetailDrawer";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { PermissionDenied } from "@/components/ui/PermissionDenied";
 import { LoadingSkeleton } from "@/components/ui/LoadingSkeleton";
+import { ProductShell } from "@/components/ui/product-shell";
+import { KpiCard } from "@/components/ui/kpi-card";
 
 interface CandidateItem { id: string; name: string; source: string | null; currentCompany: string | null; currentTitle: string | null; tags: string[]; applicationCount: number; latestApplicationStage: string | null; latestJobTitle: string | null; updatedAt: string; createdAt: string; }
 
@@ -37,12 +38,21 @@ export default function CandidatesPage() {
   if (error) return <ErrorState title="加载失败" description={error} onRetry={() => fetchCandidates(filters)} />;
 
   return (
-    <div className="space-y-6">
-      <div><h2 className="text-lg font-semibold text-[var(--color-text-primary)]">候选人库</h2><p className="mt-1 text-sm text-[var(--color-text-secondary)]">查看候选人档案、投递岗位和当前推进阶段</p></div>
-      {!loading && <CandidateKpiCards total={candidates.length} active={active} multiJob={multiJob} recent={recent} />}
-      <CandidateFilters onFilter={setFilters} sources={sources} />
+    <ProductShell
+      title="候选人"
+      description="查看候选人档案、投递岗位和当前推进阶段"
+      kpiRow={
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <KpiCard label="总候选人" value={candidates.length} href="/candidates" />
+          <KpiCard label="推进中" value={active} />
+          <KpiCard label="多岗位投递" value={multiJob} />
+          <KpiCard label="本周新增" value={recent} trendDirection={recent > 3 ? "up" : "flat"} />
+        </div>
+      }
+      filterBar={<CandidateFilters onFilter={setFilters} sources={sources} />}
+    >
       {loading ? <LoadingSkeleton /> : <CandidateList candidates={candidates} onSelect={setSelectedId} />}
       <CandidateDetailDrawer candidateId={selectedId} onClose={() => setSelectedId(null)} />
-    </div>
+    </ProductShell>
   );
 }

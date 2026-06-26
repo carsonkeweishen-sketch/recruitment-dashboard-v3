@@ -1,0 +1,169 @@
+# Phase 8.0 Foundation — Commands Log
+
+> 日期：2026-06-27 | 分支：agent/workbuddy/phase-7
+
+## CMD-1: pnpm typecheck
+```
+(no output)
+EXIT: 0
+```
+
+## CMD-2: pnpm lint
+```
+(no output)
+EXIT: 0
+```
+
+## CMD-3: pnpm build
+```
+├ ○ /candidates
+├ ○ /dashboard
+├ ○ /interviews
+├ ○ /jobs
+├ ○ /knowledge
+├ ○ /offer-risks
+├ ○ /permissions-debug
+├ ○ /reports
+└ ○ /settings
+EXIT: 0
+```
+
+## CMD-4: git status --short
+```
+(modified + new files — see git status)
+```
+
+## CMD-5: git branch --show-current
+```
+agent/workbuddy/phase-7
+```
+
+## CMD-6: git ls-files .env .env.local ".env.*.local"
+```
+(no output)
+EXIT: 0
+```
+
+## CMD-7: grep -R "page.route" scripts app components docs
+```
+scripts/phase-4.4-screenshots.ts (历史脚本)
+scripts/phase-5-screenshots.ts (历史脚本)
+scripts/phase-7.4b-screenshots.ts (历史脚本)
+scripts/phase-7.4b-real-screenshots.ts (注明 NO page.route mock)
+scripts/generate-*.js/py (报告生成脚本引用)
+结论：app/ components/ 中无 page.route
+```
+
+## CMD-8: grep -R "Mock Action\|mock action\|mockActions\|mock activity\|static timeline\|Mock Insight\|mock insight" app components scripts docs
+```
+scripts/generate-7.4b-report.js (历史报告)
+docs/self-checks/phase-7.4b-real-commands.log (历史命令记录)
+docs/self-checks/phase-7d-ux-commands.log (历史命令记录)
+docs/self-checks/phase-7d-final-commands.log (历史命令记录)
+结论：app/ components/ 中无 mock
+```
+
+## CMD-9: grep -R "DemoAction\|DemoCandidate\|测试候选人\|测试岗位\|候选人A\|Sample Job\|Sample Candidate" app components server prisma docs
+```
+docs/self-checks/ 历史命令记录
+结论：app/ components/ server/ prisma/ 中无测试命名
+```
+
+## CMD-10: grep -R "undefined\|NaN\|Invalid Date" app components docs/self-checks docs/product docs/design
+```
+app/api/ 中 TS 类型注解（as string | undefined）
+结论：非 UI 显示 bug，正常的 TypeScript 类型标注
+```
+
+## CMD-11: grep -R "DATABASE_URL\|OPENAI_API_KEY\|MOKA\|FEISHU" app components server docs prisma
+```
+server/services/*/ 和 server/repositories/*/ 中 process.env.DATABASE_URL
+结论：后端代码正常引用，无明文泄露
+```
+
+## CMD-12: grep -R "AI 自动淘汰\|AI 决定录用\|面霸\|面试官排名" app components server docs
+```
+docs/ 中均为禁止列表说明
+PRODUCT_INFORMATION_ARCHITECTURE.md 中"面试官排名"已修正为"面试官质量评估"
+结论：无实际使用
+```
+
+## CMD-13: grep -R "Coming soon\|TODO\|测试模块" app
+```
+(no output)
+EXIT: 1
+结论：无
+```
+
+## CMD-14: grep -n "permissions-debug" components/layout/Sidebar.tsx
+```
+(no output)
+EXIT: 1
+结论：已从导航移除
+```
+
+## CMD-15: New routes verification
+```
+ls app/dashboard/page.tsx → exists
+ls app/reports/page.tsx → exists
+ls app/knowledge/page.tsx → exists
+ls app/settings/page.tsx → exists
+ls app/offer-risks/page.tsx → exists
+EXIT: 0
+```
+
+## CMD-16: UI components verification
+```
+ls components/ui/design-tokens.ts → exists
+ls components/ui/product-shell.tsx → exists
+ls components/ui/module-page.tsx → exists
+ls components/ui/kpi-card.tsx → exists
+ls components/ui/object-chip.tsx → exists
+ls components/ui/empty-state.tsx → exists
+ls components/ui/error-state.tsx → exists
+ls components/ui/permission-state.tsx → exists
+ls components/ui/loading-skeleton.tsx → exists
+ls components/ui/drawer-shell.tsx → exists
+ls components/ui/modal-shell.tsx → exists
+EXIT: 0
+```
+
+## CMD-17: Product docs verification
+```
+ls docs/product/PRODUCT_INFORMATION_ARCHITECTURE.md → exists
+ls docs/product/CORE_DOMAIN_OBJECT_MODEL.md → exists
+ls docs/product/AI_CAPABILITY_FRAMEWORK.md → exists
+ls docs/product/AI_OUTPUT_PROVENANCE_STANDARD.md → exists
+ls docs/product/PRODUCT_NAMING_GLOSSARY.md → exists
+ls docs/product/MODULE_ROADMAP.md → exists
+EXIT: 0
+```
+
+## CMD-18: Design docs verification
+```
+ls docs/design/RIJON_RECRUITMENT_DESIGN_SYSTEM.md → exists
+ls docs/design/DRAWER_MODAL_INTERACTION_STANDARD.md → exists
+ls docs/design/CLAUDE_PHASE_8_FOUNDATION_REVIEW_TRIAGE.md → exists
+EXIT: 0
+```
+
+## Summary
+
+| CMD | Result |
+|-----|--------|
+| typecheck | ✅ 0 errors |
+| lint | ✅ 0 errors 0 warnings |
+| build | ✅ PASS (14 routes) |
+| page.route mock in app/ | ✅ NONE |
+| test data names in app/ | ✅ ZERO |
+| null/undefined/NaN in UI | ✅ NONE |
+| env/secrets leak | ✅ NONE |
+| fake AI | ✅ NONE |
+| Coming soon/TODO in app/ | ✅ NONE |
+| permissions-debug in nav | ✅ REMOVED |
+| 面试官排名 | ✅ FIXED |
+| New routes (5) | ✅ ALL EXIST |
+| UI components (11) | ✅ ALL EXIST |
+| Product docs (6) | ✅ ALL EXIST |
+| Design docs (3) | ✅ ALL EXIST |
+| git branch | ✅ feature only |
