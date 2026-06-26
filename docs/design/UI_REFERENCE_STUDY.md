@@ -3,7 +3,8 @@
 > Recruitment Dashboard v3 — 海外优秀 SaaS 产品设计语言学习与落地计划
 >
 > 编写日期：2025-06-26
-> 研究范围：Linear、Stripe、Ashby、Greenhouse、Vercel/Geist、Panda CSS、Airtable、Retool、Attio、Rippling、Tremor、Untitled UI
+> 研究范围：Linear、Stripe、Ashby、Greenhouse、Vercel/Geist、Panda Design System (Setproduct)、Airtable、Retool、Attio、Rippling、Tremor、Untitled UI
+> 技术补充：Panda CSS（Type-safe token 框架，仅作为 token 技术参考）
 
 ---
 
@@ -37,7 +38,8 @@ Recruitment Dashboard v3 定位为**轻量 SaaS 招聘工作台**，需要在视
 | 3 | **Ashby** | 招聘 ATS | 同领域产品，一体化招聘平台，现代 UI |
 | 4 | **Greenhouse** | 招聘 ATS | 行业龙头，结构化招聘流程，AA 无障碍标准 |
 | 5 | **Vercel/Geist** | 设计系统 | 高对比度、可访问的色彩系统，Geist 字体 |
-| 6 | **Panda CSS** | 样式框架 | Type-safe design token，build-time CSS，recipes 模式 |
+| 6 | **Panda Design System (Setproduct)** | Figma UI Kit | 250+ 组件，80+ dashboard 模板，桌面端 1920w 设计规范 |
+| 6b | **Panda CSS** (技术补充) | 样式框架 | Type-safe design token，仅作为 token 技术参考 |
 | 7 | **Airtable** | 低代码数据库 | 信息密度管理，Interface Designer 布局系统 |
 | 8 | **Retool** | 内部工具平台 | 数据密集型仪表盘设计，表格为核心组件 |
 | 9 | **Attio** | CRM | 极高信息密度，单像素边框，4px 网格系统 |
@@ -284,47 +286,68 @@ Recruitment Dashboard v3 定位为**轻量 SaaS 招聘工作台**，需要在视
 
 ---
 
-### 2.6 Panda CSS — Type-safe Design Token 框架
+### 2.6 Panda Design System (Setproduct) — 专业 Dashboard Figma UI Kit
 
-**来源**：[Panda CSS](https://panda-css.com/)、[Introducing Panda CSS](https://panda-css.com/blog/introducing-panda-css)
+**来源**：[Panda UI Kit - Setproduct](https://www.setproduct.com/templates/panda)、[Panda Design System Figma](https://www.figma.com/community/file/1415982271263017545/panda-design-system)、[Creative Market](https://creativemarket.com/E-sam/92036869-Panda-UI-Kit-%E2%80%93-Figma-Design-System)
 
-#### 核心特征
+#### 产品定位
+
+Panda 是 Setproduct 出品的企业级 Dashboard Figma UI Kit，专注于**桌面端 1920w 数据密集型应用**设计。不是样式框架，而是一套完整的 Dashboard 设计系统。
+
+#### 核心数据
+
+| 指标 | 数据 |
+|------|------|
+| 组件数量 | 250+ auto-layout 组件，支持 Variants |
+| Dashboard 模板 | 80+ 桌面端模板，覆盖主流 Dashboard 类别 |
+| 布局宽度 | 1920w 桌面端（亮色 + 暗色双主题） |
+| 设计模式 | Atomic 结构 + Modular + Responsive |
+| 样式体系 | Auto-layout、Variants、Color & Text Styles、Global Styles |
+
+#### Dashboard 模板类别
+
+| 类别 | 示例 |
+|------|------|
+| Analytics | 数据分析仪表盘，KPI 卡片 + 图表 |
+| Invoice | 发票管理，表格 + 状态追踪 |
+| Calendar | 日历视图，事件管理 |
+| Kanban | 看板视图，拖拽管理 |
+| CRM | 客户关系管理，Pipeline 视图 |
+| Project Management | 项目管理，任务列表 + 甘特图 |
+
+#### 设计特征
+
+| 特征 | 详情 |
+|------|------|
+| 风格 | Clean & modern web app dashboard |
+| 信息密度 | 中等偏高 — 适合数据密集型 Dashboard |
+| 组件结构 | Atomic：基础组件 → 复合组件 → 页面模板 |
+| 布局 | 左侧导航 + 顶栏 + 内容区（经典 Dashboard 布局） |
+| KPI 卡片 | 数字突出 + 趋势指示 + 图标装饰 |
+| 表格 | 紧凑行高、状态标签、操作按钮右置 |
+| 色彩 | 中性灰白底 + 蓝色强调 + 语义色（绿/红/黄） |
+
+#### 对本项目的启示
+
+- ✅ **80+ Dashboard 模板** — 直接参考 Analytics、CRM、Project Management 类别的布局
+- ✅ **250+ 组件** — 我们的组件库可以对齐其分类体系
+- ✅ **1920w 桌面端优先** — 招聘 Dashboard 以桌面端为核心使用场景
+- ✅ **KPI 卡片设计** — 数字 + 趋势 + 图标的三要素组合
+- ✅ **Atomic 结构** — 基础 UI 组件 → 业务组件 → 页面模板 的分层思路
+- ⚠️ Panda 是 Figma 设计资产，不直接提供代码 — 我们学习其设计模式，用 Tailwind CSS 实现
+
+### 2.6b Panda CSS（技术补充）— Type-safe Token 框架
+
+> 仅作为 Design Token 技术参考，**不是 UI 设计参考对象**。
 
 | 特征 | 详情 |
 |------|------|
 | 构建时 | 零运行时 CSS-in-JS，build time 生成静态 CSS |
 | 类型安全 | TypeScript 原生支持 |
 | Design Token | 支持 W3C token 规范的 base + semantic tokens |
-| Cascade Layers | 使用 `@layer reset, base, tokens, recipes, utilities` |
 | Recipes | 类似 Stitches 的 variant 系统（cva 模式） |
-| RSC 兼容 | 支持 React Server Components |
 
-#### Design Token 模式
-
-```typescript
-// Core Tokens
-const tokens = {
-  colors: { primary: { value: '#0FEE0F' } },
-  fonts: { body: { value: 'system-ui, sans-serif' } },
-  sizes: { small: { value: '12px' }, medium: { value: '16px' } }
-}
-
-// Semantic Tokens（支持亮暗模式）
-const semanticTokens = {
-  colors: {
-    danger: { value: { base: '{colors.red.500}', _dark: '{colors.red.200}' } },
-    success: { value: { base: '{colors.green.500}', _dark: '{colors.green.300}' } },
-    canvas: { value: '{colors.white}' }
-  }
-}
-```
-
-#### 对本项目的启示
-
-- ✅ Token 驱动理念 — 我们的 CSS 变量已经接近此模式
-- ✅ Recipes 模式 — 可应用于组件变体（StatusBadge 的 status 变体）
-- ✅ Cascade Layers — Tailwind CSS 4 已经内置，无需额外引入
-- ⚠️ Panda CSS 本身不需要引入，但理念值得学习
+对本项目的 Token 技术参考价值：Recipes 模式可应用于组件变体，但我们使用 Tailwind CSS 4 + CSS 变量实现，**不引入 Panda CSS**。
 
 ---
 
@@ -610,7 +633,7 @@ Body:    Inter · 1rem / 400 / 1.5
 
 | 模式 | 采用者 | 本项目当前状态 |
 |------|--------|---------------|
-| Design Token 驱动 | Stripe、Geist、Panda CSS、Rippling | ✅ 已采用 CSS 变量 |
+| Design Token 驱动 | Stripe、Geist、Panda Design System、Rippling | ✅ 已采用 CSS 变量 |
 | 语义色命名 | 全部 | ✅ primary/success/warning/danger |
 | 8-10 阶色阶 | Geist、Tailwind | ⚠️ 仅定义了语义色，缺少色阶 |
 | 组件三态（default/hover/active） | Geist、Stripe | ⚠️ 仅有 primary/primary-hover |
@@ -711,7 +734,7 @@ Body:    Inter · 1rem / 400 / 1.5
 
 > 所有视觉属性（颜色、间距、圆角、阴影、字体）必须通过 Design Token 定义。禁止在业务页面新增任意 hex 值。
 
-**参考**：Stripe、Geist、Panda CSS
+**参考**：Stripe、Geist、Panda Design System
 **当前状态**：✅ 已建立 Token 体系，需扩展
 
 ### 原则 2：信息密度分级管理
@@ -1008,7 +1031,8 @@ Body:    Inter · 1rem / 400 / 1.5
 | 22 | 自动化/工作流强调色（紫色） | Rippling | AI 分析标签 | P2 |
 | 23 | 品牌色 ≠ 功能色 | Rippling | 颜色使用规范 | ✅ 已遵守 |
 | 24 | Pill CTA（rounded-full 主按钮） | Airtable | 按钮变体 | P2 |
-| 25 | Type-safe Design Token（W3C 规范） | Panda CSS | Token 体系升级 | P2 |
+| 25 | 80+ Dashboard 模板布局参考 | Panda Design System (Setproduct) | 全局页面布局 | P1 |
+| 26 | Type-safe Design Token（W3C 规范） | Panda CSS（技术补充） | Token 体系升级 | P2 |
 
 ---
 
@@ -1025,7 +1049,8 @@ Body:    Inter · 1rem / 400 / 1.5
 | Tremor | https://www.tremor.so/ |
 | Retool | https://blog.boldtech.dev/ui-tips-efficient-dashboards-retool/ |
 | Airtable | https://www.designmd.co/d/airtable |
-| Panda CSS | https://panda-css.com/ |
+| Panda Design System (Setproduct) | https://www.setproduct.com/templates/panda |
+| Panda CSS (技术补充) | https://panda-css.com/ |
 | Greenhouse | https://support.greenhouse.io/hc/en-us/articles/6013087071643-Redesign-overview |
 | Ashby | https://www.outsail.co/post/ashby-reviews---pricing-pros-cons-and-user-feedback |
 | Untitled UI | https://www.untitledui.com/ |
