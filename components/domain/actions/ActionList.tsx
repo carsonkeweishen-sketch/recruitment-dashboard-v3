@@ -12,6 +12,7 @@ import {
 
 interface Props {
   actions: ActionItem[];
+  onActionClick?: (id: string) => void;
 }
 
 const ROUND_LABELS: Record<string, string> = {
@@ -51,7 +52,7 @@ function formatDate(iso: string): string {
   return d.toLocaleDateString("zh-CN");
 }
 
-export function ActionList({ actions }: Props) {
+export function ActionList({ actions, onActionClick }: Props) {
   return (
     <div className="overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)]">
       <div className="overflow-x-auto">
@@ -90,7 +91,8 @@ export function ActionList({ actions }: Props) {
               return (
                 <tr
                   key={action.id}
-                  className="transition-colors hover:bg-[var(--color-surface-tertiary)]"
+                  onClick={() => onActionClick?.(action.id)}
+                  className="cursor-pointer transition-colors hover:bg-[var(--color-surface-tertiary)]"
                 >
                   {/* Title + Summary */}
                   <td className="px-4 py-3">
