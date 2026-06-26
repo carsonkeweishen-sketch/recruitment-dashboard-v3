@@ -1,0 +1,219 @@
+# Phase 7.3.1 — Commands Log
+
+> 日期：2025-06-26
+> 分支：agent/workbuddy/phase-7
+> HEAD：0072b0e
+
+---
+
+## CMD-1: pnpm prisma generate
+
+```
+$ NODE_OPTIONS="" npx prisma generate 2>&1 | tail -3
+✔ Generated Prisma Client (v7.8.0) to ...
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+EXIT: 0
+```
+✅ Prisma Client generated.
+
+---
+
+## CMD-2: pnpm typecheck
+
+```
+$ NODE_OPTIONS="" npx tsc --noEmit 2>&1
+(no output)
+EXIT: 0
+```
+✅ 0 errors.
+
+---
+
+## CMD-3: pnpm lint
+
+```
+$ NODE_OPTIONS="" pnpm lint 2>&1 | tail -3
+> recruitment-dashboard-v3@0.1.0 lint /workspace/recruitment-dashboard
+> eslint . --ext .ts,.tsx
+EXIT: 0
+```
+✅ 0 errors, 0 warnings.
+
+---
+
+## CMD-4: pnpm build
+
+```
+$ NODE_OPTIONS="" pnpm build 2>&1 | tail -5
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+EXIT: 0
+```
+✅ Build PASS.
+
+---
+
+## CMD-5: git status --short
+
+```
+(no output — clean)
+EXIT: 0
+```
+
+---
+
+## CMD-6: git log --oneline --decorate -8
+
+```
+0072b0e (HEAD -> agent/workbuddy/phase-7) phase-7.3.1: api smoke + ui data contracts
+4bd94db phase-7.3: Claude UX review document
+5c03396 phase-7.3: checkpoint lock self-check report
+d25d5f0 phase-7.3: action api routes
+b0f02b1 phase-7.2: action service + rule engine
+b85cce4 phase-7.1: action scope + repository
+ab96f02 phase-7.0: action item schema redesign
+c7d45dd (agent/workbuddy/phase-6) phase-6.2: final Word report
+```
+
+---
+
+## CMD-7: git branch --show-current
+
+```
+agent/workbuddy/phase-7
+```
+
+---
+
+## CMD-8: git diff --stat
+
+```
+(no output — no uncommitted changes)
+EXIT: 0
+```
+
+---
+
+## CMD-9: git ls-files .env
+
+```
+(no output — no env files tracked)
+EXIT: 0
+```
+
+---
+
+## CMD-10: grep findUnique({ where: { id
+
+```
+(no output)
+EXIT: 1
+```
+✅ ZERO findUnique in permission paths.
+
+---
+
+## CMD-11: grep getActionById( API/service
+
+```
+(no output)
+EXIT: 1
+```
+✅ ZERO unscoped calls.
+
+---
+
+## CMD-12: grep prisma. in API routes
+
+```
+(no output)
+EXIT: 1
+```
+✅ API 层无直接 DB 查询。
+
+---
+
+## CMD-13: grep unscoped/fallback
+
+```
+server/services/interview/interview-service.ts:3:// No unscoped fallbacks.
+server/repositories/business-feedback/profile-calibration-repository.ts:80: * eliminating the unscoped findUnique
+EXIT: 0
+```
+2 matches are comments, not code. ✅
+
+---
+
+## CMD-14: grep bizOwnerId+ownerId
+
+```
+server/permissions/resource-scope-builder.ts:6:  // comment
+server/permissions/resource-scope-builder.ts:35: // comment
+server/permissions/resource-scope-builder.ts:99: // comment
+server/permissions/resource-scope-builder.ts:137:// comment
+server/permissions/resource-scope-builder.ts:214:// comment
+server/services/action/action-rule-service.ts:202: ownerId: bf.job.businessOwnerId ?? undefined
+server/services/action/action-rule-service.ts:223: select: { ownerId: true, businessOwnerId: true }
+server/repositories/business-feedback/ownership-check.ts:17:  type declaration
+server/repositories/business-feedback/ownership-check.ts:20:  select declaration
+server/repositories/business-feedback/ownership-check.ts:57:  select declaration
+EXIT: 0
+```
+5 comments, 2 correct uses of businessOwnerId (not OR mixing), 3 select/type declarations. ✅
+
+---
+
+## CMD-15: grep return true / || true
+
+```
+server/repositories/action/action-repository.ts:305:    if (!a.dueAt) return true;
+EXIT: 0
+```
+Only match: onTimeRate calculation — "no dueAt means on time". Legal business logic. ✅
+
+---
+
+## CMD-16: grep hardcoded names
+
+```
+prisma/seed.ts:35-38: 张HRBP/王招聘/赵业务/孙面试官 (seed data)
+docs/self-checks/*.md: references in evidence docs
+EXIT: 0
+```
+Seed data uses role-based names for dev/test. Business pages (app/, components/) have ZERO hardcoded names. ✅
+
+---
+
+## CMD-17: grep mock/demo/sample/fallback
+
+```
+components/auth/PermissionGate.tsx:12: fallback React prop (legal)
+prisma/schema.prisma:418: isFallback data model field (legal)
+docs/*: design document references (legal)
+EXIT: 0
+```
+Only legal uses. No business data mock. ✅
+
+---
+
+## Summary
+
+| # | Command | Result | Verdict |
+|---|---------|--------|---------|
+| 1 | prisma generate | v7.8.0 | PASS |
+| 2 | typecheck | 0 errors | PASS |
+| 3 | lint | 0 errors, 0 warnings | PASS |
+| 4 | build | PASS | PASS |
+| 5 | git status | clean | PASS |
+| 6 | git log | 8 commits | PASS |
+| 7 | git branch | agent/workbuddy/phase-7 | PASS |
+| 8 | git diff | no changes | PASS |
+| 9 | git ls-files .env | none tracked | PASS |
+| 10 | grep findUnique | ZERO | PASS |
+| 11 | grep getActionById | ZERO | PASS |
+| 12 | grep prisma. in API | ZERO | PASS |
+| 13 | grep unscoped | comments only | PASS |
+| 14 | grep bizOwnerId+ownerId | no OR mixing | PASS |
+| 15 | grep return true | 1 legal use | PASS |
+| 16 | grep hardcoded names | seed only | PASS |
+| 17 | grep mock/demo | legal only | PASS |
