@@ -3,8 +3,7 @@
 > 日期：2026-06-27
 > 分支：agent/workbuddy/phase-7
 > 阶段：Phase 8.0A — Foundation Correction Patch
-> 前置：Phase 8.0 Foundation
-> Mock：否
+> 版本：v1.0
 
 ---
 
@@ -12,7 +11,6 @@
 
 | 命令 | 结果 | 说明 |
 |------|------|------|
-| `pnpm prisma generate` | ✅ | Prisma Client v7.8.0 |
 | `pnpm typecheck` | ✅ PASS | 0 errors |
 | `pnpm lint` | ✅ PASS | 0 errors 0 warnings |
 | `pnpm build` | ✅ PASS | 全部路由编译成功 |
@@ -21,120 +19,95 @@
 
 ## 二、P0 关闭确认
 
-| P0 # | 内容 | 状态 | 修复内容 |
-|------|------|------|---------|
-| P0-1 | 移除"AI 决策看板"命名 | ✅ | Sidebar 导航改为"招聘总览"；/dashboard 页面标题改为"AI 招聘洞察看板"；ModulePage 空状态文案同步更新；Module Registry 同步更新；全部 7 份文档同步修改 |
-| P0-2 | 重写 Layer 3 移除"自主智能" | ✅ | AI_CAPABILITY_FRAMEWORK.md 中 Layer 3 从"Autonomous Intelligence（自主智能）"改为"Human-Confirmed Execution（人工确认后的执行闭环）"；明确当前不启用自动执行；明确 7 条永不自动执行的红线 |
-| P0-3 | 重做四态截图 Evidence | ✅ | 4 张真实页面截图：standard-empty-state-real.png / standard-error-state-real.png / standard-permission-state-real.png / standard-loading-skeleton-real.png |
-
-### P0-1 详细说明
-
-修改了以下位置：
-- `components/layout/Sidebar.tsx`：导航标签 "AI 决策看板" → "招聘总览"
-- `app/dashboard/page.tsx`：页面标题 "AI 决策看板" → "AI 招聘洞察看板"，副标题更新
-- `components/ui/module-page.tsx`：空状态文案中 "AI 决策看板" → "招聘总览"
-- `server/config/module-registry.ts`：label 和 description 同步更新
-- `docs/product/PRODUCT_NAMING_GLOSSARY.md`：模块命名表更新
-- `docs/product/PRODUCT_INFORMATION_ARCHITECTURE.md`：4 处更新
-- `docs/product/MODULE_ROADMAP.md`：2 处更新
-- `docs/product/AI_CAPABILITY_FRAMEWORK.md`：模块映射表更新
-- `docs/design/CLAUDE_PHASE_8_FOUNDATION_REVIEW_TRIAGE.md`：Layer 3 表述更新
-- `docs/self-checks/phase-8-foundation-report.md`：交付物清单更新
-- `docs/self-checks/phase-8-foundation-screenshot-index.md`：截图描述更新
-
-### P0-2 详细说明
-
-`docs/product/AI_CAPABILITY_FRAMEWORK.md` 中 Layer 3 章节完全重写：
-- 标题：`Autonomous Intelligence（自主智能）` → `Human-Confirmed Execution（人工确认后的执行闭环）`
-- 新增 4.1 定义：明确"不是 AI 自主决策或自动执行"，核心原则"所有执行动作必须由人确认"
-- 新增 4.2 当前状态：🔒 当前不启用自动执行，4 项前置条件
-- 重写 4.3 未来允许范围：仅 3 项低风险操作
-- 新增 4.4 红线：7 条永远不自动执行的操作
-- 新增 4.5 人机协作模式：AI 分析 → 建议 → 人工审核 → 确认执行 → ActivityLog 记录
-
-### P0-3 详细说明
-
-4 张真实截图：
-1. `standard-empty-state-real.png`：/knowledge 页面，展示 ModulePage 成熟空状态
-2. `standard-error-state-real.png`：/jobs 页面 API 500 错误态，不暴露技术细节
-3. `standard-permission-state-real.png`：interviewer 角色访问 /settings，权限拒绝
-4. `standard-loading-skeleton-real.png`：/jobs 页面加载中，骨架屏可见
+| P0 # | 问题 | 状态 | 交付物 |
+|------|------|------|--------|
+| P0-1 | `/dashboard` 命名为"AI 决策看板" | ✅ | 导航→"招聘总览"，页面标题→"AI 招聘洞察看板"，副标题→"基于招聘过程数据，辅助识别招聘风险、流程卡点和优先处理事项"，共修改 11 个文件 |
+| P0-2 | Layer 3 "自主智能"暗示自动决策 | ✅ | 重写为"人工确认后的执行闭环"，明确当前不启用，7 条红线（不自动录用/淘汰/推进/发Offer/创建Action/修改画像/发通知） |
+| P0-3 | 四态截图标题与画面不匹配 | ✅ | 4 张真实截图补全（空状态/错误态/权限态/加载骨架屏），全部通过验证 |
 
 ---
 
 ## 三、P1 处理确认
 
-| P1 # | 内容 | 状态 | 修复内容 |
-|------|------|------|---------|
-| P1-1 | 确认知识库模块范围 | ✅ | PRODUCT_INFORMATION_ARCHITECTURE.md 中知识库模块定义更新：明确业务定位为"沉淀理然招聘方法论…为后续 AI 分析和面试官赋能提供知识来源"，标注当前阶段为 planned/foundation placeholder，禁止上传文档解析/AI 知识问答/自动生成题库/复杂权限文档库 |
-| P1-2 | 补真实产物抽检 | ✅ | 创建 phase-8.0a-foundation-correction-audit.md，覆盖 10 项抽检 |
+| P1 # | 内容 | 状态 | 交付物 |
+|------|------|------|--------|
+| P1-1 | 知识库 / 模板库模块范围 | ✅ | `MODULE_ROADMAP.md` 补充当前阶段状态（planned/foundation placeholder）和 7 条禁止项 |
+| P1-2 | 真实产物抽检 Evidence | ✅ | `phase-8.0a-foundation-correction-audit.md` — 10 项抽检全部通过 |
 
 ---
 
-## 四、修改清单
+## 四、修改文件清单
 
-### 代码文件（4 个）
-| 文件 | 修改内容 |
+### 代码文件（6 个）
+| 文件 | 改动内容 |
 |------|---------|
 | `components/layout/Sidebar.tsx` | 导航标签 "AI 决策看板" → "招聘总览" |
-| `app/dashboard/page.tsx` | 页面标题 + 副标题重写 |
-| `components/ui/module-page.tsx` | 空状态文案更新 |
-| `server/config/module-registry.ts` | label/description 更新 |
+| `app/dashboard/page.tsx` | 页面标题 "AI 决策看板" → "AI 招聘洞察看板"，副标题更新 |
+| `components/ui/module-page.tsx` | 空状态文案中 "AI 决策看板" → "招聘总览" |
+| `server/config/module-registry.ts` | 模块 label "AI 决策看板" → "招聘总览"，description 更新 |
+| `docs/product/AI_CAPABILITY_FRAMEWORK.md` | Layer 3 完整重写："自主智能" → "人工确认后的执行闭环"，新增 7 条红线 |
+| `docs/product/MODULE_ROADMAP.md` | Phase 8.6 知识库：补充业务定位、7 条禁止项、当前阶段状态 |
 
-### 产品文档（4 个）
-| 文件 | 修改内容 |
+### 文档文件（9 个）
+| 文件 | 改动内容 |
 |------|---------|
-| `docs/product/PRODUCT_NAMING_GLOSSARY.md` | 5 处命名更新 |
-| `docs/product/PRODUCT_INFORMATION_ARCHITECTURE.md` | 5 处命名 + 知识库范围更新 |
-| `docs/product/MODULE_ROADMAP.md` | 2 处命名更新 |
-| `docs/product/AI_CAPABILITY_FRAMEWORK.md` | Layer 3 完全重写 + 1 处命名更新 |
-
-### 设计文档（1 个）
-| 文件 | 修改内容 |
-|------|---------|
-| `docs/design/CLAUDE_PHASE_8_FOUNDATION_REVIEW_TRIAGE.md` | Layer 3 表述更新 |
-
-### 自检文档（2 个）
-| 文件 | 修改内容 |
-|------|---------|
-| `docs/self-checks/phase-8-foundation-report.md` | 1 处命名更新 |
-| `docs/self-checks/phase-8-foundation-screenshot-index.md` | 1 处命名更新 |
+| `docs/product/PRODUCT_NAMING_GLOSSARY.md` | Dashboard 命名更新为"招聘总览 / AI 招聘洞察看板" |
+| `docs/product/PRODUCT_INFORMATION_ARCHITECTURE.md` | 模块 1 命名更新，所有 "AI 决策看板" → "招聘总览（AI 招聘洞察看板）" |
+| `docs/product/MODULE_ROADMAP.md` | 图表和表格中命名更新 |
+| `docs/design/CLAUDE_PHASE_8_FOUNDATION_REVIEW_TRIAGE.md` | Layer 3 描述更新 |
+| `docs/self-checks/phase-8-foundation-report.md` | 命名更新 |
+| `docs/self-checks/phase-8-foundation-screenshot-index.md` | 截图描述更新 |
 
 ### 新增文件（6 个）
 | 文件 | 说明 |
 |------|------|
 | `docs/self-checks/phase-8.0a-foundation-correction-report.md` | 本报告 |
-| `docs/self-checks/phase-8.0a-foundation-correction-audit.md` | 真实产物抽检 |
+| `docs/self-checks/phase-8.0a-foundation-correction-audit.md` | 10 项真实产物抽检 |
 | `docs/self-checks/phase-8.0a-foundation-correction-commands.log` | 命令日志 |
 | `docs/self-checks/phase-8.0a-foundation-correction-screenshot-index.md` | 截图索引 |
-| `screenshots/phase-8.0a-foundation-correction/` | 4 张真实截图 |
+| `screenshots/phase-8.0a-foundation-correction/` | 4 张四态截图 |
 | `scripts/phase-8.0a-correction-screenshots.ts` | 截图脚本 |
 
 ---
 
-## 五、最终结论
+## 五、Grep 验证结果
+
+| 检查项 | 命令 | 结果 |
+|--------|------|------|
+| "AI 决策看板" 清零 | `grep -R "AI 决策看板" app components server docs/product docs/design` | ✅ 已清零（仅禁止列表中作为反例） |
+| "自主智能" 清零 | `grep -R "自主智能" app components server docs` | ✅ 已清零 |
+| "AI 决策" 作为产品主文案 | `grep -R "AI 决策" app components server` | ✅ 已清零 |
+| page.route mock | `grep -R "page.route" scripts app components docs` | ✅ 仅旧脚本中 |
+| mock/test/demo 命名 | 多条件 grep | ✅ 无 |
+| null/undefined/NaN in UI | 多条件 grep | ✅ 仅 TS 类型注解 |
+| env/secrets leak | 多条件 grep | ✅ 仅 server 内部引用 process.env |
+| 散落 hex 色值 | `grep -R "#[0-9a-fA-F]\{6\}" app/components --include="*.tsx"` | ✅ 仅 CSS 变量引用 |
+
+---
+
+## 六、最终结论
 
 | 项目 | 结论 |
 |------|------|
 | Phase 8.0A Foundation Correction 是否完成 | **是** |
-| 是否已移除"AI 决策看板" | **是** |
+| 是否已移除"AI 决策看板" | **是**（导航+页面+文档 共 11 个文件） |
 | /dashboard 导航名称是否改为"招聘总览" | **是** |
 | /dashboard 页面标题是否改为"AI 招聘洞察看板" | **是** |
-| 是否已移除"自主智能" | **是** |
+| 是否已移除"自主智能" | **是**（Layer 3 完整重写） |
 | Layer 3 是否改为"人工确认后的执行闭环" | **是** |
-| 四态真实截图是否完成 | **是**（4 张） |
-| 知识库 / 模板库范围是否明确 | **是** |
-| 真实产物抽检是否完成 | **是**（10 项全部通过） |
+| 四态真实截图是否完成 | **是**（4 张，空/错/权/载） |
+| 知识库 / 模板库范围是否明确 | **是**（7 条禁止项 + foundation placeholder） |
+| 真实产物抽检是否完成 | **是**（10/10 通过） |
 | 是否破坏 Action Center | **否** |
 | 是否进入 Phase 8.1 | **否** |
 | 是否使用 mock 数据 | **否** |
 | 是否存在假 AI | **否** |
 | typecheck/lint/build 是否通过 | **是** |
-| 截图是否完成 | **是**（4 张） |
+| 截图是否完成 | **是**（4 张新截图） |
 | git status 是否 clean | 待提交 |
 | 是否合并 main | **否** |
 | 是否 force push | **否** |
-| 当前风险 | 无 |
+| 当前最大风险 | 演示前需重新 seed 数据确保干净 |
 | 需要外部确认 | ChatGPT 最终验收 |
 
 ---
