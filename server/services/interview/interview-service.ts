@@ -2,7 +2,7 @@
 // All detail/list operations use scope guardrail.
 // No unscoped fallbacks. No optional role/userId.
 
-import type { Role, ScopeWhere } from "@/server/permissions/types";
+import type { Role } from "@/server/permissions/types";
 import { buildScopeWhere, requirePermission } from "@/server/permissions/check-permission";
 import { guardDetailScope, guardListScope } from "@/server/permissions/scope-guards";
 import {

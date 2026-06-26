@@ -172,7 +172,7 @@ export function InterviewFeedbackForm({
             三、面试证据 <span className="text-red-500">*</span>
           </div>
           <div className="mb-1 text-xs text-[var(--color-text-tertiary)]">
-            请用 STAR 方法记录：情境-任务-行动-结果。避免仅写"感觉不错"、"还可以"。
+            请用 STAR 方法记录：情境-任务-行动-结果。避免仅写&ldquo;感觉不错&rdquo;、&ldquo;还可以&rdquo;。
           </div>
           <textarea
             value={evidenceText}

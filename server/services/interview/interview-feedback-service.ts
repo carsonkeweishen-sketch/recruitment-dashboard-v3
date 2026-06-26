@@ -2,7 +2,7 @@
 // Structured feedback submission with quality scoring and risk detection.
 // Scope guardrail enforced: interviewer can only submit their own feedback.
 
-import type { Role, ScopeWhere } from "@/server/permissions/types";
+import type { Role } from "@/server/permissions/types";
 import { buildScopeWhere, requirePermission } from "@/server/permissions/check-permission";
 import {
   guardDetailScope,

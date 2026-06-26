@@ -72,8 +72,8 @@ export function InterviewDetailDrawer({ interview, onClose, onSubmitFeedback }: 
   const hasFeedback = interview.feedbacks.length > 0;
   const feedback = hasFeedback ? interview.feedbacks[0] : null;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const riskList: any[] = (feedback?.riskSignals && Array.isArray(feedback.riskSignals as any))
-    ? (feedback.riskSignals as any)
+  const riskList: any[] = (feedback?.riskSignals && Array.isArray(feedback.riskSignals))
+    ? feedback.riskSignals
     : [];
 
   const renderContent = (): React.ReactNode => (

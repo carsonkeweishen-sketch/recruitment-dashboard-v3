@@ -1,6 +1,7 @@
 // Phase 2 Demo Seed — 理然真实业务结构 + 虚拟候选人
 // 禁止提交真实候选人隐私数据
 
+import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
