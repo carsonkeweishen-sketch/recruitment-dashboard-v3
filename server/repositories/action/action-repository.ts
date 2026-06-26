@@ -113,10 +113,26 @@ export async function getActionByIdWithScope(id: string, scope: ScopeWhere) {
   const scopeWhere = buildActionScopeWhere(scope);
   const where: Record<string, unknown> = { id, ...scopeWhere };
 
-  return prisma.actionItem.findFirst({
+  const action = await prisma.actionItem.findFirst({
     where,
     include: actionInclude,
   });
+
+  if (!action) return null;
+
+  // Fetch ActivityLog entries for this action
+  const activityLogs = await prisma.activityLog.findMany({
+    where: {
+      resourceType: "action_item",
+      resourceId: id,
+    },
+    include: {
+      actor: { select: { id: true, name: true } },
+    },
+    orderBy: { createdAt: "asc" },
+  });
+
+  return { ...action, activity: activityLogs };
 }
 
 export async function createAction(input: CreateActionInput) {

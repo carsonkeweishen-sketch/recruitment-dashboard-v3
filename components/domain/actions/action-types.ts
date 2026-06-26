@@ -28,6 +28,16 @@ export type ActionSourceType =
   | "system_rule"
   | "future_ai";
 
+export interface ActivityLogEntry {
+  id: string;
+  action: string;
+  resourceType: string;
+  resourceId: string;
+  actor?: { id: string; name: string } | null;
+  detail?: Record<string, unknown> | null;
+  createdAt: string;
+}
+
 export interface ActionItem {
   id: string;
   title: string;
@@ -57,6 +67,7 @@ export interface ActionItem {
   resolvedAt?: string | null;
   resolutionNote?: string | null;
   dismissedReason?: string | null;
+  activity?: ActivityLogEntry[] | null;
   createdAt: string;
   updatedAt: string;
 }

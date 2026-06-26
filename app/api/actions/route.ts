@@ -1,7 +1,28 @@
-// Phase 7: POST /api/actions — Create action
+// Phase 7: GET/POST /api/actions — List + Create actions
 import { getSession } from "@/server/auth/session";
-import { createActionItem } from "@/server/services/action/action-service";
-import { ActionError } from "@/server/services/action/action-service";
+import { listActionList, createActionItem, ActionError } from "@/server/services/action/action-service";
+
+export async function GET(request: Request) {
+  const session = await getSession();
+  if (!session.userId) {
+    return Response.json({ success: false, error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    const url = new URL(request.url);
+    const filters: Record<string, string> = {};
+    url.searchParams.forEach((v, k) => { if (v) filters[k] = v; });
+
+    const { actions, metrics } = await listActionList(
+      session.role, session.userId, session.departmentId, filters
+    );
+    return Response.json({ success: true, actions, metrics });
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "Internal error";
+    const status = msg.includes("Permission denied") ? 403 : 500;
+    return Response.json({ success: false, error: msg }, { status });
+  }
+}
 
 export async function POST(request: Request) {
   const session = await getSession();
