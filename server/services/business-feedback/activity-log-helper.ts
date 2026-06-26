@@ -67,3 +67,36 @@ export async function logProfileCalibrationConfirmed(params: {
     },
   });
 }
+
+// Phase 6: Interview feedback activity log
+export async function logInterviewFeedbackSubmitted(params: {
+  actorId: string;
+  feedbackId: string;
+  interviewId: string;
+  applicationId: string;
+  candidateId: string;
+  jobId: string;
+  overallRecommendation: string;
+  feedbackQualityScore: number;
+  riskSignals: unknown;
+}) {
+  await prisma.activityLog.create({
+    data: {
+      actorId: params.actorId,
+      action: "INTERVIEW_FEEDBACK_SUBMITTED",
+      resourceType: "interview_feedback",
+      resourceId: params.feedbackId,
+      detail: {
+        interviewId: params.interviewId,
+        applicationId: params.applicationId,
+        candidateId: params.candidateId,
+        jobId: params.jobId,
+        overallRecommendation: params.overallRecommendation,
+        feedbackQualityScore: params.feedbackQualityScore,
+        riskSignalCount: Array.isArray(params.riskSignals)
+          ? (params.riskSignals as unknown[]).length
+          : 0,
+      },
+    },
+  });
+}

@@ -1,11 +1,28 @@
-// Phase 6: Job Interview Signals Service
-// Aggregates interview-related metrics for a specific job.
+// Phase 6.1: Job Interview Signals Service (optimized)
+// Fixed: removed listInterviews + JS filter. Uses shared Prisma instance.
 
 import type { Role } from "@/server/permissions/types";
 import { buildScopeWhere, requirePermission } from "@/server/permissions/check-permission";
 import { getJobByIdWithScope } from "@/server/repositories/job-repository";
 import { getFeedbacksByJobId } from "@/server/repositories/interview/interview-feedback-repository";
-import { listInterviews } from "@/server/repositories/interview/interview-repository";
+import { PrismaClient } from "@prisma/client";
+
+// Reuse the same PrismaClient pattern as repositories — single pool instance
+let _prisma: PrismaClient | null = null;
+function getPrisma(): PrismaClient {
+  if (!_prisma) {
+    const { PrismaPg } = require("@prisma/adapter-pg");
+    const { Pool } = require("pg");
+    const pool = new Pool({
+      connectionString: process.env.DATABASE_URL,
+      max: 5,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 10000,
+    });
+    _prisma = new PrismaClient({ adapter: new PrismaPg(pool) });
+  }
+  return _prisma;
+}
 
 export async function getJobInterviewSignals(
   jobId: string,
@@ -22,22 +39,58 @@ export async function getJobInterviewSignals(
     return null;
   }
 
-  // Get interviews for this job (reuse scope)
-  const jobScope = buildScopeWhere({ role, userId, departmentId }, "interviews");
-  const interviews = await listInterviews(jobScope);
-  const jobInterviews = interviews.filter(
-    (i) => i.application.job.id === jobId
-  );
+  // Build scope-aware job interview query (single query, no JS filter)
+  const interviewWhere: Record<string, unknown> = {
+    application: { jobId },
+  };
 
-  // Get feedbacks for this job
-  const feedbacks = await getFeedbacksByJobId(jobId, jobScope);
+  if (scope.scope === "DEPARTMENT" && scope.departmentId) {
+    interviewWhere.application = {
+      job: { departmentId: scope.departmentId, id: jobId },
+    };
+  } else if (scope.scope === "OWNED" && scope.userId) {
+    interviewWhere.OR = [
+      { application: { ownerId: scope.userId } },
+      { application: { job: { ownerId: scope.userId } } },
+    ];
+  } else if (scope.scope === "RELATED" && scope.userId) {
+    if (scope.role === "interviewer") {
+      interviewWhere.interviewerId = scope.userId;
+    } else {
+      interviewWhere.application = {
+        job: { businessOwnerId: scope.userId, id: jobId },
+      };
+    }
+  } else if (scope.scope === "DENY") {
+    return null;
+  }
+  // ALL scope: no extra filter
 
-  // Funnel
-  const scheduled = jobInterviews.filter((i) => i.status === "scheduled").length;
-  const completed = jobInterviews.filter((i) => i.status === "completed").length;
-  const withFeedback = jobInterviews.filter(
-    (i) => i.feedbacks.length > 0
-  ).length;
+  // Single query for interview stats
+  const prisma = getPrisma();
+  const interviews = await prisma.interview.findMany({
+    where: interviewWhere,
+    select: {
+      id: true,
+      status: true,
+      scheduledAt: true,
+      feedbacks: {
+        select: {
+          id: true,
+          feedbackQualityScore: true,
+          submittedAt: true,
+        },
+      },
+    },
+  });
+
+  // Get feedbacks for quality analysis
+  const feedbacks = await getFeedbacksByJobId(jobId, scope);
+
+  // Funnel stats from single interview query
+  const scheduled = interviews.filter((i) => i.status === "scheduled").length;
+  const completed = interviews.filter((i) => i.status === "completed").length;
+  const withFeedback = interviews.filter((i) => i.feedbacks.length > 0).length;
   const pending = completed - withFeedback;
 
   // Quality
@@ -49,7 +102,7 @@ export async function getJobInterviewSignals(
       ? Math.round(qualityScores.reduce((a, b) => a + b, 0) / qualityScores.length)
       : 0;
 
-  // Risk signals from feedbacks
+  // Risk signals
   const riskSignals = feedbacks
     .filter((f) => f.riskSignals)
     .flatMap((f) => {
@@ -67,7 +120,7 @@ export async function getJobInterviewSignals(
       }));
     });
 
-  // Avg delay hours
+  // Avg delay
   const delays = feedbacks
     .filter((f) => f.submittedAt && f.interview?.scheduledAt)
     .map((f) => {
@@ -91,9 +144,12 @@ export async function getJobInterviewSignals(
       completedCount: completed,
       feedbackSubmittedCount: withFeedback,
       feedbackPendingCount: pending,
-      firstInterviewPassRate: 0, // Requires cross-round analysis — future Phase
-      secondInterviewPassRate: 0,
-      finalInterviewPassRate: 0,
+      firstInterviewPassRate: null as number | null,
+      firstInterviewPassRateReason: "insufficient_data" as const,
+      secondInterviewPassRate: null as number | null,
+      secondInterviewPassRateReason: "insufficient_data" as const,
+      finalInterviewPassRate: null as number | null,
+      finalInterviewPassRateReason: "insufficient_data" as const,
       avgFeedbackDelayHours: avgDelayHours,
     },
     feedbackQualitySummary: {
@@ -106,7 +162,7 @@ export async function getJobInterviewSignals(
         insufficient: qualityScores.filter((s) => s < 50).length,
       },
     },
-    riskSignals: riskSignals.slice(0, 10), // Top 10
+    riskSignals: riskSignals.slice(0, 10),
     interviewerQualitySummary: {
       totalInterviewers: new Set(feedbacks.map((f) => f.interviewerId)).size,
       avgQualityScore: avgQuality,

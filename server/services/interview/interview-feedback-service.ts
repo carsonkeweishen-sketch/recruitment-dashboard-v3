@@ -106,6 +106,22 @@ export async function submitInterviewFeedback(
     riskSignals
   );
 
+  // Write ActivityLog
+  const { logInterviewFeedbackSubmitted } = await import(
+    "@/server/services/business-feedback/activity-log-helper"
+  );
+  await logInterviewFeedbackSubmitted({
+    actorId: userId,
+    feedbackId: feedback.id,
+    interviewId: input.interviewId,
+    applicationId: interview.application.id,
+    candidateId: interview.application.candidate.id,
+    jobId: interview.application.job.id,
+    overallRecommendation: input.overallRecommendation,
+    feedbackQualityScore: qualityResult.score,
+    riskSignals,
+  });
+
   return {
     feedback,
     quality: qualityResult,
