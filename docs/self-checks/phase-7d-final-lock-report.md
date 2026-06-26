@@ -2,7 +2,8 @@
 
 > 日期：2026-06-27
 > 分支：agent/workbuddy/phase-7
-> 版本：CEO Demo Final Lock
+> 版本：CEO Demo Final Lock + Patch
+> Patch 状态：✅ 已完成（P0-1 / P0-2 / P1-1 / P1-2 全部通过）
 
 ## 一、构建验证
 
@@ -42,7 +43,7 @@
 
 ## 三、截图验证
 
-12 张 Final Lock 截图，全部来自真实 API，Mock=否。
+14 张 Final Lock 截图（12 原始 + 2 Patch 新增），全部来自真实 API，Mock=否。
 
 | # | 文件 | API | Mock | 通过 |
 |---|------|-----|------|------|
@@ -58,6 +59,15 @@
 | 10 | ceo-final-dismiss-action-modal.png | — | 否 | ✅ |
 | 11 | ceo-final-dismiss-action-success.png | POST /api/actions/:id/dismiss → 200 | 否 | ✅ |
 | 12 | ceo-final-permission-state.png | GET /api/actions (interviewer) → 200 | 否 | ✅ |
+| 13 | ceo-final-action-detail-permission-denied.png | GET /api/actions/:id (interviewer) → 404 | 否 | ✅ |
+| 14 | ceo-final-activity-with-created-resolved.png | GET /api/actions/:id (含真实 ActivityLog) → 200 | 否 | ✅ |
+
+### Patch 新增截图说明
+
+| # | 截图 | 对应 Review 问题 | 验证内容 |
+|---|------|-----------------|---------|
+| 13 | ceo-final-action-detail-permission-denied.png | P0-1 | Interviewer 访问非授权 Action 详情 → 404，不暴露对象存在性 |
+| 14 | ceo-final-activity-with-created-resolved.png | P0-2 | 已解决 Action 的 Activity 时间线展示 ACTION_CREATED + ACTION_RESOLVED，数据来自真实 ActivityLog 表 | |
 
 ## 四、验收红线确认
 
@@ -80,10 +90,14 @@
 
 ## 五、Demo 账号
 
-| 用途 | Cookie |
-|------|--------|
-| 演示用 (admin) | `rd_dev_role=admin; rd_dev_user_id=cmqv2nfjo0007y3jxiwti2eer` |
-| 权限演示 (interviewer) | `rd_dev_role=interviewer; rd_dev_user_id=cmqv2nfjr000cy3jxq62urqiq` |
+> ⚠️ Cookie 明文已移至私密运维手册 `docs/demo/CEO_DEMO_PRIVATE_RUNBOOK.md`，不在此公开报告中展示。
+
+| 用途 | 角色 | 说明 |
+|------|------|------|
+| 演示用 | admin | 全权限，主演示路径 |
+| 权限演示 | interviewer | 受限权限演示 |
+
+Cookie 注入步骤详见 **CEO_DEMO_PRIVATE_RUNBOOK.md**。
 
 ## 六、ActivityLog 验证
 
@@ -100,9 +114,13 @@
 | 项目 | 结论 |
 |------|------|
 | Phase 7.D-Final Lock 是否完成 | **是** |
+| Final Lock Patch 是否完成 | **是**（P0-1/P0-2/P1-1/P1-2 全部完成） |
 | CEO Demo Script 是否完成 | **是** |
 | CEO Demo Q&A 是否完成 | **是** |
 | CEO Demo Checklist 是否完成 | **是** |
+| CEO Demo 私密运维手册 | **是**（PRIVATE_RUNBOOK.md） |
+| CEO Demo 重置运维手册 | **是**（RESET_RUNBOOK.md） |
+| Cookie 脱敏完成 | **是**（公开报告已移除 cookie/userId 明文） |
 | Final Risk Register 是否完成 | **是** |
 | P0 风险数量 | 0 |
 | P1 风险数量 | 3（见 Risk Register） |
@@ -113,7 +131,7 @@
 | Activity 是否来自真实 ActivityLog | **是** |
 | 是否存在测试感命名 | **否** |
 | 是否存在 null/undefined/NaN/Invalid Date | **否** |
-| 12 张截图是否完成 | **是** |
+| 14 张截图是否完成 | **是**（12 原始 + 2 Patch 新增） |
 | typecheck/lint/build 是否通过 | **是** |
 | git status 是否 clean | **是**（待提交后） |
 | 是否合并 main | **否** |

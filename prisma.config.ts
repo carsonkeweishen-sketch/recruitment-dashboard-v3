@@ -10,6 +10,6 @@ export default defineConfig({
   },
   datasource: {
     url: process.env["DATABASE_URL"],
-    shadowDatabaseUrl: "postgres://postgres:postgres@localhost:51215/recruitment_dashboard_v3_shadow?sslmode=disable&connect_timeout=10",
+    shadowDatabaseUrl: "postgres://postgres:postgres@localhost:5432/recruitment_dashboard_v3_shadow?sslmode=disable&connect_timeout=10",
   },
 });

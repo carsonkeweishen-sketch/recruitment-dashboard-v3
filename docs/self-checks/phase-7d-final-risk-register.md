@@ -16,27 +16,19 @@
 
 ## 演示前必须执行
 
-```bash
-# 1. 确认 PostgreSQL 运行
-pg_isready
+详见 **`docs/demo/CEO_DEMO_RESET_RUNBOOK.md`**（完整重置步骤 + 验证清单）。
 
-# 2. 重新 seed 数据
-cd /workspace/recruitment-dashboard
-NODE_OPTIONS="" npx prisma db push --force-reset --accept-data-loss
-NODE_OPTIONS="" npx tsx prisma/seed.ts
+> ⚠️ Cookie 注入步骤已移至 **`docs/demo/CEO_DEMO_PRIVATE_RUNBOOK.md`**（私密文档）。
 
-# 3. 启动 dev server
-NODE_OPTIONS="" pnpm dev
-
-# 4. 在浏览器 console 设置 cookie
-document.cookie = "rd_dev_role=admin; path=/; max-age=86400";
-document.cookie = "rd_dev_user_id=cmqv2nfjo0007y3jxiwti2eer; path=/; max-age=86400";
-location.reload();
-```
+快速摘要：
+1. 确认 PostgreSQL 运行：`pg_isready`
+2. 重置 + Seed：`NODE_OPTIONS="" npx prisma db push --force-reset --accept-data-loss && NODE_OPTIONS="" npx tsx prisma/seed.ts`
+3. 启动 dev server：`NODE_OPTIONS="" pnpm dev`
+4. Cookie 注入：见私密运维手册
 
 ## 回退方案
 
 如果演示现场出现严重问题：
-1. 使用截图作为备选（12 张 Final Lock 截图完整）
+1. 使用截图作为备选（14 张 Final Lock 截图完整）
 2. Word 自检报告包含全部截图可离线展示
 3. 核心价值可以通过截图 + 口述传达

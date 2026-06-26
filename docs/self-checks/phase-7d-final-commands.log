@@ -1,6 +1,7 @@
 # Phase 7.D-Final Lock — Commands Log
 
 > 日期：2026-06-27 | 分支：agent/workbuddy/phase-7
+> 版本：Final Lock + Patch
 
 ## CMD-1: pnpm prisma generate
 ```
@@ -34,7 +35,7 @@ EXIT: 0
 
 ## CMD-5: ls screenshots/phase-7d-final/
 ```
-12 PNG files, total ~6 MB
+14 PNG files, total ~7.5 MB
 EXIT: 0
 ```
 
@@ -45,9 +46,7 @@ EXIT: 0
 
 ## CMD-7: git log --oneline --decorate -5
 ```
-da7ab1e workbuddy phase-7d: add Word self-check report
-855ad9b workbuddy phase-7d: polish action center ux for ceo demo
-13e9048 workbuddy phase-7.4b: replace mock evidence with real api evidence
+(see git log below)
 ```
 
 ## CMD-8: git branch --show-current
@@ -61,7 +60,7 @@ agent/workbuddy/phase-7
 EXIT: 0
 ```
 
-## CMD-10: grep -R "page.route" scripts/phase-7d-ux-screenshots.ts app components
+## CMD-10: grep -R "page.route" scripts/phase-7d-ux-screenshots.ts scripts/phase-7d-patch-screenshots.ts app components
 ```
 (no output)
 EXIT: 1
@@ -91,6 +90,32 @@ EXIT: 1
 EXIT: 1
 ```
 
+## CMD-15: grep -R "rd_dev_role\|rd_dev_user_id\|cmqv2nf" docs/self-checks/phase-7d-final-*.md
+```
+(no output — Cookie 明文已脱敏)
+EXIT: 1
+```
+
+## CMD-16: grep "activity" app/api/actions/route.ts server/repositories/action/
+```
+app/api/actions/route.ts: (GET handler with activity include)
+server/repositories/action/action-repository.ts: activityLogs JOIN query
+EXIT: 0
+```
+
+## CMD-17: grep "getActionByIdWithScope" server/repositories/action/action-repository.ts
+```
+async getActionByIdWithScope(id: string, scope: ActionScope)
+EXIT: 0
+```
+
+## CMD-18: Patch 截图验证
+```
+ls screenshots/phase-7d-final/ceo-final-action-detail-permission-denied.png
+ls screenshots/phase-7d-final/ceo-final-activity-with-created-resolved.png
+EXIT: 0
+```
+
 ## Summary
 
 | CMD | Result |
@@ -98,9 +123,15 @@ EXIT: 1
 | typecheck | ✅ 0 errors |
 | lint | ✅ 0 errors |
 | build | ✅ PASS |
-| 12 Final Lock screenshots | ✅ |
+| 14 Final Lock screenshots | ✅ (12 original + 2 patch) |
 | page.route mock | ✅ NONE |
 | test data names | ✅ ZERO |
 | null/undefined/NaN in UI | ✅ NONE |
 | env/secrets leak | ✅ ZERO |
+| cookie/userId in public reports | ✅ ZERO (脱敏完成) |
+| ActivityLog JOIN query | ✅ EXISTS |
 | git branch | ✅ feature only |
+| P0-1 permission denied screenshot | ✅ EXISTS |
+| P0-2 activity real logs screenshot | ✅ EXISTS |
+| P1-1 PRIVATE_RUNBOOK | ✅ EXISTS |
+| P1-2 RESET_RUNBOOK | ✅ EXISTS |
