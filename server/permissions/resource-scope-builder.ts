@@ -171,3 +171,56 @@ export function buildCandidateApplicationScopeWhere(
 
   return { id: "__DENY__" };
 }
+
+// ============================================================
+// Action scope
+// ============================================================
+export function buildActionScopeWhere(
+  scope: ScopeWhere
+): Record<string, unknown> {
+  if (scope.scope === "ALL") return {};
+  if (scope.scope === "DENY") return { id: "__DENY__" };
+
+  if (scope.scope === "DEPARTMENT" && scope.departmentId) {
+    return {
+      OR: [
+        { job: { departmentId: scope.departmentId } },
+        { application: { job: { departmentId: scope.departmentId } } },
+        { interview: { application: { job: { departmentId: scope.departmentId } } } },
+      ],
+    };
+  }
+
+  if (scope.scope === "OWNED" && scope.userId) {
+    return {
+      OR: [
+        { ownerId: scope.userId },
+        { job: { ownerId: scope.userId } },
+        { application: { ownerId: scope.userId } },
+        { interview: { application: { ownerId: scope.userId } } },
+      ],
+    };
+  }
+
+  if (scope.scope === "RELATED" && scope.userId) {
+    if (scope.role === "interviewer") {
+      return {
+        OR: [
+          { ownerId: scope.userId },
+          { interview: { interviewerId: scope.userId } },
+        ],
+      };
+    }
+    // business_owner: via job.businessOwnerId (NOT ownerId)
+    return {
+      OR: [
+        { ownerId: scope.userId },
+        { job: { businessOwnerId: scope.userId } },
+        { application: { job: { businessOwnerId: scope.userId } } },
+        { interview: { application: { job: { businessOwnerId: scope.userId } } } },
+      ],
+    };
+  }
+
+  return { id: "__DENY__" };
+}
