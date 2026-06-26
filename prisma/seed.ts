@@ -199,10 +199,11 @@ async function main() {
   });
   await prisma.interviewFeedback.create({
     data: {
-      interviewId: interview1.id, overallRecommendation: "HIRE",
+      interviewId: interview1.id, interviewerId: userInterviewer.id,
+      overallRecommendation: "HIRE",
       scores: { role_competency: 4, business_understanding: 4, problem_solving: 3, communication: 4, ownership_collaboration: 4, motivation_stability: 4 },
-      strengths: "抖音投放经验丰富，数据驱动思维强。", concerns: "跨部门协作经验偏少。",
-      suggestedFollowUps: ["安排业务复试", "确认薪资期望"],
+      evidenceText: "抖音投放经验丰富，数据驱动思维强。跨部门协作经验偏少。",
+      suggestedFollowUpQuestions: ["安排业务复试", "确认薪资期望"],
     },
   });
 
@@ -214,10 +215,11 @@ async function main() {
   });
   await prisma.interviewFeedback.create({
     data: {
-      interviewId: interview2.id, overallRecommendation: "STRONG_HIRE",
+      interviewId: interview2.id, interviewerId: userInterviewer.id,
+      overallRecommendation: "STRONG_HIRE",
       scores: { role_competency: 5, business_understanding: 4, problem_solving: 4, communication: 5, ownership_collaboration: 5, motivation_stability: 4 },
-      strengths: "文案功底扎实，爆款率高，内容sense好。", concerns: "管理经验偏少。",
-      suggestedFollowUps: ["安排终面"],
+      evidenceText: "文案功底扎实，爆款率高，内容sense好。管理经验偏少。",
+      suggestedFollowUpQuestions: ["安排终面"],
     },
   });
 
@@ -229,10 +231,11 @@ async function main() {
   });
   await prisma.interviewFeedback.create({
     data: {
-      interviewId: interview3.id, overallRecommendation: "STRONG_HIRE",
+      interviewId: interview3.id, interviewerId: userLeader.id,
+      overallRecommendation: "STRONG_HIRE",
       scores: { role_competency: 5, business_understanding: 5, problem_solving: 4, communication: 5, ownership_collaboration: 5, motivation_stability: 5 },
-      strengths: "品牌经验丰富，主导过3个新品上市，联合利华背景。", concerns: "",
-      suggestedFollowUps: ["发Offer", "关注竞品Offer风险"],
+      evidenceText: "品牌经验丰富，主导过3个新品上市，联合利华背景。",
+      suggestedFollowUpQuestions: ["发Offer", "关注竞品Offer风险"],
     },
   });
 

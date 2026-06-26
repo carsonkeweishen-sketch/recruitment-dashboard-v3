@@ -163,6 +163,7 @@ model User {
   businessJobs     Job[]             @relation("JobBusinessOwner")
   applications     Application[]     @relation("ApplicationOwner")
   interviews       Interview[]       @relation("Interviewer")
+  interviewFeedbacks InterviewFeedback[] @relation("FeedbackInterviewer")
   businessFeedbacks BusinessFeedback[]
   actionItems      ActionItem[]      @relation("ActionAssignee")
   offerRisks       OfferRisk[]       @relation("OfferRiskOwner")
@@ -270,12 +271,16 @@ model InterviewFeedback {
   id                    String               @id @default(cuid())
   interviewId           String
   interview             Interview            @relation(fields: [interviewId], references: [id])
+  interviewerId         String               @map("interviewer_id")
+  interviewer           User                 @relation("FeedbackInterviewer", fields: [interviewerId], references: [id])
   overallRecommendation OverallRecommendation? @map("overall_recommendation")
   scores                Json?
-  strengths             String?
-  concerns              String?
-  evidence              String?
-  suggestedFollowUps    String[]             @map("suggested_follow_ups")
+  evidenceText          String?              @map("evidence_text")
+  riskNotes             String?              @map("risk_notes")
+  suggestedFollowUpQuestions String[]             @map("suggested_follow_up_questions")
+  feedbackQualityScore  Int?                 @map("feedback_quality_score")
+  qualityLevel          String?              @map("quality_level")
+  riskSignals           Json?                @map("risk_signals")
   submittedAt           DateTime?            @map("submitted_at")
   createdAt             DateTime             @default(now()) @map("created_at")
   updatedAt             DateTime             @updatedAt @map("updated_at")

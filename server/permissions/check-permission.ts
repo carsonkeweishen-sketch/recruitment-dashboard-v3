@@ -1,7 +1,34 @@
 // Phase 1: 服务端权限校验工具
+// Phase 6.0: 新增 ScopeContext 和 scope guards 导出
 
 import type { Role, Resource, Action, PermissionContext, ScopeWhere } from "./types";
 import { hasPermission, getScopeFor } from "./matrix";
+
+// Re-export scope guardrail for convenience
+export {
+  type ScopeContext,
+  assertScopeContext,
+  createScopeContext,
+  scopeWhereToContext,
+  ScopeContextError,
+} from "./scope-context";
+
+export {
+  guardDetailScope,
+  guardListScope,
+  guardWriteScope,
+  guardBusinessOwnerScope,
+  guardInterviewerWriteScope,
+  ScopeGuardError,
+} from "./scope-guards";
+
+export {
+  buildJobScopeWhere,
+  buildApplicationScopeWhere,
+  buildInterviewScopeWhere,
+  buildInterviewFeedbackScopeWhere,
+  buildCandidateApplicationScopeWhere,
+} from "./resource-scope-builder";
 
 /**
  * 检查当前用户是否���有指定资源/操作的权限。
