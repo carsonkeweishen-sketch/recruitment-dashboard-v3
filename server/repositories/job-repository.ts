@@ -57,6 +57,7 @@ export async function getJobs(params: JobListParams) {
   });
 }
 
+/** @internal Internal use only — API routes must use getJobByIdWithScope() */
 export async function getJobById(id: string) {
   return prisma.job.findUnique({
     where: { id },

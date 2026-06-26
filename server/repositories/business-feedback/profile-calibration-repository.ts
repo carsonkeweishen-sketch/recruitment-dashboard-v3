@@ -35,6 +35,7 @@ export async function getCalibrationsByJob(jobId: string, scope: ScopeWhere) {
   });
 }
 
+/** @internal Internal use only — API routes must use getCalibrationByIdWithScope() */
 export async function getCalibrationById(id: string) {
   return prisma.profileCalibration.findUnique({
     where: { id },

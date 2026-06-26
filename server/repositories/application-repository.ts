@@ -55,6 +55,7 @@ export async function getApplications(params: ApplicationListParams) {
   });
 }
 
+/** @internal Internal use only — API routes must use getApplicationByIdWithScope() */
 export async function getApplicationById(id: string) {
   return prisma.application.findUnique({
     where: { id },

@@ -45,7 +45,11 @@ export async function PATCH(
     return Response.json({ success: true, data: calibration });
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Internal error";
-    const status = msg.includes("Permission denied") ? 403 : msg.includes("already confirmed") ? 409 : 500;
+    const status =
+      msg.includes("Permission denied") ? 403 :
+      msg.includes("not found") || msg.includes("access denied") ? 404 :
+      msg.includes("already confirmed") ? 409 :
+      500;
     return Response.json({ success: false, error: msg }, { status });
   }
 }

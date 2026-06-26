@@ -68,6 +68,7 @@ export async function getCandidates(params: CandidateListParams) {
   });
 }
 
+/** @internal Internal use only — API routes must use getCandidateByIdWithScope() */
 export async function getCandidateById(id: string) {
   return prisma.candidate.findUnique({
     where: { id },

@@ -1,0 +1,96 @@
+# Phase 5.2.1 Commands Log
+# Branch: agent/workbuddy/phase-5
+
+=================================================================
+SECTION 1: Pre-Fix Unscoped Function Audit
+=================================================================
+$ grep -Rn "getJobById\b" app/api server/services --include="*.ts" | grep -v "WithScope"
+(no output - 0 calls to unscoped getJobById in API/service)
+
+$ grep -Rn "getCandidateById\b" app/api server/services --include="*.ts" | grep -v "WithScope"
+(no output - 0 calls)
+
+$ grep -Rn "getApplicationById\b" app/api server/services --include="*.ts" | grep -v "WithScope"
+(no output - 0 calls)
+
+$ grep -Rn "getFeedbackById\b" app/api server/services --include="*.ts" | grep -v "WithScope"
+(no output - 0 calls)
+
+$ grep -Rn "getCalibrationById\b" app/api server/services --include="*.ts" | grep -v "WithScope"
+(no output - 0 calls)
+
+$ grep -Rn "findUnique({ where: { id" server/repositories --include="*.ts"
+server/repositories/business-feedback/ownership-check.ts:18:  const job = await prisma.job.findUnique({
+server/repositories/business-feedback/ownership-check.ts:52:  const cal = await prisma.profileCalibration.findUnique({
+
+Remaining findUnique: only in ownership-check.ts (internal validation, not API-facing).
+All unscoped functions marked @internal with JSDoc.
+
+=================================================================
+SECTION 2: P0-1 500 Fix Verification
+=================================================================
+feedback-summary unauthorized (interviewer):
+  Before: HTTP 500
+  After:  HTTP 404, body={"success":false,"error":"Job not found or access denied"} ✅
+
+mismatched applicationId:
+  Before: HTTP 500
+  After:  HTTP 400, body={"success":false,"error":"Application does not belong to the specified job"} ✅
+
+invalid sourceFeedbackId:
+  Before: HTTP 500
+  After:  HTTP 404, body={"success":false,"error":"Source feedback nonexistent not found or access denied"} ✅
+
+Error status mapping in all API routes:
+  "Permission denied" → 403
+  "not found" / "access denied" → 404
+  "does not belong" / "Invalid" → 400
+  otherwise → 500
+
+=================================================================
+SECTION 3: P0-3/P0-4 Permission Scope Verification
+=================================================================
+business_owner RELATED job (KA大客户, bizOwner=赵业务) → 201 ✅
+business_owner UNRELATED job (品牌策划, bizOwner=孙面试官) → 403 ✅
+business_owner ownerId match but bizOwnerId mismatch → 403 ✅
+
+recruiter OWNED application (ownerId=王招聘) → 200 ✅
+recruiter UNOWNED application (hrbp job) → 404 ✅
+
+=================================================================
+SECTION 4: P0-5 Candidate Detail Applications Scope
+=================================================================
+admin → candidate 林可 → applications=1 (full visibility) ✅
+recruiter → candidate 林可 → applications=1 (owner match) ✅
+interviewer → candidate 陈书妍 → applications=1 (interview assignment match) ✅
+
+No cross-job application leakage verified.
+
+=================================================================
+SECTION 5: Build Verification
+=================================================================
+$ pnpm prisma generate
+✔ Generated Prisma Client (v7.8.0)
+
+$ pnpm typecheck
+> tsc --noEmit
+(exit 0 — 0 errors)
+
+$ pnpm lint
+> eslint . --ext .ts,.tsx
+(exit 0 — 0 errors, 0 warnings)
+
+$ pnpm build
+○ (Static) prerendered as static content
+ƒ (Dynamic) server-rendered on demand
+(exit 0 — PASS)
+
+$ git status --short
+(clean)
+
+$ git log --oneline --decorate -5
+cf78e5d (HEAD -> agent/workbuddy/phase-5, tag: workbuddy-phase-5.2, origin/agent/workbuddy/phase-5) workbuddy phase-5.2: add complete security evidence pack
+ede6800 workbuddy phase-5.2: close feedback object scope security gaps
+e9e1413 (tag: workbuddy-phase-5.1.1) workbuddy phase-5.1.1: clarify business owner ownership rule
+bb06fe7 (tag: workbuddy-phase-5.1) workbuddy phase-5.1: harden feedback permissions and calibration status
+b321d66 (tag: workbuddy-phase-5) workbuddy phase-5: add business feedback and profile calibration

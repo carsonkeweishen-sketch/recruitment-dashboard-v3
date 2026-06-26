@@ -59,6 +59,7 @@ export async function getFeedbacks(params: FeedbackListParams) {
   });
 }
 
+/** @internal Internal use only — API routes must use getFeedbackByIdWithScope() */
 export async function getFeedbackById(id: string) {
   return prisma.businessFeedback.findUnique({
     where: { id },
