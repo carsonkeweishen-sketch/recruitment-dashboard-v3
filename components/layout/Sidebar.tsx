@@ -15,7 +15,7 @@ const navItems: NavItem[] = [
   { label: "权限调试", href: "/permissions-debug", icon: "shield", enabled: true },
   { label: "岗位管理", href: "/jobs", icon: "briefcase", enabled: true },
   { label: "候选人", href: "/candidates", icon: "users", enabled: true },
-  { label: "面试反馈", href: "/interviews", icon: "chat", enabled: false },
+  { label: "面试管理", href: "/interviews", icon: "chat", enabled: true },
   { label: "协同任务", href: "/actions", icon: "check", enabled: false },
   { label: "数据导入", href: "/imports", icon: "upload", enabled: false },
   { label: "Offer 风险", href: "/offer-risks", icon: "alert", enabled: false },
