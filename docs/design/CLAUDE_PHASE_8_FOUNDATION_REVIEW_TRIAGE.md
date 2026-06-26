@@ -12,7 +12,7 @@
 |---|------------|------|---------|---------|---------|-----------|---------|
 | 1 | 导航不能 14+ 模块平铺，应业务分组 | P0 | ✅ 采纳 | 重写 Sidebar 为 6 组业务分组导航（概览/招聘运营/面试/风险与行动/分析/设置），移除 permissions-debug | `components/layout/Sidebar.tsx` | 否 | ✅ 完成 |
 | 2 | 设计系统必须成为唯一来源 | P0 | ✅ 采纳 | 创建 design-tokens.ts 统一管理颜色/圆角/间距/字体/阴影/动画；统一所有 UI 组件使用 design-tokens | `components/ui/design-tokens.ts`, `components/ui/*` | 否 | ✅ 完成 |
-| 3 | 规则智能与 LLM 必须分开 | P0 | ✅ 采纳 | 更新 AI_CAPABILITY_FRAMEWORK.md 明确 Layer 1 系统规则提醒 / Layer 2 AI 辅助建议 / Layer 3 自主智能；UI 文案区分"系统发现"和"AI 辅助建议，仅供参考" | `docs/product/AI_CAPABILITY_FRAMEWORK.md` | 否 | ✅ 完成 |
+| 3 | 规则智能与 LLM 必须分开 | P0 | ✅ 采纳 | 更新 AI_CAPABILITY_FRAMEWORK.md 明确 Layer 1 系统规则提醒 / Layer 2 AI 辅助建议 / Layer 3 人工确认后的执行闭环；UI 文案区分"系统发现"和"AI 辅助建议，仅供参考" | `docs/product/AI_CAPABILITY_FRAMEWORK.md` | 否 | ✅ 完成（Phase 8.0A 已修正） |
 | 4 | 未完成模块必须有成熟空状态 | P0 | ✅ 采纳 | 创建 ModulePage 组件（统一"该模块正在接入招聘数据"文案），为 /dashboard /reports /knowledge /settings /offer-risks 创建成熟空状态页面 | `components/ui/module-page.tsx`, `app/dashboard/`, `app/reports/`, `app/knowledge/`, `app/settings/`, `app/offer-risks/` | 否 | ✅ 完成 |
 | 5 | 全局模块命名必须中文招聘语义化 | P0 | ✅ 采纳 | 创建 PRODUCT_NAMING_GLOSSARY.md 定义全部模块/操作/状态/优先级/AI/角色的中文命名；统一 Sidebar 命名 | `docs/product/PRODUCT_NAMING_GLOSSARY.md`, `components/layout/Sidebar.tsx` | 否 | ✅ 完成 |
 | 6 | 导航按角色收敛 | P1 | ✅ 采纳 | 在 module-registry.ts 中定义每个模块的角色可见性；Sidebar 未启用模块显示 phaseLabel | `server/config/module-registry.ts` | 否 | ✅ 完成 |

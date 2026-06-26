@@ -45,8 +45,8 @@ export const moduleRegistry: ModuleDefinition[] = [
   {
     route: "/dashboard",
     navGroup: "概览",
-    label: "AI 决策看板",
-    description: "招聘全局概览 — 一站式发现风险与待办，掌握招聘整体健康度。",
+    label: "招聘总览",
+    description: "基于招聘过程数据，辅助识别招聘风险、流程卡点和优先处理事项。",
     phase: "phase-8.1",
     navEnabled: true,
     producesActions: true,

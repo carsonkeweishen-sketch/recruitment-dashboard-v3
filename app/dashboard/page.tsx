@@ -3,8 +3,8 @@ import { ModulePage } from "@/components/ui/module-page";
 export default function DashboardPage() {
   return (
     <ModulePage
-      title="AI 决策看板"
-      description="招聘全局概览 — 一站式发现风险与待办，掌握招聘整体健康度。"
+      title="AI 招聘洞察看板"
+      description="基于招聘过程数据，辅助识别招聘风险、流程卡点和优先处理事项。"
       icon="📊"
       phase="Phase 8.1"
       expectedPhase="Phase 8.1"

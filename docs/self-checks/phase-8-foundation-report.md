@@ -111,7 +111,7 @@
 | 文件 | 说明 |
 |------|------|
 | `app/page.tsx` | 重定向到 /dashboard |
-| `app/dashboard/page.tsx` | AI 决策看板（空状态） |
+| `app/dashboard/page.tsx` | 招聘总览（空状态） |
 | `app/reports/page.tsx` | 周报/复盘（空状态） |
 | `app/knowledge/page.tsx` | 知识库（空状态） |
 | `app/settings/page.tsx` | 设置（空状态） |

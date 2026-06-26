@@ -8,7 +8,7 @@
 | # | 文件名 | 页面/状态 | 路由 | 验证内容 |
 |---|--------|----------|------|---------|
 | 1 | product-shell-navigation-grouped.png | Product Shell + 业务分组导航 | /actions | 左侧导航 6 组分组，无 permissions-debug，中文招聘语义命名 |
-| 2 | product-shell-dashboard-entry.png | AI 决策看板（空状态） | /dashboard | ModulePage 组件，成熟空状态文案 |
+| 2 | product-shell-dashboard-entry.png | 招聘总览（空状态） | /dashboard | ModulePage 组件，成熟空状态文案 |
 | 3 | action-center-with-product-shell.png | 风险行动中心（Product Shell 内） | /actions | /actions 在 Product Shell 中正常工作 |
 | 4 | jobs-module-foundation-state.png | 岗位 | /jobs | 岗位页面使用 ProductShell + KpiCard |
 | 5 | candidates-module-foundation-state.png | 候选人 | /candidates | 候选人页面使用 ProductShell + KpiCard |

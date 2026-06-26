@@ -62,7 +62,7 @@ export function ModulePage({
           <p className="mt-2 text-sm text-[var(--color-text-secondary)] leading-relaxed">
             该模块正在接入招聘数据。当前可先通过{" "}
             <strong className="text-[var(--color-text-primary)]">
-              AI 决策看板
+              招聘总览
             </strong>{" "}
             和{" "}
             <strong className="text-[var(--color-text-primary)]">

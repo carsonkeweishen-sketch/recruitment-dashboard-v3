@@ -26,7 +26,7 @@ const navGroups: NavGroup[] = [
   {
     label: "概览",
     items: [
-      { label: "AI 决策看板", href: "/dashboard", icon: "dashboard", enabled: true },
+      { label: "招聘总览", href: "/dashboard", icon: "dashboard", enabled: true },
     ],
   },
   {

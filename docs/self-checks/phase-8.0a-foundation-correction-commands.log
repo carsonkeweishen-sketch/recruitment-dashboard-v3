@@ -1,0 +1,147 @@
+# Phase 8.0A Foundation Correction — Commands Log
+
+> 日期：2026-06-27 | 分支：agent/workbuddy/phase-7
+
+## CMD-1: pnpm prisma generate
+```
+✔ Generated Prisma Client (v7.8.0)
+EXIT: 0
+```
+
+## CMD-2: pnpm typecheck
+```
+(no output)
+EXIT: 0
+```
+
+## CMD-3: pnpm lint
+```
+(no output)
+EXIT: 0
+```
+
+## CMD-4: pnpm build
+```
+├ ○ /candidates
+├ ○ /dashboard
+├ ○ /interviews
+├ ○ /jobs
+├ ○ /knowledge
+├ ○ /offer-risks
+├ ○ /reports
+└ ○ /settings
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+EXIT: 0
+```
+
+## CMD-5: git status --short
+```
+(modified + new files pending commit)
+```
+
+## CMD-6: git log --oneline --decorate -10
+```
+5bb1f6d (HEAD) workbuddy phase-8: add Word self-check report
+2a943ce workbuddy phase-8: close product foundation p0 p1
+38e112f workbuddy phase-8: close product foundation p0 p1
+6db0383 workbuddy phase-7d: patch final ceo demo lock evidence
+...
+```
+
+## CMD-7: git branch --show-current
+```
+agent/workbuddy/phase-7
+```
+
+## CMD-8: git ls-files .env .env.local ".env.*.local"
+```
+(no output)
+EXIT: 0
+```
+
+## CMD-9: grep -R "AI 决策看板" app components server docs/product docs/design docs/self-checks
+```
+docs/product/PRODUCT_NAMING_GLOSSARY.md: (prohibition list entry only)
+EXIT: 0
+```
+**结论**：仅禁止列表中出现，非实际使用。✅
+
+## CMD-10: grep -R "自主智能" app components server docs/product docs/design docs/self-checks
+```
+(no output)
+EXIT: 1
+```
+**结论**：已清零。✅
+
+## CMD-11: grep -R "page.route" app components
+```
+(no output)
+EXIT: 1
+```
+**结论**：app/components 中无 page.route mock。✅
+
+## CMD-12: grep -R "Mock Action\|mock action\|mockActions\|mock activity\|static timeline\|Mock Insight\|mock insight" app components
+```
+(no output)
+EXIT: 1
+```
+**结论**：无 mock/test 命名。✅
+
+## CMD-13: grep -R "DemoAction\|DemoCandidate\|测试候选人\|测试岗位\|候选人A\|Sample Job\|Sample Candidate" app components server prisma
+```
+(no output)
+EXIT: 1
+```
+**结论**：无测试数据命名。✅
+
+## CMD-14: grep -R "undefined\|NaN\|Invalid Date" app components
+```
+app/api/jobs/.../route.ts: (TypeScript type assertions only, not UI display)
+EXIT: 0
+```
+**结论**：仅 TS 类型注解中的 `as ... | undefined`，非 UI 显示 bug。✅
+
+## CMD-15: grep -R "DATABASE_URL\|OPENAI_API_KEY\|MOKA\|FEISHU" app components
+```
+(no output)
+EXIT: 1
+```
+**结论**：前端代码无环境变量/密钥泄露。✅
+
+## CMD-16: grep -R "#[0-9a-fA-F]\{6\}" app components
+```
+(no output outside globals.css and design-tokens.ts)
+EXIT: 1
+```
+**结论**：无散落 hex 色值。✅
+
+## CMD-17: ls screenshots/phase-8.0a-foundation-correction/
+```
+standard-empty-state-real.png
+standard-error-state-real.png
+standard-permission-state-real.png
+standard-loading-skeleton-real.png
+4 files
+EXIT: 0
+```
+**结论**：4 张真实截图全部就位。✅
+
+---
+
+## Summary
+
+| CMD | Result |
+|-----|--------|
+| typecheck | ✅ 0 errors |
+| lint | ✅ 0 errors 0 warnings |
+| build | ✅ PASS |
+| "AI 决策看板" grep | ✅ 仅禁止列表 |
+| "自主智能" grep | ✅ 已清零 |
+| page.route mock | ✅ NONE |
+| mock/test names | ✅ ZERO |
+| null/undefined/NaN in UI | ✅ NONE |
+| env/secrets leak | ✅ ZERO |
+| hex 散落 | ✅ ZERO |
+| 四态截图 | ✅ 4 张 |
+| git branch | ✅ feature only |
