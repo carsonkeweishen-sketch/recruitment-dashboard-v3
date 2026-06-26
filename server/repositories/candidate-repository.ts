@@ -46,13 +46,12 @@ export async function getCandidates(params: CandidateListParams) {
   } else if (scope.scope === "OWNED" && scope.userId) {
     where.applications = { ...(where.applications as object ?? {}), some: { ...appWhere, ownerId: scope.userId } };
   } else if (scope.scope === "RELATED" && scope.userId) {
-    // RELATED semantics differ by role:
     // - interviewer: only candidates they have been assigned to interview
-    // - business_owner: candidates whose application ownerId or job.businessOwnerId matches
+    // - business_owner: only candidates with applications on jobs where they are businessOwner
     if (scope.role === "interviewer") {
       where.applications = { ...(where.applications as object ?? {}), some: { ...appWhere, interviews: { some: { interviewerId: scope.userId } } } };
     } else {
-      where.applications = { ...(where.applications as object ?? {}), some: { ...appWhere, OR: [{ ownerId: scope.userId }, { job: { businessOwnerId: scope.userId } }] } };
+      where.applications = { ...(where.applications as object ?? {}), some: { ...appWhere, job: { businessOwnerId: scope.userId } } };
     }
   }
 
@@ -96,7 +95,21 @@ export async function getCandidateByIdWithScope(id: string, scope: ScopeWhere) {
     if (scope.role === "interviewer") {
       where.applications = { some: { interviews: { some: { interviewerId: scope.userId } } } };
     } else {
-      where.applications = { some: { OR: [{ ownerId: scope.userId }, { job: { businessOwnerId: scope.userId } }] } };
+      where.applications = { some: { job: { businessOwnerId: scope.userId } } };
+    }
+  }
+
+  // Build application-level scope condition for nested include
+  let appScopeWhere: Record<string, unknown> = {};
+  if (scope.scope === "DEPARTMENT" && scope.departmentId) {
+    appScopeWhere = { job: { departmentId: scope.departmentId } };
+  } else if (scope.scope === "OWNED" && scope.userId) {
+    appScopeWhere = { ownerId: scope.userId };
+  } else if (scope.scope === "RELATED" && scope.userId) {
+    if (scope.role === "interviewer") {
+      appScopeWhere = { interviews: { some: { interviewerId: scope.userId } } };
+    } else {
+      appScopeWhere = { job: { businessOwnerId: scope.userId } };
     }
   }
 
@@ -104,6 +117,7 @@ export async function getCandidateByIdWithScope(id: string, scope: ScopeWhere) {
     where,
     include: {
       applications: {
+        where: scope.scope === "ALL" ? undefined : appScopeWhere,
         include: {
           job: { select: { id: true, title: true, jobCode: true, department: { select: { name: true } }, level: true } },
           owner: { select: { id: true, name: true } },

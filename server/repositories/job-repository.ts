@@ -32,7 +32,12 @@ export async function getJobs(params: JobListParams) {
   } else if (scope.scope === "OWNED" && scope.userId) {
     where.ownerId = scope.userId;
   } else if (scope.scope === "RELATED" && scope.userId) {
-    where.OR = [{ ownerId: scope.userId }, { businessOwnerId: scope.userId }];
+    // business_owner: only businessOwnerId
+    if (scope.role === "interviewer") {
+      where.applications = { some: { interviews: { some: { interviewerId: scope.userId } } } };
+    } else {
+      where.businessOwnerId = scope.userId;
+    }
   } else if (scope.scope === "DENY") {
     return [];
   }
@@ -79,12 +84,13 @@ export async function getJobByIdWithScope(id: string, scope: ScopeWhere) {
   if (scope.scope === "DEPARTMENT" && scope.departmentId) {
     where.departmentId = scope.departmentId;
   } else if (scope.scope === "OWNED" && scope.userId) {
-    where.OR = [{ ownerId: scope.userId }, { businessOwnerId: scope.userId }];
+    where.ownerId = scope.userId;
   } else if (scope.scope === "RELATED" && scope.userId) {
     if (scope.role === "interviewer") {
       where.applications = { some: { interviews: { some: { interviewerId: scope.userId } } } };
     } else {
-      where.OR = [{ ownerId: scope.userId }, { businessOwnerId: scope.userId }];
+      // business_owner: only businessOwnerId
+      where.businessOwnerId = scope.userId;
     }
   }
 

@@ -10,6 +10,7 @@ export async function GET(
   requirePermission(session, "applications", "view");
 
   const { id } = await params;
+  if (!session.userId) return Response.json({ success: false, error: "Unauthorized" }, { status: 401 });
   const app = await getApplicationDetail(id, session.role, session.userId, session.departmentId);
   if (!app) return Response.json({ success: false, error: "Not found" }, { status: 404 });
 

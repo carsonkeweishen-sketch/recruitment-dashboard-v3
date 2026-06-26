@@ -1,0 +1,65 @@
+# Phase 5.2.2 Commands Log — Object Scope Hardening Final
+# Branch: agent/workbuddy/phase-5
+
+=================================================================
+SECTION 1: Unscoped Calls Audit (Post-Fix)
+=================================================================
+$ grep -Rn "getJobById\b|getCandidateById\b|getApplicationById\b|getFeedbackById\b|getCalibrationById\b" app/api server/services --include="*.ts" | grep -v "WithScope"
+(no output — ZERO unscoped calls in API/service layer)
+
+=================================================================
+SECTION 2: businessOwnerId + ownerId OR Pattern Audit
+=================================================================
+$ grep -Rn "businessOwnerId.*ownerId|ownerId.*businessOwnerId" server/repositories --include="*.ts" | grep -v "select:" | grep -v "//"
+server/repositories/business-feedback/ownership-check.ts:17:): Promise<{ id: string; title: string; businessOwnerId: string | null; ownerId: string }> {
+
+This is a TypeScript type signature, NOT a scope condition. No OR patterns in scope logic.
+
+=================================================================
+SECTION 3: Multi-Application Candidate Detail Test
+=================================================================
+林可 has 2 applications in DB: KA大客户销售 + 品牌策划
+
+admin → apps=2 (KA大客户销售, 品牌策划) ✅ ALL scope
+recruiter → apps=2 (both owned by 王招聘) ✅ OWNED scope via ownerId
+business_owner → apps=1 (KA大客户销售 only) ✅ RELATED scope via businessOwnerId
+interviewer → HTTP 404 ✅ No interview assignment, denied at candidate level
+
+=================================================================
+SECTION 4: Removed Code
+=================================================================
+1. Service fallbacks deleted:
+   - getCandidateDetail: removed unscoped getCandidateById fallback
+   - getApplicationDetail: removed unscoped getApplicationById fallback
+   - getFeedback: removed unscoped getFeedbackById fallback
+   - getJobDetail: removed unscoped fetchJob fallback
+   - confirmCalibrationAction: removed unscoped getCalibrationById call
+
+2. JS filterApplicationsByScope() deleted — replaced by Prisma include.where
+
+3. business_owner OR ownerId patterns removed from 7 repository functions:
+   - job-repository (list + detail): RELATED → businessOwnerId only; OWNED → ownerId only
+   - candidate-repository (list + detail): RELATED → job.businessOwnerId only
+   - application-repository (list + detail): RELATED → job.businessOwnerId only
+
+=================================================================
+SECTION 5: Build Verification
+=================================================================
+$ pnpm typecheck
+> tsc --noEmit
+(exit 0 — 0 errors)
+
+$ pnpm lint
+> eslint . --ext .ts,.tsx
+(exit 0 — 0 errors, 0 warnings)
+
+$ pnpm build
+○ (Static) prerendered as static content
+ƒ (Dynamic) server-rendered on demand
+(exit 0 — PASS)
+
+$ git status --short
+(clean after commit)
+
+$ git log --oneline --decorate -5
+(will be populated at commit time)

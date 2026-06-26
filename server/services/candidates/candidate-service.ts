@@ -1,6 +1,6 @@
 import type { Role } from "@/server/permissions/types";
 import { buildScopeWhere } from "@/server/permissions/check-permission";
-import { getCandidates, getCandidateById, getCandidateByIdWithScope } from "@/server/repositories/candidate-repository";
+import { getCandidates, getCandidateByIdWithScope } from "@/server/repositories/candidate-repository";
 import type { CandidateListParams } from "@/server/repositories/candidate-repository";
 
 export async function listCandidates(
@@ -11,11 +11,9 @@ export async function listCandidates(
   return getCandidates({ scope, ...filters });
 }
 
-export async function getCandidateDetail(id: string, role?: Role, userId?: string, departmentId?: string) {
-  const scope = role ? buildScopeWhere({ role, userId, departmentId }, "candidates") : undefined;
-  const candidate = scope
-    ? await getCandidateByIdWithScope(id, scope)
-    : await getCandidateById(id);
+export async function getCandidateDetail(id: string, role: Role, userId: string, departmentId?: string) {
+  const scope = buildScopeWhere({ role, userId, departmentId }, "candidates");
+  const candidate = await getCandidateByIdWithScope(id, scope);
   if (!candidate) return null;
   return {
     ...candidate,

@@ -4,7 +4,6 @@ import { buildScopeWhere, requirePermission } from "@/server/permissions/check-p
 import {
   createCalibration,
   confirmCalibration,
-  getCalibrationById,
 } from "@/server/repositories/business-feedback/profile-calibration-repository";
 import { requireJobOwnership, requireCalibrationOwnership } from "@/server/repositories/business-feedback/ownership-check";
 import type { CreateCalibrationInput } from "@/server/repositories/business-feedback/profile-calibration-repository";
@@ -55,9 +54,6 @@ export async function confirmCalibrationAction(
 
   // Phase 5.1: Object-level ownership check
   await requireCalibrationOwnership(userId, calibrationId, role);
-
-  const calibration = await getCalibrationById(calibrationId);
-  if (!calibration) throw new Error("Calibration not found");
 
   return confirmCalibration(calibrationId, userId);
 }

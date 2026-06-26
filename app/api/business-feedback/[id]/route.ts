@@ -8,6 +8,7 @@ export async function GET(
 ) {
   const session = await getSession();
   const { id } = await params;
+  if (!session.userId) return Response.json({ success: false, error: "Unauthorized" }, { status: 401 });
   const feedback = await getFeedback(id, session.role, session.userId, session.departmentId);
   if (!feedback) return Response.json({ success: false, error: "Not found" }, { status: 404 });
   return Response.json({ success: true, data: feedback });

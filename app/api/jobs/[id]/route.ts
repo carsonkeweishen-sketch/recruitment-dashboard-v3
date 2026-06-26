@@ -10,6 +10,7 @@ export async function GET(
   requirePermission(session, "jobs", "view");
 
   const { id } = await params;
+  if (!session.userId) return Response.json({ success: false, error: "Unauthorized" }, { status: 401 });
   const job = await getJobDetail(id, session.role, session.userId, session.departmentId);
 
   if (!job) {

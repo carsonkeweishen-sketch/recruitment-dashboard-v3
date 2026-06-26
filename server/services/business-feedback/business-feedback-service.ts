@@ -3,7 +3,6 @@ import type { Role } from "@/server/permissions/types";
 import { buildScopeWhere, requirePermission } from "@/server/permissions/check-permission";
 import {
   getFeedbacks,
-  getFeedbackById,
   getFeedbackByIdWithScope,
   createFeedback,
   getFeedbackStatsByJob,
@@ -21,12 +20,9 @@ export async function listFeedbacks(
   return getFeedbacks({ scope, ...filters });
 }
 
-export async function getFeedback(id: string, role?: Role, userId?: string, departmentId?: string) {
-  if (role && userId) {
-    const scope = buildScopeWhere({ role, userId, departmentId }, "candidates");
-    return getFeedbackByIdWithScope(id, scope);
-  }
-  return getFeedbackById(id);
+export async function getFeedback(id: string, role: Role, userId: string, departmentId?: string) {
+  const scope = buildScopeWhere({ role, userId, departmentId }, "candidates");
+  return getFeedbackByIdWithScope(id, scope);
 }
 
 export async function submitFeedback(
