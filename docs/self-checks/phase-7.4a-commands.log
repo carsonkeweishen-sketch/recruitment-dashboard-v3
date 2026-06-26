@@ -1,0 +1,89 @@
+# Phase 7.4A — Commands Log
+
+> 日期：2025-06-26
+> 分支：agent/workbuddy/phase-7
+> HEAD：dfa4a1a
+
+## CMD-1: pnpm prisma generate
+```
+✔ Generated Prisma Client (v7.8.0)
+EXIT: 0
+```
+
+## CMD-2: pnpm typecheck
+```
+(no output)
+EXIT: 0
+```
+
+## CMD-3: pnpm lint
+```
+> eslint . --ext .ts,.tsx
+EXIT: 0
+```
+
+## CMD-4: pnpm build
+```
+○ /actions (Static)  prerendered as static content
+EXIT: 0
+```
+
+## CMD-5: git status --short
+```
+(clean)
+EXIT: 0
+```
+
+## CMD-6: git log --oneline --decorate -8
+```
+dfa4a1a phase-7.4a: add action center evidence lock
+f176077 phase-7.4a: add Word self-check report
+aa865d3 phase-7.4a: add action center list ui
+1f60de1 phase-7.3.1a: add Word self-check report
+fd5dc78 phase-7.3.1a: complete action api runtime smoke
+4a01ea1 phase-7.3.1: add Word self-check report
+6e5ede4 phase-7.3.1: complete field gap check
+0072b0e phase-7.3.1: add action api smoke and ui data contracts
+```
+
+## CMD-7: git branch --show-current
+```
+agent/workbuddy/phase-7
+```
+
+## CMD-8: git diff --stat
+```
+(no changes)
+```
+
+## CMD-9: grep hardcoded names
+```
+(no output in app/components — only seed.ts + self-checks docs)
+EXIT: 0
+```
+
+## CMD-10: grep mock/demo/sample/fallback
+```
+components/auth/PermissionGate.tsx: fallback React prop (legal)
+prisma/schema.prisma: isFallback field (legal)
+EXIT: 0
+```
+
+## CMD-11: grep const .*Data.*= \\[
+```
+(no output)
+EXIT: 1
+```
+✅ No hardcoded data arrays in components.
+
+## Summary
+| CMD | Result |
+|-----|--------|
+| prisma generate | ✅ |
+| typecheck | ✅ 0 errors |
+| lint | ✅ 0 errors, 0 warnings |
+| build | ✅ /actions static route |
+| git status | ✅ clean |
+| hardcoded names | ✅ ZERO in app/components |
+| mock/demo | ✅ legal uses only |
+| const Data arrays | ✅ ZERO |
