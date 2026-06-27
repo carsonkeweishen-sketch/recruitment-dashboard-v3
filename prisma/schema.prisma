@@ -474,3 +474,93 @@ model ActivityLog {
 
   @@map("activity_logs")
 }
+
+model AIInsight {
+  id                String    @id @default(cuid())
+  objectType        String
+  objectId          String
+  insightType       String
+  title             String
+  summary           String
+  suggestedAction   String?
+  riskLevel         String?
+  generatedBy       String
+  provider          String?
+  model             String?
+  promptVersion     String?
+  confidence        Float?
+  humanReviewStatus String    @default("pending")
+  createdById       String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  evidences         AIEvidence[]
+  reviews           AIHumanReview[]
+
+  @@map("ai_insights")
+}
+
+model AIEvidence {
+  id          String    @id @default(cuid())
+  aiInsightId String
+  aiInsight   AIInsight @relation(fields: [aiInsightId], references: [id])
+  sourceType  String
+  sourceId    String?
+  sourceLabel String
+  summary     String
+  quote       String?
+  metricName  String?
+  metricValue String?
+  createdAt   DateTime  @default(now())
+
+  @@map("ai_evidences")
+}
+
+model AIPromptTemplate {
+  id                 String   @id @default(cuid())
+  key                String   @unique
+  name               String
+  objectType         String
+  promptVersion      String
+  systemPrompt       String
+  userPromptTemplate String
+  outputSchema       String?
+  isActive           Boolean  @default(true)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@map("ai_prompt_templates")
+}
+
+model AICallLog {
+  id               String   @id @default(cuid())
+  provider         String
+  model            String
+  objectType       String
+  objectId         String?
+  promptVersion    String
+  requestHash      String
+  status           String
+  latencyMs        Int?
+  tokenUsageInput  Int?
+  tokenUsageOutput Int?
+  errorCode        String?
+  errorMessage     String?
+  createdById      String?
+  createdAt        DateTime @default(now())
+
+  @@map("ai_call_logs")
+}
+
+model AIHumanReview {
+  id                     String    @id @default(cuid())
+  aiInsightId            String
+  aiInsight              AIInsight @relation(fields: [aiInsightId], references: [id])
+  reviewerId             String
+  status                 String
+  reviewNote             String?
+  editedSummary          String?
+  editedSuggestedAction  String?
+  createdAt              DateTime  @default(now())
+
+  @@map("ai_human_reviews")
+}
