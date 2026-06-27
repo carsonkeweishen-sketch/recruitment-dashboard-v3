@@ -162,8 +162,46 @@ for i, (filename, description, api_info, role) in enumerate(screenshots, 1):
         doc.add_paragraph(f'⚠️ {filepath}')
     doc.add_paragraph()
 
-# 七、验收红线
-doc.add_heading('七、验收红线确认', level=1)
+# 七、Commands Log & Grep 验证
+doc.add_heading('七、Commands Log & Grep 验证', level=1)
+
+doc.add_heading('7.1 构建命令', level=2)
+add_styled_table(doc,
+    ['命令', '结果'],
+    [
+        ['pnpm prisma generate', '✅ Prisma Client v7.8.0'],
+        ['pnpm typecheck', '✅ PASS (0 errors)'],
+        ['pnpm lint', '✅ PASS (0 errors)'],
+        ['pnpm build', '✅ PASS (全部路由编译)'],
+    ]
+)
+
+doc.add_heading('7.2 Git 状态', level=2)
+add_styled_table(doc,
+    ['命令', '结果'],
+    [
+        ['git status --short', '✅ clean'],
+        ['git branch --show-current', 'agent/workbuddy/phase-7'],
+        ['是否合并 main', '否'],
+        ['是否 force push', '否'],
+    ]
+)
+
+doc.add_heading('7.3 代码质量 Grep', level=2)
+add_styled_table(doc,
+    ['检查项', '结果', '说明'],
+    [
+        ['AI 决策看板 / AI 决策', '✅ 已清零', 'app/components/server 中无'],
+        ['自主智能 / 自动决策', '✅ 已清零', '仅在禁止列表中作为反例'],
+        ['mock/test/demo 命名', '✅ 已清零', 'app/components 中无'],
+        ['null/undefined/NaN in UI', '✅ 已清零', '仅 TS 类型注解'],
+        ['DATABASE_URL 泄露', '✅ 无泄露', '仅 server 端内部引用 process.env'],
+        ['散落 hex 色值', '✅ 无', '全部使用 CSS 变量'],
+    ]
+)
+
+# 八、验收红线确认
+doc.add_heading('八、验收红线确认', level=1)
 add_styled_table(doc,
     ['#', '验收标准', '状态'],
     [
@@ -180,8 +218,8 @@ add_styled_table(doc,
     ]
 )
 
-# 八、最终结论
-doc.add_heading('八、最终结论', level=1)
+# 九、最终结论
+doc.add_heading('九、最终结论', level=1)
 add_styled_table(doc,
     ['项目', '结论'],
     [
