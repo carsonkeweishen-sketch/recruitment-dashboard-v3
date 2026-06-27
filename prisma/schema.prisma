@@ -564,3 +564,80 @@ model AIHumanReview {
 
   @@map("ai_human_reviews")
 }
+
+model DataSource {
+  id            String   @id @default(cuid())
+  sourceType    String   // upload / feishu_link / moka_link / external_url
+  sourceSystem  String   // local / feishu / moka / external
+  fileName      String?
+  fileMimeType  String?
+  fileSize      Int?
+  fileUrl       String?
+  externalUrl   String?
+  externalId    String?
+  objectType    String?
+  objectId      String?
+  usageType     String?
+  parseStatus   String   @default("pending")
+  parseError    String?
+  uploadedById  String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  chunks        DataSourceChunk[]
+  parseJobs     DataSourceParseJob[]
+  links         DataSourceLink[]
+
+  @@map("data_sources")
+}
+
+model DataSourceChunk {
+  id            String   @id @default(cuid())
+  dataSourceId  String
+  dataSource    DataSource @relation(fields: [dataSourceId], references: [id])
+  chunkIndex    Int
+  contentText   String?
+  contentSummary String?
+  tokenCount    Int?
+  metadataJson  String?
+  createdAt     DateTime @default(now())
+
+  @@map("data_source_chunks")
+}
+
+model DataSourceParseJob {
+  id            String    @id @default(cuid())
+  dataSourceId  String
+  dataSource    DataSource @relation(fields: [dataSourceId], references: [id])
+  jobStatus     String    @default("pending")
+  parserType    String?
+  startedAt     DateTime?
+  finishedAt    DateTime?
+  errorCode     String?
+  errorMessage  String?
+  createdAt     DateTime  @default(now())
+
+  @@map("data_source_parse_jobs")
+}
+
+model DataSourceLink {
+  id            String   @id @default(cuid())
+  dataSourceId  String
+  dataSource    DataSource @relation(fields: [dataSourceId], references: [id])
+  objectType    String
+  objectId      String
+  createdAt     DateTime @default(now())
+
+  @@map("data_source_links")
+}
+
+model IntegrationConnection {
+  id            String    @id @default(cuid())
+  provider      String    @unique
+  status        String    @default("not_configured")
+  displayName   String?
+  lastCheckedAt DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("integration_connections")
+}
