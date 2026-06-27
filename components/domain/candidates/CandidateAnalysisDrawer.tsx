@@ -217,14 +217,24 @@ function InsightsTab({ data }: { data: Record<string, any> }) {
     <div className="space-y-3">
       {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
       {insights.map((ins: any, i: number) => (
-        <div key={i} className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
+        <div key={i} className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4" data-insight-card="true">
           <div className="flex items-center gap-2 mb-1">
             <StatusBadge label={ins.category ?? "—"} variant={ins.severity === "high" ? "danger" : "warning"} />
-            <span className="text-xs text-[var(--color-text-tertiary)]">系统规则提醒</span>
+            <span className="text-xs text-[var(--color-text-tertiary)]" data-provenance="system_rule">生成方式：系统规则提醒</span>
           </div>
           <h4 className="text-sm font-semibold text-[var(--color-text-primary)]">{ins.title}</h4>
           <p className="mt-1 text-sm text-[var(--color-text-secondary)]">{ins.summary}</p>
-          <p className="mt-2 text-xs text-[var(--color-primary)]">→ {ins.suggestedAction ?? ""}</p>
+          {(ins.evidence || []).length > 0 && (
+            <div className="mt-2 space-y-0.5">
+              {(ins.evidence || []).filter(Boolean).map((e: string, j: number) => (
+                <div key={j} className="text-xs text-[var(--color-text-tertiary)]">· {e}</div>
+              ))}
+            </div>
+          )}
+          <p className="mt-2 text-xs text-[var(--color-primary)]" data-suggested-action="true">→ {ins.suggestedAction ?? ""}</p>
+          {ins.triggerCondition && (
+            <p className="mt-1 text-[10px] text-[var(--color-text-tertiary)]">触发条件：{ins.triggerCondition}</p>
+          )}
         </div>
       ))}
     </div>
