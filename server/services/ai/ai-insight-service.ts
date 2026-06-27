@@ -27,49 +27,47 @@ export async function generateInsight(objectType: string, objectId: string, ques
 
   const startTime = Date.now();
   try {
-    const content = await generateCompletion(prompt.systemPrompt, userPrompt);
+    const response = await generateCompletion(prompt.systemPrompt, userPrompt, prompt.promptVersion);
     const latencyMs = Date.now() - startTime;
 
     await logCall({
-      provider: providerStatus.provider || "openai",
-      model: providerStatus.model || "gpt-4o-mini",
+      provider: providerStatus.provider || "deepseek",
+      model: providerStatus.model || "deepseek-v4-flash",
       objectType, objectId, promptVersion: prompt.promptVersion,
       requestHash, status: "success", latencyMs, createdById: userId,
+      tokenUsageInput: response.tokenUsageInput, tokenUsageOutput: response.tokenUsageOutput,
     });
-
-    // Parse response content
-    let parsed;
-    try { parsed = JSON.parse(content); } catch { parsed = { summary: content }; }
 
     const insight = await prisma.aIInsight.create({
       data: {
         objectType, objectId, insightType: mode,
-        title: parsed.title || `AI 辅助分析: ${objectType}`,
-        summary: parsed.summary || content.substring(0, 500),
-        suggestedAction: parsed.suggestedAction || "",
+        title: `${objectType} AI 辅助分析`,
+        summary: response.answer,
+        suggestedAction: response.suggestedAction,
         generatedBy: "llm",
-        provider: providerStatus.provider,
-        model: providerStatus.model,
-        promptVersion: prompt.promptVersion,
-        confidence: parsed.confidence || 0.8,
+        provider: response.provider,
+        model: response.model,
+        promptVersion: response.promptVersion,
+        confidence: response.confidence,
         createdById: userId,
       },
     });
 
     return {
-      answer: parsed.summary || content,
-      suggestedAction: parsed.suggestedAction || "",
-      confidence: parsed.confidence || 0.8,
+      answer: response.answer,
+      suggestedAction: response.suggestedAction,
+      confidence: response.confidence,
       generatedBy: "llm",
-      provider: providerStatus.provider,
-      model: providerStatus.model,
-      promptVersion: prompt.promptVersion,
-      evidence: [],
+      provider: response.provider,
+      model: response.model,
+      promptVersion: response.promptVersion,
+      evidence: response.evidence,
       humanReviewStatus: "pending",
       disclaimer: "AI 辅助建议，仅供参考",
       insightId: insight.id,
     };
   } catch (e) {
+    console.error("generateInsight error:", e);
     const errorMsg = e instanceof Error ? e.message : "Unknown error";
     await logCall({
       provider: providerStatus.provider || "openai",
