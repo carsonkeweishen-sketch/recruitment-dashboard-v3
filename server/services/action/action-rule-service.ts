@@ -239,5 +239,43 @@ export async function generateActions(
     else { results.skippedDuplicateCount++; }
   }
 
+  // Rule 7: Pipeline bottleneck — application stuck in same stage > 14 days
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const stuckApplications: any[] = await prisma.application.findMany({
+    where: {
+      ...scopeWhere,
+      status: "active",
+      stage: { notIn: ["hired", "rejected", "withdrawn", "closed"] },
+      updatedAt: { lt: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000) },
+    },
+    include: {
+      job: { select: { id: true, title: true, ownerId: true } },
+      candidate: { select: { id: true, name: true } },
+    },
+    take: 20,
+  });
+
+  for (const app of stuckApplications) {
+    const stageLabel: Record<string, string> = {
+      sourced: "入库", hr_screen: "HR筛选", business_screen: "业务筛选",
+      first_interview: "初试", second_interview: "复试", final_interview: "终面",
+      offer_risk: "Offer风险", pre_onboarding: "入职前",
+    };
+    const stageName = stageLabel[app.stage] || app.stage;
+    const input: CreateActionInput = {
+      title: `流程卡点：${app.candidate.name} - ${app.job.title}`,
+      description: `候选人在"${stageName}"阶段停留超过14天未推进，建议检查面试安排或业务反馈进度。`,
+      category: "process_blocker", priority: "high",
+      ownerId: app.job.ownerId, createdById: userId,
+      jobId: app.jobId, candidateId: app.candidateId,
+      applicationId: app.id,
+      sourceType: "job_pipeline", sourceRefId: app.id,
+      sourceSummary: `Stuck in ${app.stage} for 14+ days`,
+    };
+    const result = await createActionIfNotExists(input);
+    if (result.created) { results.createdCount++; results.actions.push({ id: result.actionId!, title: input.title, category: input.category }); }
+    else { results.skippedDuplicateCount++; }
+  }
+
   return results;
 }
