@@ -4,8 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 // ============================================================
-// 理然智能招聘 AI 看板 — 业务分组导航
-// 参考：Linear / Greenhouse / Ashby 的导航分组模式
+// 理然智能招聘 AI 看板 — 产品边界收口后导航
+// 本产品：招聘判断、风险识别、面试质量、候选人评估、岗位卡点、行动闭环
+// 周报由外部产品承接，面试流程推进由 Moka 承接
 // ============================================================
 
 interface NavItem {
@@ -13,7 +14,6 @@ interface NavItem {
   href: string;
   icon: string;
   enabled: boolean;
-  /** 未完成模块的阶段标签 */
   phaseLabel?: string;
 }
 
@@ -30,57 +30,58 @@ const navGroups: NavGroup[] = [
     ],
   },
   {
-    label: "招聘运营",
-    items: [
-      { label: "岗位", href: "/jobs", icon: "briefcase", enabled: true },
-      { label: "候选人", href: "/candidates", icon: "users", enabled: true },
-      { label: "投递", href: "/applications", icon: "layers", enabled: false, phaseLabel: "Phase 8.3" },
-    ],
-  },
-  {
-    label: "面试",
-    items: [
-      { label: "面试管理", href: "/interviews", icon: "chat", enabled: true },
-      { label: "面试反馈", href: "/interview-feedback", icon: "clipboard", enabled: false, phaseLabel: "Phase 8.4" },
-      { label: "面试官质量", href: "/interviewer-quality", icon: "star", enabled: false, phaseLabel: "Phase 8.4" },
-    ],
-  },
-  {
     label: "风险与行动",
     items: [
       { label: "风险行动中心", href: "/actions", icon: "check", enabled: true },
-      { label: "Offer 风险", href: "/offer-risks", icon: "alert", enabled: false, phaseLabel: "Phase 8.5" },
     ],
   },
   {
-    label: "分析",
+    label: "招聘分析",
     items: [
-      { label: "AI 分析中心", href: "/ai-analysis", icon: "brain", enabled: false, phaseLabel: "Phase 8.7" },
-      { label: "周报 / 复盘", href: "/reports", icon: "chart", enabled: false, phaseLabel: "Phase 8.5" },
+      { label: "岗位分析", href: "/jobs", icon: "briefcase", enabled: true },
+      { label: "候选人评估", href: "/candidates", icon: "users", enabled: true },
+      { label: "数据漏斗", href: "/funnel", icon: "chart", enabled: false, phaseLabel: "Phase 8.2" },
+    ],
+  },
+  {
+    label: "面试质量",
+    items: [
+      { label: "面试质量", href: "/interviews", icon: "chat", enabled: true },
+      { label: "面试官质量", href: "/interviewer-quality", icon: "star", enabled: false, phaseLabel: "Phase 8.5" },
+    ],
+  },
+  {
+    label: "风险分析",
+    items: [
+      { label: "Offer 风险", href: "/offer-risks", icon: "alert", enabled: false, phaseLabel: "Phase 8.6" },
+    ],
+  },
+  {
+    label: "知识资产",
+    items: [
+      { label: "知识库 / 模板库", href: "/knowledge", icon: "book", enabled: false, phaseLabel: "Phase 8.7" },
     ],
   },
   {
     label: "设置",
     items: [
-      { label: "知识库", href: "/knowledge", icon: "book", enabled: false, phaseLabel: "Phase 8.6" },
-      { label: "设置", href: "/settings", icon: "settings", enabled: false, phaseLabel: "Phase 8.6" },
+      { label: "集成", href: "/integrations", icon: "plug", enabled: false, phaseLabel: "Phase 9+" },
+      { label: "设置", href: "/settings", icon: "settings", enabled: false, phaseLabel: "Phase 9+" },
     ],
   },
 ];
 
 const iconMap: Record<string, string> = {
   dashboard: "📊",
+  check: "✅",
   briefcase: "💼",
   users: "👥",
-  layers: "📋",
-  chat: "💬",
-  clipboard: "📝",
-  star: "⭐",
-  check: "✅",
-  alert: "⚠️",
-  brain: "🧠",
   chart: "📈",
+  chat: "💬",
+  star: "⭐",
+  alert: "⚠️",
   book: "📚",
+  plug: "🔌",
   settings: "⚙️",
 };
 

@@ -1,8 +1,8 @@
 /**
- * 理然智能招聘 AI 看板 — Module Registry
+ * 理然智能招聘 AI 看板 — Module Registry（产品边界收口后）
  *
- * 集中管理所有产品模块的注册信息。
- * 每个模块定义：路由、导航分组、中文命名、当前阶段、角色可见性。
+ * 本产品定位：招聘判断、风险识别、面试质量、候选人评估、岗位卡点、行动闭环
+ * 周报由外部产品承接，面试流程推进由 Moka 承接
  */
 
 export type ModulePhase =
@@ -16,28 +16,18 @@ export type ModulePhase =
   | "phase-8.7"
   | "phase-9+";
 
-export type NavGroup = "概览" | "招聘运营" | "面试" | "风险与行动" | "分析" | "设置";
+export type NavGroup = "概览" | "风险与行动" | "招聘分析" | "面试质量" | "风险分析" | "知识资产" | "设置";
 
 export interface ModuleDefinition {
-  /** 路由路径 */
   route: string;
-  /** 导航分组 */
   navGroup: NavGroup;
-  /** 中文命名 */
   label: string;
-  /** 模块描述 */
   description: string;
-  /** 当前阶段 */
   phase: ModulePhase;
-  /** 是否在导航中启用 */
   navEnabled: boolean;
-  /** 可见角色（空数组 = 全部可见） */
   visibleRoles?: string[];
-  /** 是否产生 Action */
   producesActions: boolean;
-  /** 是否使用 AI */
   usesAI: boolean;
-  /** AI 层级 */
   aiLayer?: "layer1" | "layer2" | "layer3";
 }
 
@@ -66,9 +56,9 @@ export const moduleRegistry: ModuleDefinition[] = [
   },
   {
     route: "/jobs",
-    navGroup: "招聘运营",
-    label: "岗位",
-    description: "岗位全生命周期管理与卡点诊断 — 哪些岗位在招？哪个卡住了？",
+    navGroup: "招聘分析",
+    label: "岗位分析",
+    description: "岗位全生命周期分析与卡点诊断 — 哪些岗位在招？哪个卡住了？为什么？",
     phase: "phase-8.2",
     navEnabled: true,
     producesActions: true,
@@ -77,9 +67,9 @@ export const moduleRegistry: ModuleDefinition[] = [
   },
   {
     route: "/candidates",
-    navGroup: "招聘运营",
-    label: "候选人",
-    description: "候选人全链路追踪与评估 — 有哪些候选人？每个人在哪个阶段？",
+    navGroup: "招聘分析",
+    label: "候选人评估",
+    description: "候选人全链路追踪与风险评估 — 有哪些候选人？每个人在哪个阶段？有什么风险？",
     phase: "phase-8.3",
     navEnabled: true,
     producesActions: true,
@@ -88,9 +78,9 @@ export const moduleRegistry: ModuleDefinition[] = [
   },
   {
     route: "/interviews",
-    navGroup: "面试",
-    label: "面试管理",
-    description: "面试安排、反馈收集与质量管理。",
+    navGroup: "面试质量",
+    label: "面试质量",
+    description: "面试反馈质量分析、证据完整度评估、偏差风险识别。",
     phase: "phase-8.4",
     navEnabled: true,
     producesActions: true,
@@ -99,32 +89,21 @@ export const moduleRegistry: ModuleDefinition[] = [
   },
   {
     route: "/offer-risks",
-    navGroup: "风险与行动",
+    navGroup: "风险分析",
     label: "Offer 风险",
-    description: "Offer 阶段风险预警与加速决策。",
-    phase: "phase-8.5",
+    description: "Offer 阶段风险预警与分析 — 薪资差距、竞品Offer、决策延迟。",
+    phase: "phase-8.6",
     navEnabled: false,
     producesActions: true,
     usesAI: true,
     aiLayer: "layer1",
   },
   {
-    route: "/reports",
-    navGroup: "分析",
-    label: "周报 / 复盘",
-    description: "招聘数据的周期性复盘与决策支持。",
-    phase: "phase-8.5",
-    navEnabled: false,
-    producesActions: false,
-    usesAI: true,
-    aiLayer: "layer2",
-  },
-  {
     route: "/knowledge",
-    navGroup: "设置",
-    label: "知识库",
+    navGroup: "知识资产",
+    label: "知识库 / 模板库",
     description: "岗位画像模板、面试评估模板的结构化管理。",
-    phase: "phase-8.6",
+    phase: "phase-8.7",
     navEnabled: false,
     producesActions: false,
     usesAI: true,
@@ -135,23 +114,17 @@ export const moduleRegistry: ModuleDefinition[] = [
     navGroup: "设置",
     label: "设置",
     description: "部门、用户、角色与权限的基础管理。",
-    phase: "phase-8.6",
+    phase: "phase-9+",
     navEnabled: false,
     producesActions: false,
     usesAI: false,
   },
 ];
 
-/**
- * 获取已启用的模块列表
- */
 export function getEnabledModules(): ModuleDefinition[] {
   return moduleRegistry.filter((m) => m.navEnabled);
 }
 
-/**
- * 获取指定阶段的模块
- */
 export function getModulesByPhase(phase: ModulePhase): ModuleDefinition[] {
   return moduleRegistry.filter((m) => m.phase === phase);
 }
