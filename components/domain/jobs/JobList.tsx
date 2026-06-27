@@ -1,41 +1,22 @@
 "use client";
 
-import { StatusBadge } from "@/components/ui/StatusBadge";
-
-interface JobItem {
-  id: string;
-  jobCode: string | null;
-  title: string;
-  department: string;
-  level: string | null;
-  status: string;
-  priority: string;
-  owner: { name: string } | null;
-  businessOwner: { name: string } | null;
-  brandLine: string | null;
-  totalApplications: number;
-  updatedAt: string;
-}
-
-interface JobListProps {
-  jobs: JobItem[];
-  onSelect: (id: string) => void;
-  loading?: boolean;
-}
-
-const statusVariant: Record<string, "success" | "warning" | "default"> = {
-  open: "success",
-  paused: "warning",
-  closed: "default",
+const riskColorMap: Record<string, string> = {
+  danger: "bg-[var(--color-danger-light)] text-[var(--color-danger)]",
+  warning: "bg-[var(--color-warning-light)] text-[var(--color-warning)]",
+  success: "bg-[var(--color-success-light)] text-[var(--color-success)]",
 };
 
-const priorityVariant: Record<string, "danger" | "warning" | "default"> = {
-  high: "danger",
-  normal: "default",
-  low: "default",
+const stateColorMap: Record<string, string> = {
+  sourcing: "bg-slate-100 text-slate-600",
+  screening: "bg-blue-50 text-blue-600",
+  interviewing: "bg-amber-50 text-amber-600",
+  offering: "bg-purple-50 text-purple-600",
+  fulfilled: "bg-emerald-50 text-emerald-600",
+  closed: "bg-slate-100 text-slate-400",
 };
 
-export function JobList({ jobs, onSelect, loading }: JobListProps) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function JobList({ jobs, onSelect, loading }: { jobs: any[]; onSelect: (id: string) => void; loading?: boolean }) {
   if (loading) {
     return <div className="space-y-3">{[1, 2, 3, 4].map((i) => <div key={i} className="h-16 animate-pulse rounded-lg bg-[var(--color-surface-tertiary)]" />)}</div>;
   }
@@ -51,43 +32,83 @@ export function JobList({ jobs, onSelect, loading }: JobListProps) {
   }
 
   return (
-    <div className="overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)]">
+    <div className="overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
       {/* Header */}
-      <div className="hidden border-b border-[var(--color-border)] bg-[var(--color-surface-secondary)] px-4 py-2.5 text-xs font-medium text-[var(--color-text-tertiary)] sm:grid sm:grid-cols-12">
+      <div className="hidden border-b border-[var(--color-border)] bg-[var(--color-surface-secondary)] px-4 py-2.5 text-xs font-medium text-[var(--color-text-tertiary)] sm:grid sm:grid-cols-14">
         <span className="col-span-3">岗位</span>
-        <span className="col-span-2">部门 / 职级</span>
-        <span className="col-span-1">状态</span>
-        <span className="col-span-1">优先级</span>
+        <span className="col-span-2">状态机</span>
+        <span className="col-span-2">风险分诊</span>
+        <span className="col-span-2">候选人</span>
         <span className="col-span-2">负责人</span>
-        <span className="col-span-1">候选人</span>
+        <span className="col-span-1">行动项</span>
         <span className="col-span-2">业务线</span>
       </div>
 
       {/* Rows */}
-      {jobs.map((job) => (
-        <button
-          key={job.id}
-          onClick={() => onSelect(job.id)}
-          className="w-full border-b border-[var(--color-border)] px-4 py-3 text-left transition-colors last:border-0 hover:bg-[var(--color-surface-secondary)] sm:grid sm:grid-cols-12 sm:items-center"
-        >
-          <div className="col-span-3">
-            <div className="text-sm font-medium text-[var(--color-text-primary)]">{job.title}</div>
-            {job.jobCode && <div className="text-xs text-[var(--color-text-tertiary)]">{job.jobCode}</div>}
-          </div>
-          <div className="col-span-2 text-sm text-[var(--color-text-secondary)]">
-            <div>{job.department}</div>
-            {job.level && <div className="text-xs text-[var(--color-text-tertiary)]">{job.level}</div>}
-          </div>
-          <div className="col-span-1"><StatusBadge label={job.status === "open" ? "在招" : job.status} variant={statusVariant[job.status] ?? "default"} /></div>
-          <div className="col-span-1"><StatusBadge label={job.priority === "high" ? "高" : job.priority === "normal" ? "普通" : "低"} variant={priorityVariant[job.priority] ?? "default"} /></div>
-          <div className="col-span-2 text-sm text-[var(--color-text-secondary)]">
-            <div>{job.owner?.name ?? "—"}</div>
-            {job.businessOwner && <div className="text-xs text-[var(--color-text-tertiary)]">{job.businessOwner.name}</div>}
-          </div>
-          <div className="col-span-1 text-sm text-[var(--color-text-primary)]">{job.totalApplications}</div>
-          <div className="col-span-2 text-xs text-[var(--color-text-tertiary)]">{job.brandLine ?? "—"}</div>
-        </button>
-      ))}
+      {jobs.map((job) => {
+        const riskLabel = job.riskLabelText ?? "流程健康";
+        const riskColor = riskColorMap[job.riskColor ?? "success"] ?? riskColorMap.success;
+        const stateLabel = job.derivedStateLabel ?? "渠道寻源";
+        const stateColor = stateColorMap[job.derivedState ?? "sourcing"] ?? stateColorMap.sourcing;
+
+        return (
+          <button
+            key={job.id}
+            onClick={() => onSelect(job.id)}
+            className="w-full border-b border-[var(--color-border)] px-4 py-3 text-left transition-colors last:border-0 hover:bg-[var(--color-surface-secondary)] sm:grid sm:grid-cols-14 sm:items-center"
+          >
+            {/* Job title + dept */}
+            <div className="col-span-3 min-w-0">
+              <div className="text-sm font-medium text-[var(--color-text-primary)] truncate">{job.title}</div>
+              <div className="text-xs text-[var(--color-text-tertiary)]">{job.department}{job.level ? ` · ${job.level}` : ""}</div>
+            </div>
+
+            {/* State Machine */}
+            <div className="col-span-2">
+              <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${stateColor}`}>
+                {stateLabel}
+              </span>
+            </div>
+
+            {/* Risk Classification — THE KEY FEATURE */}
+            <div className="col-span-2">
+              <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${riskColor}`}>
+                {job.riskLabel !== "pipeline_healthy" && job.riskLabel !== undefined && (
+                  <span className="text-[10px]">⚠</span>
+                )}
+                {riskLabel}
+              </span>
+            </div>
+
+            {/* Candidates */}
+            <div className="col-span-2 text-sm">
+              <span className="text-[var(--color-text-primary)] font-medium">{job.totalApplications}</span>
+              <span className="text-[var(--color-text-tertiary)] text-xs ml-1">
+                / {job.activeApplications} 活跃
+              </span>
+            </div>
+
+            {/* Owner */}
+            <div className="col-span-2 text-sm text-[var(--color-text-secondary)] truncate">
+              {job.owner?.name ?? "—"}
+            </div>
+
+            {/* Actions */}
+            <div className="col-span-1 text-sm">
+              {(job.openActions ?? 0) > 0 ? (
+                <span className="text-[var(--color-danger)] font-medium">{job.openActions} 待办</span>
+              ) : (
+                <span className="text-[var(--color-text-tertiary)]">—</span>
+              )}
+            </div>
+
+            {/* Brand Line */}
+            <div className="col-span-2 text-xs text-[var(--color-text-tertiary)] truncate">
+              {job.brandLine ?? "—"}
+            </div>
+          </button>
+        );
+      })}
     </div>
   );
 }

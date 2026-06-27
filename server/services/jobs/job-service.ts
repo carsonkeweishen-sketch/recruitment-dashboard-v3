@@ -1,9 +1,11 @@
-// Phase 3.1: Job Service — business logic layer
+// Phase 8.1 Jobs v2: Job Service with risk classification + state machine
+// All judgment logic from Rule Engine, no hardcoded states.
 
 import type { Role } from "@/server/permissions/types";
 import { buildScopeWhere } from "@/server/permissions/check-permission";
 import { getJobs as fetchJobs, getJobByIdWithScope } from "@/server/repositories/job-repository";
 import type { JobListParams } from "@/server/repositories/job-repository";
+import { classifyJobRisk, type JobRiskResult } from "@/server/services/jobs/job-risk-classifier";
 
 export async function listJobs(
   role: Role,
@@ -12,7 +14,16 @@ export async function listJobs(
   filters: Omit<JobListParams, "role" | "scope">
 ) {
   const scope = buildScopeWhere({ role, userId, departmentId }, "jobs");
-  return fetchJobs({ role, scope, ...filters });
+  const jobs = await fetchJobs({ role, scope, ...filters });
+
+  // Classify each job's risk label
+  const riskResults = new Map<string, JobRiskResult>();
+  for (const job of jobs) {
+    const result = await classifyJobRisk(job.id, job.applications, job.status);
+    riskResults.set(job.id, result);
+  }
+
+  return { jobs, riskResults };
 }
 
 export async function getJobDetail(id: string, role: Role, userId: string, departmentId?: string) {
@@ -31,11 +42,20 @@ export async function getJobDetail(id: string, role: Role, userId: string, depar
     {} as Record<string, number>
   );
 
+  const riskResult = await classifyJobRisk(job.id, job.applications, job.status);
+
   return {
     ...job,
     totalApplications: job.applications.length,
     activeApplications: job.applications.filter((a) => a.status === "active").length,
     applicationsByStage: stages,
-    applications: undefined, // don't leak full list in API
+    applications: undefined,
+    riskLabel: riskResult.riskLabel,
+    riskLabelText: riskResult.riskLabelText,
+    riskColor: riskResult.riskColor,
+    riskDescription: riskResult.riskDescription,
+    derivedState: riskResult.derivedState,
+    derivedStateLabel: riskResult.derivedStateLabel,
+    openActions: riskResult.openActions,
   };
 }
