@@ -281,13 +281,19 @@ add_styled_table(doc,
     ['项目', '结论'],
     [
         ['Phase 8.0A Foundation Correction 是否完成', '是'],
+        ['Release Lock 是否完成', '是'],
+        ['git status 是否 clean', '是'],
+        ['是否已提交 correction commit', '是（1acdb2b）'],
         ['是否已移除"AI 决策看板"', '是'],
+        ['是否已移除"AI 决策"主文案', '是'],
         ['/dashboard 导航名称是否改为"招聘总览"', '是'],
         ['/dashboard 页面标题是否改为"AI 招聘洞察看板"', '是'],
         ['是否已移除"自主智能"', '是'],
         ['Layer 3 是否改为"人工确认后的执行闭环"', '是'],
         ['四态真实截图是否完成', '是（4 张）'],
+        ['知识库 / 模板库正向价值是否补充', '是（3 文档更新）'],
         ['知识库 / 模板库范围是否明确', '是'],
+        ['AI Provenance 真渲染是否已列入 Phase 8.1 验收清单', '是（Carry-forward 已记录）'],
         ['真实产物抽检是否完成', '是（10/10）'],
         ['是否破坏 Action Center', '否'],
         ['是否进入 Phase 8.1', '否'],
@@ -295,11 +301,22 @@ add_styled_table(doc,
         ['是否存在假 AI', '否'],
         ['typecheck/lint/build 是否通过', '是'],
         ['截图是否完成', '是（4 张）'],
-        ['git status 是否 clean', '待提交'],
         ['是否合并 main', '否'],
         ['是否 force push', '否'],
         ['当前风险', '无'],
         ['需要外部确认', 'ChatGPT 最终验收'],
+    ]
+)
+
+# ============================================================
+# 十一、Carry-forward 记录
+# ============================================================
+doc.add_heading('十一、Carry-forward 记录', level=1)
+add_styled_table(doc,
+    ['#', '内容', '状态', '验收阶段'],
+    [
+        ['CF-1', 'AI Provenance 真渲染核验（provider/model/promptVersion/confidence/evidence/humanReviewStatus）', '标准已建立，待 Phase 8.1 首次使用 Layer 1 规则智能时验收', 'Phase 8.1'],
+        ['CF-2', '知识库 / 模板库正向价值', '已补充（3 文档），当前阶段 foundation placeholder', 'Phase 8.6'],
     ]
 )
 
