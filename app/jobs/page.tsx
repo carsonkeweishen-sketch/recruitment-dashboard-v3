@@ -9,6 +9,7 @@ import { ErrorState } from "@/components/ui/ErrorState";
 import { PermissionState } from "@/components/ui/permission-state";
 import { JobHealthCard } from "@/components/domain/jobs/JobHealthCard";
 import { JobAnalysisDrawer } from "@/components/domain/jobs/JobAnalysisDrawer";
+import { AICopilotPanel } from "@/components/domain/ai/AICopilotPanel";
 
 const HEALTH_OPTIONS = [
   { value: "all", label: "全部" },
@@ -18,6 +19,7 @@ const HEALTH_OPTIONS = [
 ];
 
 export default function JobsPage() {
+  const [_aiOpen, _setAiOpen] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [jobs, setJobs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -130,7 +132,10 @@ export default function JobsPage() {
             ))}
           </div>
         )}
-      </ProductShell>
+      
+      <button onClick={() => _setAiOpen(true)} className="fixed bottom-4 right-4 z-40 rounded-full bg-[var(--color-primary)] text-white px-4 py-2 shadow-lg text-sm font-medium hover:opacity-90 transition-opacity">AI 助手</button>
+      {_aiOpen && <AICopilotPanel objectType="job" objectId={selectedJobId || ""} onClose={() => _setAiOpen(false)} />}
+</ProductShell>
       <JobAnalysisDrawer jobId={selectedJobId} onClose={() => setSelectedJobId(null)} />
     </>
   );

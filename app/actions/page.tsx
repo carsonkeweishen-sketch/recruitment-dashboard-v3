@@ -13,8 +13,10 @@ import { ErrorState } from "@/components/ui/ErrorState";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PermissionDenied } from "@/components/ui/PermissionDenied";
 import type { ActionItem, ActionMetrics } from "@/components/domain/actions/action-types";
+import { AICopilotPanel } from "@/components/domain/ai/AICopilotPanel";
 
 export default function ActionsPage() {
+  const [_aiOpen, _setAiOpen] = useState(false);
   const [actions, setActions] = useState<ActionItem[]>([]);
   const [metrics, setMetrics] = useState<ActionMetrics | null>(null);
   const [loading, setLoading] = useState(true);

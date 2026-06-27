@@ -9,11 +9,13 @@ import { ErrorState } from "@/components/ui/ErrorState";
 import { PermissionState } from "@/components/ui/permission-state";
 import { CandidateEvaluationCard } from "@/components/domain/candidates/CandidateEvaluationCard";
 import { CandidateAnalysisDrawer } from "@/components/domain/candidates/CandidateAnalysisDrawer";
+import { AICopilotPanel } from "@/components/domain/ai/AICopilotPanel";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type CandidateItem = any;
 
 export default function CandidatesPage() {
+  const [_aiOpen, _setAiOpen] = useState(false);
   const [candidates, setCandidates] = useState<CandidateItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -116,6 +118,9 @@ export default function CandidatesPage() {
         ))}
       </div>
       <CandidateAnalysisDrawer candidateId={selectedId} onClose={() => setSelectedId(null)} />
-    </ProductShell>
+    
+      <button onClick={() => _setAiOpen(true)} className="fixed bottom-4 right-4 z-40 rounded-full bg-[var(--color-primary)] text-white px-4 py-2 shadow-lg text-sm font-medium hover:opacity-90 transition-opacity">AI 助手</button>
+      {_aiOpen && <AICopilotPanel objectType="candidate" objectId={selectedId || ""} onClose={() => _setAiOpen(false)} />}
+</ProductShell>
   );
 }

@@ -22,6 +22,7 @@ import { PriorityActionsPanel } from "@/components/domain/dashboard/PriorityActi
 import { JobHealthSnapshot } from "@/components/domain/dashboard/JobHealthSnapshot";
 import { CandidateRiskSnapshot } from "@/components/domain/dashboard/CandidateRiskSnapshot";
 import { RecentActivityPanel } from "@/components/domain/dashboard/RecentActivityPanel";
+import { AICopilotPanel } from "@/components/domain/ai/AICopilotPanel";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type DashboardData = any;
@@ -32,6 +33,7 @@ const DASHBOARD_DESC =
 
 export function AiRecruitmentDashboard() {
   const [data, setData] = useState<DashboardData | null>(null);
+  const [_aiOpen, _setAiOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [permissionDenied, setPermissionDenied] = useState(false);
@@ -159,6 +161,8 @@ export function AiRecruitmentDashboard() {
         {/* 7. Recent Activity */}
         <RecentActivityPanel activities={data.recentActivity} />
       </div>
+      <button onClick={() => _setAiOpen(true)} className="fixed bottom-4 right-4 z-40 rounded-full bg-[var(--color-primary)] text-white px-4 py-2 shadow-lg text-sm font-medium hover:opacity-90 transition-opacity">AI 助手</button>
+      {_aiOpen && <AICopilotPanel objectType="dashboard" objectId="" onClose={() => _setAiOpen(false)} />}
     </ProductShell>
   );
 }

@@ -9,8 +9,10 @@ import { ErrorState } from "@/components/ui/ErrorState";
 import { PermissionState } from "@/components/ui/permission-state";
 import { InterviewQualityCard } from "@/components/domain/interview-quality/InterviewQualityCard";
 import { InterviewQualityDrawer } from "@/components/domain/interview-quality/InterviewQualityDrawer";
+import { AICopilotPanel } from "@/components/domain/ai/AICopilotPanel";
 
 export default function InterviewQualityPage() {
+  const [_aiOpen, _setAiOpen] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -69,6 +71,9 @@ export default function InterviewQualityPage() {
         </div>
       )}
       <InterviewQualityDrawer feedbackId={selectedId} onClose={() => setSelectedId(null)} />
-    </ProductShell>
+    
+      <button onClick={() => _setAiOpen(true)} className="fixed bottom-4 right-4 z-40 rounded-full bg-[var(--color-primary)] text-white px-4 py-2 shadow-lg text-sm font-medium hover:opacity-90 transition-opacity">AI 助手</button>
+      {_aiOpen && <AICopilotPanel objectType="interview_quality" objectId={""} onClose={() => _setAiOpen(false)} />}
+</ProductShell>
   );
 }

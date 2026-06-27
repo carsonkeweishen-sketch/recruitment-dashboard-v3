@@ -7,6 +7,7 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { LoadingSkeleton } from "@/components/ui/LoadingSkeleton";
+import { AICopilotPanel } from "@/components/domain/ai/AICopilotPanel";
 
 const RISK_VARIANT: Record<string, "danger" | "warning" | "default"> = { urgent: "danger", high: "warning", medium: "default", low: "default" };
 const RISK_LABEL: Record<string, string> = { urgent: "紧急", high: "高", medium: "中", low: "低" };
@@ -37,6 +38,7 @@ function OfferRiskCard({ risk, onClick }: { risk: any; onClick: () => void }) {
 type TabKey = "overview" | "risk-factors" | "intent" | "closing" | "actions" | "insights" | "activity";
 
 export default function OfferRisksPage() {
+  const [_aiOpen, _setAiOpen] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [data, setData] = useState<any[] | null>(null);
   const [loading, setLoading] = useState(true);
@@ -178,6 +180,9 @@ export default function OfferRisksPage() {
           </div>
         </div>
       )}
-    </ProductShell>
+    
+      <button onClick={() => _setAiOpen(true)} className="fixed bottom-4 right-4 z-40 rounded-full bg-[var(--color-primary)] text-white px-4 py-2 shadow-lg text-sm font-medium hover:opacity-90 transition-opacity">AI 助手</button>
+      {_aiOpen && <AICopilotPanel objectType="offer_risk" objectId={selectedId || ""} onClose={() => _setAiOpen(false)} />}
+</ProductShell>
   );
 }
