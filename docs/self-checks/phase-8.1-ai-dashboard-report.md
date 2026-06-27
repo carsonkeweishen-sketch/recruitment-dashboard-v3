@@ -74,7 +74,7 @@
 | 是否破坏 Action Center | **否** |
 | 是否使用 mock 数据 | **否** |
 | typecheck/lint/build 是否通过 | **是** |
-| git status 是否 clean | 待提交 |
+| git status 是否 clean | **是** |
 | 是否合并 main | **否** |
 | 是否 force push | **否** |
 | 是否进入 Phase 8.2 | **否** |
