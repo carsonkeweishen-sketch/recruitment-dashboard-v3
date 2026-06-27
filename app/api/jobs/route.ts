@@ -8,7 +8,7 @@ export async function GET(request: Request) {
 
   const { searchParams } = new URL(request.url);
 
-  const { jobs, riskResults } = await listJobs(session.role, session.userId, session.departmentId, {
+  const { jobs, snapshots } = await listJobs(session.role, session.userId, session.departmentId, {
     search: searchParams.get("search") ?? undefined,
     departmentId: searchParams.get("departmentId") ?? undefined,
     status: searchParams.get("status") ?? undefined,
@@ -19,7 +19,7 @@ export async function GET(request: Request) {
   });
 
   const data = jobs.map((j) => {
-    const risk = riskResults.get(j.id);
+    const ss = snapshots.get(j.id);
     return {
       id: j.id,
       jobCode: j.jobCode,
@@ -39,14 +39,21 @@ export async function GET(request: Request) {
       updatedAt: j.updatedAt,
       totalApplications: j.applications.length,
       activeApplications: j.applications.filter((a) => a.status === "active").length,
-      // Phase 8.1 Jobs v2: Risk classification + state machine
-      riskLabel: risk?.riskLabel ?? "pipeline_healthy",
-      riskLabelText: risk?.riskLabelText ?? "流程健康",
-      riskColor: risk?.riskColor ?? "success",
-      riskDescription: risk?.riskDescription ?? "",
-      derivedState: risk?.derivedState ?? "sourcing",
-      derivedStateLabel: risk?.derivedStateLabel ?? "渠道寻源",
-      openActions: risk?.openActions ?? 0,
+      // Event-Driven State Machine fields
+      currentState: ss?.currentState ?? "sourcing",
+      currentStateLabel: ss?.currentStateLabel ?? "渠道寻源",
+      riskType: ss?.riskType ?? "pipeline_healthy",
+      riskLabel: ss?.riskLabel ?? "流程健康",
+      riskColor: ss?.riskColor ?? "success",
+      riskExplanation: ss?.riskExplanation ?? "",
+      ruleId: ss?.ruleId ?? "R000",
+      latestEvent: ss?.eventSummary?.latestEvent ?? "job_created",
+      latestEventLabel: ss?.eventSummary?.latestEventLabel ?? "岗位创建",
+      latestEventAt: ss?.eventSummary?.latestEventAt ?? null,
+      totalEvents: ss?.eventSummary?.totalEvents ?? 0,
+      openActions: ss?.openActions ?? 0,
+      isBottleneck: ss?.isBottleneck ?? false,
+      bottleneckReason: ss?.bottleneckReason ?? null,
     };
   });
 

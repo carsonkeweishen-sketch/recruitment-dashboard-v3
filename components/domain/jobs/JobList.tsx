@@ -34,28 +34,25 @@ export function JobList({ jobs, onSelect, loading }: { jobs: any[]; onSelect: (i
   return (
     <div className="overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
       {/* Header */}
-      <div className="hidden border-b border-[var(--color-border)] bg-[var(--color-surface-secondary)] px-4 py-2.5 text-xs font-medium text-[var(--color-text-tertiary)] sm:grid sm:grid-cols-14">
+      <div className="hidden border-b border-[var(--color-border)] bg-[var(--color-surface-secondary)] px-4 py-2.5 text-xs font-medium text-[var(--color-text-tertiary)] sm:grid sm:grid-cols-16">
         <span className="col-span-3">岗位</span>
-        <span className="col-span-2">状态机</span>
+        <span className="col-span-2">当前状态</span>
         <span className="col-span-2">风险分诊</span>
+        <span className="col-span-2">最近事件</span>
         <span className="col-span-2">候选人</span>
-        <span className="col-span-2">负责人</span>
         <span className="col-span-1">行动项</span>
-        <span className="col-span-2">业务线</span>
+        <span className="col-span-4">卡点原因</span>
       </div>
 
-      {/* Rows */}
       {jobs.map((job) => {
-        const riskLabel = job.riskLabelText ?? "流程健康";
         const riskColor = riskColorMap[job.riskColor ?? "success"] ?? riskColorMap.success;
-        const stateLabel = job.derivedStateLabel ?? "渠道寻源";
-        const stateColor = stateColorMap[job.derivedState ?? "sourcing"] ?? stateColorMap.sourcing;
+        const stateColor = stateColorMap[job.currentState ?? "sourcing"] ?? stateColorMap.sourcing;
 
         return (
           <button
             key={job.id}
             onClick={() => onSelect(job.id)}
-            className="w-full border-b border-[var(--color-border)] px-4 py-3 text-left transition-colors last:border-0 hover:bg-[var(--color-surface-secondary)] sm:grid sm:grid-cols-14 sm:items-center"
+            className="w-full border-b border-[var(--color-border)] px-4 py-3 text-left transition-colors last:border-0 hover:bg-[var(--color-surface-secondary)] sm:grid sm:grid-cols-16 sm:items-center"
           >
             {/* Job title + dept */}
             <div className="col-span-3 min-w-0">
@@ -63,34 +60,37 @@ export function JobList({ jobs, onSelect, loading }: { jobs: any[]; onSelect: (i
               <div className="text-xs text-[var(--color-text-tertiary)]">{job.department}{job.level ? ` · ${job.level}` : ""}</div>
             </div>
 
-            {/* State Machine */}
+            {/* State — Event-driven, from State Machine */}
             <div className="col-span-2">
               <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${stateColor}`}>
-                {stateLabel}
+                {job.currentStateLabel ?? "渠道寻源"}
               </span>
             </div>
 
-            {/* Risk Classification — THE KEY FEATURE */}
+            {/* Risk — from Rule Engine (Transition Validator) */}
             <div className="col-span-2">
               <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${riskColor}`}>
-                {job.riskLabel !== "pipeline_healthy" && job.riskLabel !== undefined && (
-                  <span className="text-[10px]">⚠</span>
-                )}
-                {riskLabel}
+                {job.riskType !== "pipeline_healthy" && <span className="text-[10px]">⚠</span>}
+                {job.riskLabel ?? "流程健康"}
               </span>
+            </div>
+
+            {/* Recent Event — from ActivityLog */}
+            <div className="col-span-2">
+              <div className="text-xs text-[var(--color-text-secondary)]">
+                {job.latestEventLabel ?? "—"}
+              </div>
+              {job.latestEventAt && (
+                <div className="text-[10px] text-[var(--color-text-tertiary)]">
+                  {new Date(job.latestEventAt).toLocaleDateString("zh-CN")}
+                </div>
+              )}
             </div>
 
             {/* Candidates */}
             <div className="col-span-2 text-sm">
               <span className="text-[var(--color-text-primary)] font-medium">{job.totalApplications}</span>
-              <span className="text-[var(--color-text-tertiary)] text-xs ml-1">
-                / {job.activeApplications} 活跃
-              </span>
-            </div>
-
-            {/* Owner */}
-            <div className="col-span-2 text-sm text-[var(--color-text-secondary)] truncate">
-              {job.owner?.name ?? "—"}
+              <span className="text-[var(--color-text-tertiary)] text-xs ml-1">/ {job.activeApplications} 活跃</span>
             </div>
 
             {/* Actions */}
@@ -102,9 +102,17 @@ export function JobList({ jobs, onSelect, loading }: { jobs: any[]; onSelect: (i
               )}
             </div>
 
-            {/* Brand Line */}
-            <div className="col-span-2 text-xs text-[var(--color-text-tertiary)] truncate">
-              {job.brandLine ?? "—"}
+            {/* Bottleneck Reason — from Rule Engine, with rule ID */}
+            <div className="col-span-4 text-xs text-[var(--color-text-secondary)] truncate">
+              {job.isBottleneck && job.bottleneckReason ? (
+                <span className="text-[var(--color-warning)]">
+                  {job.bottleneckReason}
+                </span>
+              ) : job.riskExplanation ? (
+                <span className="text-[var(--color-text-tertiary)]">{job.riskExplanation}</span>
+              ) : (
+                <span className="text-[var(--color-text-tertiary)]">—</span>
+              )}
             </div>
           </button>
         );
