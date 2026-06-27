@@ -32,7 +32,7 @@
 | Interviewer Quality | 面试官质量 | 不使用"面试官能力"、"面试官评估" |
 | Offer Risk | Offer 风险 | 不使用"录用风险"、"Offer 预警" |
 | Reports | 周报 / 复盘 | 不使用"报表"、"Reports"、"统计" |
-| Knowledge Base | 知识库 | 不使用"文档中心"、"模板库"、"Wiki" |
+| Knowledge Base | 知识库 / 模板库 | 沉淀理然招聘方法论、面试官手册、JD 库、面评模板等知识资产。不使用"文档中心"、"Wiki" |
 | Settings | 设置 | 不使用"系统配置"、"Settings"、"管理" |
 | AI Analysis Center | AI 分析中心 | 不使用"智能分析"、"AI 洞察" |
 

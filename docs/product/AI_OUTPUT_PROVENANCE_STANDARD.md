@@ -253,3 +253,24 @@ OpenAI GPT-4o · 置信度 78% · 仅供参考
 ---
 
 > 版本：v1.0 | 日期：2026-06-27 | 分支：agent/workbuddy/phase-8
+
+## 8. Phase 8.0A Release Lock — AI Provenance 真渲染 Carry-forward
+
+当前阶段（Phase 8.0 Foundation）为产品地基期，尚未接入真实 AI 模型。
+
+以下 Provenance 字段已建立标准，但**真实渲染核验**将在以下条件满足后执行：
+
+- provider
+- model
+- promptVersion
+- confidence
+- evidence
+- humanReviewStatus
+
+**当前状态**：标准已建立，字段已定义，AiAnalysisLog 模型已在 Prisma schema 中就绪。
+
+**验收计划**：
+- Phase 8.1 AI Dashboard 首次使用 Layer 1 规则智能时，验证 triggerCondition + evidence 的真实渲染
+- Phase 8.7 AI Insight Engine 首次接入 LLM 时，验证 provider/model/promptVersion/confidence 的真实渲染
+
+**当前阶段不以此阻塞 Foundation 签收。**

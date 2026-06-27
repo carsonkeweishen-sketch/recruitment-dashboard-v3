@@ -37,15 +37,17 @@ EXIT: 0
 
 ## CMD-5: git status --short
 ```
-(modified + new files pending commit)
+(clean after release lock commit)
+EXIT: 0
 ```
 
 ## CMD-6: git log --oneline --decorate -10
 ```
-5bb1f6d (HEAD) workbuddy phase-8: add Word self-check report
+7137296 (HEAD) workbuddy phase-8.0a: correct foundation naming ai boundary and state evidence
+e5b5222 workbuddy phase-8.0a: correct foundation naming ai boundary and state evidence
+5bb1f6d workbuddy phase-8: add Word self-check report with all 16 screenshots embedded
 2a943ce workbuddy phase-8: close product foundation p0 p1
 38e112f workbuddy phase-8: close product foundation p0 p1
-6db0383 workbuddy phase-7d: patch final ceo demo lock evidence
 ...
 ```
 
