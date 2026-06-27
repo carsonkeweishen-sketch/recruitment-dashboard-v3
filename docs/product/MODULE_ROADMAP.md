@@ -1,7 +1,9 @@
 # 理然智能招聘 AI 看板 — 模块实施路线图
 
-> 版本：v1.0 | Phase 8.0
+> 版本：v1.1 | Phase 8.1A（产品边界收口后）
 > 前置阅读：`PRODUCT_INFORMATION_ARCHITECTURE.md`（产品信息架构）、`CORE_DOMAIN_OBJECT_MODEL.md`（核心域对象模型）
+
+> ⚠️ **Moka 边界声明**：面试流程推进（候选人阶段流转、面试排期、Offer 发放）由 Moka 承接。本系统只从 Moka 获取数据用于分析，不在系统内推进流程。
 
 ---
 
