@@ -1,0 +1,149 @@
+# Phase 8.1 AI Dashboard — Commands Log
+
+> 日期：2026-06-27 | 分支：agent/workbuddy/phase-7
+
+## CMD-1: pnpm prisma generate
+```
+✔ Generated Prisma Client (v7.8.0)
+EXIT: 0
+```
+
+## CMD-2: pnpm typecheck
+```
+(no output)
+EXIT: 0
+```
+
+## CMD-3: pnpm lint
+```
+✖ 2 problems (0 errors, 2 warnings)
+EXIT: 0 (warnings only — unused eslint-disable directives in job-risk-classifier.ts)
+```
+
+## CMD-4: pnpm build
+```
+├ ○ /dashboard
+├ ○ /actions
+├ ○ /jobs
+├ ○ /candidates
+├ ○ /interviews
+├ ○ /knowledge
+├ ○ /offer-risks
+├ ○ /reports
+└ ○ /settings
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+EXIT: 0
+```
+
+## CMD-5: git status --short
+```
+(clean after commit)
+```
+
+## CMD-6: git log --oneline --decorate -5
+```
+cc34a62 workbuddy phase-8.1: add ai recruitment insight dashboard v1
+e809b80 workbuddy phase-8.1 jobs v3: complete Word report
+3c3ebda workbuddy phase-8.1 jobs v3: event-driven state machine system
+```
+
+## CMD-7: git branch --show-current
+```
+agent/workbuddy/phase-7
+```
+
+## CMD-8: git ls-files .env .env.local ".env.*.local"
+```
+(no output)
+EXIT: 0
+```
+
+## CMD-9: grep "AI 决策看板\|AI 决策\|AI 自动判断\|AI 自动淘汰\|AI 决定录用"
+```
+(no output in app/components/server)
+EXIT: 1
+```
+**结论**：已清零。✅
+
+## CMD-10: grep "自主智能\|自动决策\|自动录用\|自动淘汰\|自动推进\|自动发 Offer"
+```
+components/domain/interviews/InterviewFeedbackForm.tsx: "不会自动推进候选人阶段" (correct boundary text)
+docs/product/AI_CAPABILITY_FRAMEWORK.md: prohibition list entries
+```
+**结论**：仅正确的边界说明和禁止列表中出现。✅
+
+## CMD-11: grep "OpenAI 生成\|GPT 生成\|LLM 已生成"
+```
+(no output)
+EXIT: 1
+```
+**结论**：已清零。✅
+
+## CMD-12: grep "page.route" scripts app components docs
+```
+scripts/phase-4.4-screenshots.ts (old script)
+scripts/phase-5-screenshots.ts (old script)
+scripts/phase-7.4b-screenshots.ts (old script)
+scripts/generate-7.4b-report.js (documentation only)
+```
+**结论**：仅旧脚本中存在，app/components 中无。✅
+
+## CMD-13: grep "Mock Action\|mock action\|mockActions\|mock activity\|static timeline\|Mock Insight\|mock insight"
+```
+scripts/generate-7.4b-report.js (documentation only)
+docs/self-checks/ (grep verification logs)
+```
+**结论**：仅旧文档和日志中出现。✅
+
+## CMD-14: grep "DemoAction\|DemoCandidate\|测试候选人\|测试岗位\|候选人A\|Sample Job\|Sample Candidate"
+```
+docs/self-checks/ (grep verification logs)
+```
+**结论**：仅自检日志中出现。✅
+
+## CMD-15: grep "undefined\|NaN\|Invalid Date" app components docs/self-checks docs/product docs/design
+```
+app/api/jobs/ (TypeScript type assertions: as string | undefined)
+```
+**结论**：仅 TS 类型注解，非 UI 显示。✅
+
+## CMD-16: grep "DATABASE_URL\|OPENAI_API_KEY\|MOKA\|FEISHU" app components server docs prisma
+```
+server/repositories/ (process.env.DATABASE_URL — server-side only)
+server/services/ (process.env.DATABASE_URL — server-side only)
+```
+**结论**：仅在 server 端内部代码中引用，前端无泄露。✅
+
+## CMD-17: grep "#[0-9a-fA-F]\{6\}" app components
+```
+(no output outside globals.css and design-tokens.ts)
+```
+**结论**：无散落 hex 色值。✅
+
+## CMD-18: ls screenshots/phase-8.1-ai-dashboard/
+```
+25 PNG files
+EXIT: 0
+```
+**结论**：25 张真实截图全部就位。✅
+
+---
+
+## Summary
+
+| CMD | Result |
+|-----|--------|
+| typecheck | ✅ 0 errors |
+| lint | ✅ 0 errors |
+| build | ✅ PASS |
+| "AI 决策" grep | ✅ 已清零 |
+| "自主智能" grep | ✅ 仅正确边界说明 |
+| "OpenAI/GPT" grep | ✅ 已清零 |
+| page.route mock | ✅ 仅旧脚本 |
+| mock/test names | ✅ ZERO |
+| null/undefined/NaN in UI | ✅ 仅 TS 类型 |
+| env/secrets leak | ✅ 仅 server 内部 |
+| hex 散落 | ✅ ZERO |
+| 截图 | ✅ 25 张 |
+| git branch | ✅ feature only |

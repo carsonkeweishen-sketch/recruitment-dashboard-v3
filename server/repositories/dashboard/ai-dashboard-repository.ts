@@ -266,7 +266,7 @@ export async function getCandidateRiskItems(params: DashboardQueryParams, jobIds
 // Recent Activity
 // ============================================================
 
-export async function getRecentActivity(params: DashboardQueryParams) {
+export async function getRecentActivity(_params: DashboardQueryParams) {
   return prisma.activityLog.findMany({
     orderBy: { createdAt: "desc" },
     take: 5,
@@ -280,9 +280,8 @@ export async function getRecentActivity(params: DashboardQueryParams) {
 // Risk Distribution (for Risk Radar)
 // ============================================================
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export async function getRiskDistribution(params: DashboardQueryParams) {
-  const scopeWhere = buildActionScopeWhere(params.scope);
+export async function getRiskDistribution(_params: DashboardQueryParams) {
+  const scopeWhere = buildActionScopeWhere(_params.scope);
   const categories = [
     "process_blocker",
     "feedback_followup",

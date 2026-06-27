@@ -26,6 +26,10 @@ import { RecentActivityPanel } from "@/components/domain/dashboard/RecentActivit
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type DashboardData = any;
 
+const DASHBOARD_TITLE = "AI 招聘洞察看板";
+const DASHBOARD_DESC =
+  "基于招聘过程数据，辅助识别招聘风险、流程卡点和优先处理事项。系统仅提供辅助洞察，不替代 HR 或业务做录用、淘汰和阶段推进决策。";
+
 export function AiRecruitmentDashboard() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -61,7 +65,7 @@ export function AiRecruitmentDashboard() {
 
   if (permissionDenied) {
     return (
-      <ProductShell title="AI 招聘洞察看板" description="基于招聘过程数据，辅助识别招聘风险、流程卡点和优先处理事项。">
+      <ProductShell title={DASHBOARD_TITLE} description={DASHBOARD_DESC}>
         <PermissionState description="暂无权限查看招聘洞察。当前账号没有访问该范围招聘数据的权限。如需查看，请联系招聘负责人或管理员。" />
       </ProductShell>
     );
@@ -69,7 +73,7 @@ export function AiRecruitmentDashboard() {
 
   if (error) {
     return (
-      <ProductShell title="AI 招聘洞察看板" description="基于招聘过程数据，辅助识别招聘风险、流程卡点和优先处理事项。">
+      <ProductShell title={DASHBOARD_TITLE} description={DASHBOARD_DESC}>
         <ErrorState title="招聘洞察加载失败" description={error} onRetry={() => window.location.reload()} />
       </ProductShell>
     );
@@ -77,7 +81,7 @@ export function AiRecruitmentDashboard() {
 
   if (loading) {
     return (
-      <ProductShell title="AI 招聘洞察看板" description="基于招聘过程数据，辅助识别招聘风险、流程卡点和优先处理事项。">
+      <ProductShell title={DASHBOARD_TITLE} description={DASHBOARD_DESC}>
         <LoadingSkeleton />
       </ProductShell>
     );
@@ -85,7 +89,7 @@ export function AiRecruitmentDashboard() {
 
   if (!data) {
     return (
-      <ProductShell title="AI 招聘洞察看板" description="基于招聘过程数据，辅助识别招聘风险、流程卡点和优先处理事项。">
+      <ProductShell title={DASHBOARD_TITLE} description={DASHBOARD_DESC}>
         <EmptyState
           title="当前暂无足够招聘数据生成洞察"
           description="当岗位、候选人、面试反馈和行动项数据沉淀后，系统会在这里辅助识别招聘风险和优先处理事项。"
@@ -101,7 +105,7 @@ export function AiRecruitmentDashboard() {
 
   if (!hasAnyData) {
     return (
-      <ProductShell title="AI 招聘洞察看板" description="基于招聘过程数据，辅助识别招聘风险、流程卡点和优先处理事项。">
+      <ProductShell title={DASHBOARD_TITLE} description={DASHBOARD_DESC}>
         <EmptyState
           title="当前暂无足够招聘数据生成洞察"
           description="当岗位、候选人、面试反馈和行动项数据沉淀后，系统会在这里辅助识别招聘风险和优先处理事项。"
