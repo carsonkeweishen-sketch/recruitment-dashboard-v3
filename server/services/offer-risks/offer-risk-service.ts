@@ -50,7 +50,7 @@ function generateInsights(risk: any): any[] {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const insights: any[] = [];
   const now = new Date().toISOString();
-  if (risk.riskLevel === "urgent" || risk.riskLevel === "high") {
+  if (risk.riskLevel === "urgent" || risk.riskLevel === "high" || risk.riskLevel === "medium") {
     insights.push({
       id: `offer-risk-${risk.id}`, title: "高优先级 Offer 风险", category: "offer_risk", severity: risk.riskLevel,
       summary: risk.summary || "候选人存在 Offer 接受风险", evidence: risk.evidence ? [risk.evidence] : [],
