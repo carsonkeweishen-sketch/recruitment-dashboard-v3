@@ -641,3 +641,115 @@ model IntegrationConnection {
 
   @@map("integration_connections")
 }
+model KnowledgeCollection {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  name        String
+  description String?
+  visibility  String   @default("global")
+  allowedRoles String?
+  status      String   @default("active")
+  createdById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  documents   KnowledgeDocument[]
+  @@map("knowledge_collections")
+}
+
+model KnowledgeDocument {
+  id            String   @id @default(cuid())
+  collectionId  String
+  collection    KnowledgeCollection @relation(fields: [collectionId], references: [id])
+  dataSourceId  String   @unique
+  title         String
+  sourceType    String
+  usageType     String?
+  objectType    String?
+  objectId      String?
+  indexStatus   String   @default("pending")
+  chunkCount    Int      @default(0)
+  lastIndexedAt DateTime?
+  createdById   String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  chunks        KnowledgeChunk[]
+  indexJobs     KnowledgeIndexJob[]
+  @@map("knowledge_documents")
+}
+
+model KnowledgeChunk {
+  id                  String   @id @default(cuid())
+  knowledgeDocumentId String
+  knowledgeDocument   KnowledgeDocument @relation(fields: [knowledgeDocumentId], references: [id])
+  dataSourceChunkId   String?
+  chunkIndex          Int
+  contentText         String?
+  contentSummary      String?
+  tags                String?
+  tokenCount          Int?
+  evidenceLevel       String   @default("unknown")
+  embeddingStatus     String   @default("not_configured")
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  @@map("knowledge_chunks")
+}
+
+model KnowledgeSearchLog {
+  id            String   @id @default(cuid())
+  query         String
+  mode          String   @default("keyword")
+  collectionKey String?
+  objectType    String?
+  objectId      String?
+  userId        String?
+  topK          Int      @default(5)
+  resultCount   Int      @default(0)
+  noEvidence    Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  @@map("knowledge_search_logs")
+}
+
+model KnowledgeAnswer {
+  id                String   @id @default(cuid())
+  question          String
+  answer            String?
+  answerStatus      String   @default("pending")
+  generatedBy       String   @default("retrieval_only")
+  provider          String?
+  model             String?
+  promptVersion     String?
+  humanReviewStatus String   @default("pending")
+  createdById       String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  citations         KnowledgeCitation[]
+  @@map("knowledge_answers")
+}
+
+model KnowledgeCitation {
+  id                String   @id @default(cuid())
+  knowledgeAnswerId String
+  knowledgeAnswer   KnowledgeAnswer @relation(fields: [knowledgeAnswerId], references: [id])
+  knowledgeChunkId  String
+  dataSourceId      String?
+  dataSourceChunkId String?
+  sourceLabel       String
+  quote             String?
+  summary           String?
+  score             Float?
+  createdAt         DateTime @default(now())
+  @@map("knowledge_citations")
+}
+
+model KnowledgeIndexJob {
+  id                  String    @id @default(cuid())
+  dataSourceId        String
+  knowledgeDocumentId String?
+  status              String    @default("pending")
+  startedAt           DateTime?
+  finishedAt          DateTime?
+  errorCode           String?
+  errorMessage        String?
+  createdAt           DateTime  @default(now())
+  @@map("knowledge_index_jobs")
+}
