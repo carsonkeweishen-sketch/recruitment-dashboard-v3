@@ -7,11 +7,15 @@ const ACTIVITY_LABELS: Record<string, string> = {
   CREATED: "创建了",
   JOB_CREATED: "创建了岗位",
   CANDIDATE_ADDED: "添加了候选人",
+  CANDIDATE_CREATED: "添加了候选人",
+  APPLICATION_CREATED: "创建了投递记录",
   INTERVIEW_COMPLETED: "完成了面试",
+  INTERVIEW_FEEDBACK_SUBMITTED: "提交了面试反馈",
   FEEDBACK_SUBMITTED: "提交了面试反馈",
   OFFER_RISK_CREATED: "创建了 Offer 风险提醒",
   RULE_TRIGGERED: "系统规则触发了行动项",
   STATE_CHANGED: "更新了状态",
+  BUSINESS_FEEDBACK_SUBMITTED: "提交了业务反馈",
 };
 
 function formatActivity(action: string, detail: unknown): string {
