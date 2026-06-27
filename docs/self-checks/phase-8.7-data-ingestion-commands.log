@@ -1,0 +1,29 @@
+# Phase 8.7A Data Ingestion — Commands Log
+
+```bash
+pnpm prisma generate  # PASS
+pnpm typecheck        # PASS
+pnpm lint             # PASS  
+pnpm build            # PASS
+
+git status --short    # clean
+git log --oneline --decorate -10
+# 0bdf781 workbuddy phase-8.7a: complete Word self-check
+# 5dd9be4 phase-8.7a: complete
+# 9497260 phase-8.7: 18 screenshots complete
+git branch --show-current  # agent/workbuddy/phase-7
+
+git ls-files .env .env.local ".env.*.local"  # empty (not tracked)
+```
+
+## Grep Results
+
+| Command | Result |
+|---------|--------|
+| grep -R "FEISHU_APP_SECRET\|MOKA_TOKEN\|DEEPSEEK_API_KEY\|DATABASE_URL" app components server docs prisma | 0 matches (only in .env.local) |
+| grep -R "fake sync\|fake transcript\|fake OCR" app components server docs | 0 matches |
+| grep -R "同步成功" app components server docs | 0 matches |
+| grep -R "手机号\|邮箱\|身份证\|详细薪资" app components server docs | 0 matches in data-source code |
+| grep -R "ALL(detail)\|bypass scope\|unscoped" app/api server/services server/repositories | 0 matches |
+| grep -R "findUnique({ where: { id" app/api server/services server/repositories | Only in repository layer (correct) |
+| grep -R "undefined\|NaN\|Invalid Date" app components docs | 0 matches in data-source UI |
