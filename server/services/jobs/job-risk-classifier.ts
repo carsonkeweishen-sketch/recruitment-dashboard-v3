@@ -103,7 +103,7 @@ export async function classifyJobRisk(
   // Rule 2: Stuck in interview stages > 14 days
   if (riskLabel === "pipeline_healthy") {
     const fourteenDaysAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const stuckCount = await prisma.application.count({
       where: {
         jobId,
@@ -128,7 +128,7 @@ export async function classifyJobRisk(
   // Rule 4: Business feedback delay
   if (riskLabel === "pipeline_healthy") {
     const twoDaysAgo = new Date(Date.now() - 48 * 60 * 60 * 1000);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const staleFeedbackCount = await (prisma as unknown as { businessFeedback: { count: (q: Record<string, unknown>) => Promise<number> } }).businessFeedback.count({
       where: {
         jobId,
