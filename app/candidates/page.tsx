@@ -1,58 +1,121 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
-import { CandidateFilters } from "@/components/domain/candidates/CandidateFilters";
-import { CandidateList } from "@/components/domain/candidates/CandidateList";
-import { CandidateDetailDrawer } from "@/components/domain/candidates/CandidateDetailDrawer";
-import { ErrorState } from "@/components/ui/ErrorState";
-import { PermissionDenied } from "@/components/ui/PermissionDenied";
-import { LoadingSkeleton } from "@/components/ui/LoadingSkeleton";
+import { useEffect, useState } from "react";
 import { ProductShell } from "@/components/ui/product-shell";
 import { KpiCard } from "@/components/ui/kpi-card";
+import { LoadingSkeleton } from "@/components/ui/LoadingSkeleton";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { ErrorState } from "@/components/ui/ErrorState";
+import { PermissionState } from "@/components/ui/permission-state";
+import { CandidateEvaluationCard } from "@/components/domain/candidates/CandidateEvaluationCard";
+import { CandidateAnalysisDrawer } from "@/components/domain/candidates/CandidateAnalysisDrawer";
 
-interface CandidateItem { id: string; name: string; source: string | null; currentCompany: string | null; currentTitle: string | null; tags: string[]; applicationCount: number; latestApplicationStage: string | null; latestJobTitle: string | null; updatedAt: string; createdAt: string; }
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type CandidateItem = any;
 
 export default function CandidatesPage() {
   const [candidates, setCandidates] = useState<CandidateItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [permissionDenied, setPermissionDenied] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [filters, setFilters] = useState<Record<string, string>>({});
+  const [search, setSearch] = useState("");
 
-  const fetchCandidates = useCallback(async (f: Record<string, string>) => {
-    setLoading(true); setError(null);
-    try { const p = new URLSearchParams(); Object.entries(f).forEach(([k,v]) => { if(v) p.set(k,v); }); const r = await fetch(`/api/candidates?${p}`); const d = await r.json(); if(r.status===403){setError("permission_denied");setCandidates([]);return;} if(!d.success){setError(d.error??"加载失败");setCandidates([]);return;} setCandidates(d.data); }
-    catch { setError("网络错误"); setCandidates([]); }
-    finally { setLoading(false); }
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await fetch("/api/candidates/analysis");
+        const d = await res.json();
+        if (res.status === 403) { if (!cancelled) setPermissionDenied(true); return; }
+        if (!d.success) { if (!cancelled) setError(d.error ?? "加载失败"); return; }
+        if (!cancelled) setCandidates(d.data);
+      } catch { if (!cancelled) setError("网络错误"); }
+      finally { if (!cancelled) setLoading(false); }
+    }
+    load();
+    return () => { cancelled = true; };
   }, []);
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => { fetchCandidates(filters); }, [filters, fetchCandidates]);
+  const filtered = search
+    ? candidates.filter((c) => String(c.candidateName ?? "").includes(search))
+    : candidates;
 
-  const sources = [...new Set(candidates.map((c) => c.source).filter(Boolean))] as string[];
-  const active = candidates.filter((c) => c.latestApplicationStage && !["hired","rejected","withdrawn","closed"].includes(c.latestApplicationStage)).length;
-  const multiJob = candidates.filter((c) => c.applicationCount > 1).length;
-  const recent = candidates.filter((c) => { const d = new Date(c.createdAt); const week = new Date(); week.setDate(week.getDate()-7); return d >= week; }).length;
+  const totalCount = candidates.length;
+  const highMatchCount = candidates.filter((c) => c.matchLevel === "high").length;
+  const riskCount = candidates.filter((c) => c.riskCount > 0).length;
+  const gapCount = candidates.filter((c) => c.evidenceGapCount > 0).length;
+  const actionCount = candidates.filter((c) => c.openActions > 0).length;
 
-  if (error === "permission_denied") return <PermissionDenied message="您没有权限访问候选人库。" />;
-  if (error) return <ErrorState title="加载失败" description={error} onRetry={() => fetchCandidates(filters)} />;
+  if (permissionDenied) {
+    return (
+      <ProductShell title="候选人评估" description="围绕候选人匹配度、面试证据、风险信号和行动闭环，辅助判断候选人是否适配当前岗位。">
+        <PermissionState description="暂无权限查看候选人评估。如需查看，请联系招聘负责人或管理员。" />
+      </ProductShell>
+    );
+  }
+
+  if (error) {
+    return (
+      <ProductShell title="候选人评估" description="围绕候选人匹配度、面试证据、风险信号和行动闭环，辅助判断候选人是否适配当前岗位。">
+        <ErrorState title="候选人评估加载失败" description={error} onRetry={() => window.location.reload()} />
+      </ProductShell>
+    );
+  }
+
+  if (loading) {
+    return (
+      <ProductShell title="候选人评估" description="围绕候选人匹配度、面试证据、风险信号和行动闭环，辅助判断候选人是否适配当前岗位。">
+        <LoadingSkeleton />
+      </ProductShell>
+    );
+  }
+
+  if (candidates.length === 0) {
+    return (
+      <ProductShell title="候选人评估" description="围绕候选人匹配度、面试证据、风险信号和行动闭环，辅助判断候选人是否适配当前岗位。">
+        <EmptyState title="暂无候选人数据" description="当前暂无候选人数据可供评估。" />
+      </ProductShell>
+    );
+  }
 
   return (
     <ProductShell
-      title="候选人"
-      description="查看候选人档案、投递岗位和当前推进阶段"
+      title="候选人评估"
+      description="围绕候选人匹配度、面试证据、风险信号和行动闭环，辅助判断候选人是否适配当前岗位。"
       kpiRow={
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <KpiCard label="总候选人" value={candidates.length} href="/candidates" />
-          <KpiCard label="推进中" value={active} />
-          <KpiCard label="多岗位投递" value={multiJob} />
-          <KpiCard label="本周新增" value={recent} trendDirection={recent > 3 ? "up" : "flat"} />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          <KpiCard label="候选人数" value={totalCount} />
+          <KpiCard label="高匹配" value={highMatchCount} />
+          <KpiCard label="存在风险" value={riskCount} trendDirection={riskCount > 0 ? "up" : "flat"} />
+          <KpiCard label="待补证据" value={gapCount} />
+          <KpiCard label="未关闭Action" value={actionCount} href="/actions" />
         </div>
       }
-      filterBar={<CandidateFilters onFilter={setFilters} sources={sources} />}
+      filterBar={
+        <div className="flex items-center gap-3">
+          <input
+            type="text"
+            placeholder="搜索候选人姓名..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="rounded-xl border border-[var(--color-border)] px-4 py-2 text-sm text-[var(--color-text-primary)] bg-[var(--color-surface)] placeholder:text-[var(--color-text-tertiary)] focus:outline-none focus:border-[var(--color-primary)] w-64"
+          />
+        </div>
+      }
     >
-      {loading ? <LoadingSkeleton /> : <CandidateList candidates={candidates} onSelect={setSelectedId} />}
-      <CandidateDetailDrawer candidateId={selectedId} onClose={() => setSelectedId(null)} />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {filtered.map((c) => (
+          <CandidateEvaluationCard
+            key={c.candidateId}
+            candidate={c}
+            onClick={() => setSelectedId(c.candidateId)}
+          />
+        ))}
+      </div>
+      <CandidateAnalysisDrawer candidateId={selectedId} onClose={() => setSelectedId(null)} />
     </ProductShell>
   );
 }
