@@ -1,0 +1,8 @@
+Phase 8.12B Commands Log
+========================
+- psql: ALTER TABLE jobs ADD COLUMN jobCode, source_file, source_sheet, source_row
+- python3 scripts/import-real-company-data.py → 100 jobs imported
+- npm run build → ✓ Compiled successfully
+- 10 screenshots captured (phase-8.12b/)
+- grep "测试岗位|测试候选人|候选人A|Sample|Demo|mock|fake" → 0 matches
+- grep "DEEPSEEK_API_KEY|DATABASE_URL" in app/components/server → only in process.env references
