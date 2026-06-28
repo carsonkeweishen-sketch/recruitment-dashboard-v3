@@ -63,6 +63,12 @@ const navGroups: NavGroup[] = [
     ],
   },
   {
+    label: "证据",
+    items: [
+      { label: "音视频证据", href: "/media", icon: "media", enabled: true },
+    ],
+  },
+  {
     label: "设置",
     items: [
       { label: "集成", href: "/integrations", icon: "plug", enabled: true },
@@ -83,6 +89,7 @@ const iconMap: Record<string, string> = {
   book: "📚",
   plug: "🔌",
   settings: "⚙️",
+  media: "🎙️",
 };
 
 export function Sidebar() {

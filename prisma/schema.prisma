@@ -804,3 +804,189 @@ model KnowledgeIndexJob {
   createdAt           DateTime  @default(now())
   @@map("knowledge_index_jobs")
 }
+
+// ============================================================
+// Models — Phase 8.10 Audio/Video/Transcription Foundation
+// ============================================================
+
+model MediaAsset {
+  id                   String   @id @default(cuid())
+  dataSourceId         String?
+  objectType           String
+  objectId             String
+  mediaType            String
+  fileName             String
+  mimeType             String?
+  fileSize             Int?
+  durationMs           Int?
+  storageKey           String?
+  storageUrl           String?
+  transcriptionStatus  String   @default("none")
+  uploadedById         String?
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @updatedAt @map("updated_at")
+
+  transcriptionJobs    TranscriptionJob[]
+  transcripts          Transcript[]
+
+  @@map("media_assets")
+}
+
+model TranscriptionJob {
+  id              String    @id @default(cuid())
+  mediaAssetId    String
+  mediaAsset      MediaAsset @relation(fields: [mediaAssetId], references: [id])
+  provider        String    @default("not_configured")
+  providerStatus  String    @default("pending")
+  status          String    @default("pending")
+  startedAt       DateTime?
+  finishedAt      DateTime?
+  errorCode       String?
+  errorMessage    String?
+  createdById     String?
+  createdAt       DateTime  @default(now()) @map("created_at")
+
+  transcripts     Transcript[]
+
+  @@map("transcription_jobs")
+}
+
+model Transcript {
+  id                  String   @id @default(cuid())
+  mediaAssetId        String
+  mediaAsset          MediaAsset @relation(fields: [mediaAssetId], references: [id])
+  transcriptionJobId  String?
+  transcriptionJob    TranscriptionJob? @relation(fields: [transcriptionJobId], references: [id])
+  source              String   @default("asr")
+  language            String   @default("zh-CN")
+  reviewStatus        String   @default("pending")
+  redactionStatus     String   @default("none")
+  segmentCount        Int      @default(0)
+  createdById         String?
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  segments            TranscriptSegment[]
+  analyses            TranscriptAnalysis[]
+  citations           TranscriptCitation[]
+
+  @@map("transcripts")
+}
+
+model TranscriptSegment {
+  id            String   @id @default(cuid())
+  transcriptId  String
+  transcript    Transcript @relation(fields: [transcriptId], references: [id])
+  segmentIndex  Int
+  speakerLabel  String?
+  startMs       Int?
+  endMs         Int?
+  text          String
+  redactedText  String?
+  evidenceLevel String   @default("raw")
+  isAiUsable    Boolean  @default(false)
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  citations     TranscriptCitation[]
+
+  @@map("transcript_segments")
+}
+
+model TranscriptAnalysis {
+  id                  String   @id @default(cuid())
+  transcriptId        String
+  transcript          Transcript @relation(fields: [transcriptId], references: [id])
+  analysisType        String
+  generatedBy         String   @default("system_rule")
+  provider            String?
+  model               String?
+  promptVersion       String?
+  summary             String?
+  riskSignals         String?
+  suggestedFollowUps  String?
+  humanReviewStatus   String   @default("pending")
+  createdAt           DateTime @default(now()) @map("created_at")
+
+  @@map("transcript_analyses")
+}
+
+model TranscriptCitation {
+  id                String   @id @default(cuid())
+  aiInsightId       String?
+  knowledgeAnswerId  String?
+  transcriptId      String
+  transcript        Transcript @relation(fields: [transcriptId], references: [id])
+  segmentId         String?
+  segment           TranscriptSegment? @relation(fields: [segmentId], references: [id])
+  quote             String?
+  timeRange         String?
+  sourceLabel       String
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  @@map("transcript_citations")
+}
+
+// ============================================================
+// Models — Speech & Communication Analysis
+// ============================================================
+
+model SpeechMetric {
+  id                  String   @id @default(cuid())
+  transcriptId        String   @map("transcript_id")
+  metricKey           String   @map("metric_key")
+  metricValue         Float    @map("metric_value")
+  speakerRole         String?  @map("speaker_role")
+  evidenceSegmentIds  String?  @map("evidence_segment_ids")
+  createdAt           DateTime @default(now()) @map("created_at")
+
+  @@map("speech_metrics")
+}
+
+model CommunicationAnalysis {
+  id                String   @id @default(cuid())
+  transcriptId      String   @map("transcript_id")
+  analysisType      String   @map("analysis_type")
+  title             String
+  summary           String?
+  riskLevel         String?  @map("risk_level")
+  generatedBy       String   @default("system_rule") @map("generated_by")
+  provider          String?
+  model             String?
+  promptVersion     String?  @map("prompt_version")
+  humanReviewStatus String   @default("pending") @map("human_review_status")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  evidences         CommunicationEvidence[]
+  reviews           CommunicationReview[]
+
+  @@map("communication_analyses")
+}
+
+model CommunicationEvidence {
+  id                  String   @id @default(cuid())
+  analysisId          String   @map("analysis_id")
+  analysis            CommunicationAnalysis @relation(fields: [analysisId], references: [id])
+  transcriptSegmentId String?  @map("transcript_segment_id")
+  quote               String?
+  startMs             Int?     @map("start_ms")
+  endMs               Int?     @map("end_ms")
+  speakerRole         String?  @map("speaker_role")
+  reason              String?
+  createdAt           DateTime @default(now()) @map("created_at")
+
+  @@map("communication_evidences")
+}
+
+model CommunicationReview {
+  id              String   @id @default(cuid())
+  analysisId      String   @map("analysis_id")
+  analysis        CommunicationAnalysis @relation(fields: [analysisId], references: [id])
+  reviewerId      String   @map("reviewer_id")
+  status          String
+  reviewNote      String?  @map("review_note")
+  editedSummary   String?  @map("edited_summary")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  @@map("communication_reviews")
+}
