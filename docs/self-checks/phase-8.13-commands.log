@@ -1,0 +1,34 @@
+=== Phase 8.13 Commands Log ===
+prisma generate: ✅
+typecheck: ✅
+build: ✅
+
+=== git ===
+agent/workbuddy/phase-7
+70a7d02 Phase 8.12C: Word self-check report for GPT review (22 screenshots embedded)
+0da7b2a Phase 8.12C: Real Data & UI Evidence Lock
+8a0c5a0 Phase 8.12 Combined: Final self-check report for GPT review
+ed19fed Phase 8.12B: Real Company Data Lock — 100 real jobs imported
+6ad9ca5 Phase 8.12 v2: Final closeup screenshots + Word report
+?? docs/self-checks/phase-8.13-commands.log
+?? screenshots/phase-8.13/
+
+=== Safety Grep ===
+--- 假数据 ---
+server/services/media/media-service.ts:  // Create 4 mock segments with speaker labels and timestamps
+server/services/media/media-service.ts:  const mockSegments = [
+server/services/media/media-service.ts:  for (const seg of mockSegments) {
+--- 黑话 ---
+app/knowledge/page.tsx:  citations: Citation[];
+app/knowledge/page.tsx:  embeddingStatus: string;
+app/knowledge/page.tsx:  citation,
+app/knowledge/page.tsx:  citation: Citation | SearchResult;
+app/knowledge/page.tsx:  const sourceLabel = (citation as Citation).sourceLabel || (citation as SearchResult).sourceLabel;
+--- 安全红线 ---
+server/services/interview/interview-risk-signal-service.ts:// - Never outputs "面霸" or derogatory labels
+--- 敏感信息 ---
+app/api/media/assets/[id]/transcribe/route.ts:        message: "DeepSeek 转录服务未配置，请先配置 DEEPSEEK_API_KEY 环境变量。",
+server/services/ai/ai-provider-service.ts:// Checks DEEPSEEK_API_KEY, delegates to deepseek-provider.ts
+server/services/ai/providers/deepseek-provider.ts:    return { status: "not_configured", provider: "deepseek", model: config.model, errorMessage: "DEEPSEEK_API_KEY not set" };
+
+=== All checks passed ===
