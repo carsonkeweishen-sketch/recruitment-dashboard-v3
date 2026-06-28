@@ -1,293 +1,48 @@
-# Phase 8.11 AI Copilot — 命令执行日志
-
-> 日期：2026-06-28
-> 项目：理然智能招聘 AI 看板 v3
-> 工作目录：/workspace/recruitment-dashboard
-
----
-
-## 1. 数据库迁移
-
-### 1.1 Prisma Schema 推送
-
-```bash
-$ npx prisma db push
-
-Environment variables loaded from .env
-Prisma schema loaded from prisma/schema.prisma
-Datasource "db": PostgreSQL database
-
-🚀  Your database is now in sync with your Prisma schema. Done in 1.23s
-
-Running generate... (Use --skip-generate to skip the generators)
-
-✔ Generated Prisma Client (v5.x.x) to ./node_modules/@prisma/client in 234ms
-
-# 新增模型：
-# - AICopilotSession
-# - AICopilotMessage
-# - AICopilotContextRef
-# - AIDraftAction
-# - AIReviewEvent
-```
-
-### 1.2 Prisma Client 重新生成
-
-```bash
-$ npx prisma generate
-
-Environment variables loaded from .env
-Prisma schema loaded from prisma/schema.prisma
-
-✔ Generated Prisma Client (v5.x.x) to ./node_modules/@prisma/client in 198ms
-
-# 输出确认：5 个新模型均已生成 TypeScript 类型
-```
-
----
-
-## 2. TypeScript 类型检查
-
-```bash
-$ npx tsc --noEmit
-
-# 输出：无错误
-# Exit code: 0
-# 
-# 验证范围：
-# - 6 个服务文件类型正确
-# - 10 个 API 路由类型正确
-# - 7 个前端组件类型正确
-# - 5 个 Prisma 模型类型正确
-```
-
----
-
-## 3. 构建
-
-```bash
-$ npm run build
-
-> recruitment-dashboard@3.0.0 build
-> next build
-
-  ▲ Next.js 14.x.x
-  - Environments: .env
-
-  ✓ Creating an optimized production build ...
-  ✓ Compiled successfully
-  ✓ Linting and checking validity of types ...
-  ✓ Collecting page data ...
-  ✓ Generating static pages (N/N)
-  ✓ Collecting build traces ...
-  ✓ Finalizing page optimization ...
-
-  Route (app)                                    Size     First Load JS
-  ┌ ○ /                                           ...      ...
-  ├ ○ /api/ai/copilot/sessions                    ...      ...
-  ├ ○ /api/ai/copilot/sessions/[id]               ...      ...
-  ├ ○ /api/ai/copilot/context                     ...      ...
-  ├ ○ /api/ai/copilot/chat                        ...      ...
-  ├ ○ /api/ai/copilot/draft-action                ...      ...
-  ├ ○ /api/ai/copilot/draft-action/[id]/confirm   ...      ...
-  ├ ○ /api/ai/copilot/messages/[id]/review        ...      ...
-  ├ ○ /api/ai/copilot/provider-health             ...      ...
-  ├ ○ /api/ai/copilot/suggestions                 ...      ...
-  └ ○ /api/ai/copilot/audit/[sessionId]           ...      ...
-
-# Exit code: 0
-# Build PASSED
-```
-
----
-
-## 4. 安全 grep 命令
-
-### 4.1 确保无自动决策代码
-
-```bash
-$ grep -rn "自动淘汰\|自动录用\|自动决策\|auto_reject\|auto_hire\|auto_decision" src/ --include="*.ts" --include="*.tsx"
-# 输出：(empty) — 无匹配，PASS
-```
-
-### 4.2 确保无情绪识别代码
-
-```bash
-$ grep -rn "emotion\|sentiment\|情绪\|情感分析" src/ --include="*.ts" --include="*.tsx"
-# 输出：(empty) — 无匹配，PASS
-```
-
-### 4.3 确保 API Key 不暴露到前端
-
-```bash
-$ grep -rn "API_KEY\|apiKey\|api_key\|OPENAI_API_KEY\|DEEPSEEK_API_KEY" src/app/ src/components/ --include="*.tsx"
-# 输出：(empty) — 前端代码无 API Key，PASS
-```
-
-### 4.4 确保环境变量仅在服务端使用
-
-```bash
-$ grep -rn "process\.env\." src/app/ src/components/ --include="*.tsx" | grep -v "NEXT_PUBLIC_"
-# 输出：(empty) — 前端仅使用 NEXT_PUBLIC_ 前缀变量，PASS
-```
-
-### 4.5 验证脱敏函数存在
-
-```bash
-$ grep -rn "redact\|sanitize\|脱敏" src/services/copilot-redaction-service.ts
-# 输出：redactPhone, redactEmail, redactIdCard, redactSalary, redactApiKey — PASS
-```
-
-### 4.6 验证权限检查覆盖所有路由
-
-```bash
-$ grep -rn "requirePermission\|checkScope\|canAccess" src/app/api/ai/copilot/ --include="*.ts"
-# 输出：所有 10 个路由文件均含权限检查 — PASS
-```
-
----
-
-## 5. curl API 测试命令
-
-### 5.1 创建会话 (admin)
-
-```bash
-curl -X POST http://localhost:3000/api/ai/copilot/sessions \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer ${ADMIN_TOKEN}" \
-  -d '{"scope":"dashboard","title":"招聘数据概览咨询"}'
-# Response: 201 Created
-# {"id":"sess-001","scope":"dashboard","title":"招聘数据概览咨询","status":"active",...}
-```
-
-### 5.2 获取 Context (hrbp)
-
-```bash
-curl -X GET "http://localhost:3000/api/ai/copilot/context?scope=job&scopeId=job-001" \
-  -H "Authorization: Bearer ${HRBP_TOKEN}"
-# Response: 200 OK
-# {"context":{...},"citations":[{...}]}
-```
-
-### 5.3 发送消息 (recruiter)
-
-```bash
-curl -X POST http://localhost:3000/api/ai/copilot/chat \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer ${RECRUITER_TOKEN}" \
-  -d '{"sessionId":"sess-001","message":"当前招聘漏斗转化率如何？","scope":"funnel","scopeId":"job-001"}'
-# Response: 200 OK
-# {"message":{"id":"msg-001","role":"assistant","content":"...","humanReviewStatus":"pending",...}}
-```
-
-### 5.4 无权限请求 (business_owner)
-
-```bash
-curl -X POST http://localhost:3000/api/ai/copilot/chat \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer ${BUSINESS_OWNER_TOKEN}" \
-  -d '{"sessionId":"sess-001","message":"test","scope":"dashboard"}'
-# Response: 403 Forbidden
-# {"error":"Forbidden","message":"You do not have permission to access AI Copilot"}
-```
-
-### 5.5 人工审查接受
-
-```bash
-curl -X PATCH http://localhost:3000/api/ai/copilot/messages/msg-001/review \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer ${RECRUITER_TOKEN}" \
-  -d '{"action":"accepted"}'
-# Response: 200 OK
-# {"message":{"humanReviewStatus":"accepted"},...}
-```
-
-### 5.6 人工审查编辑
-
-```bash
-curl -X PATCH http://localhost:3000/api/ai/copilot/messages/msg-001/review \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer ${RECRUITER_TOKEN}" \
-  -d '{"action":"edited","editedContent":"修正后的回答..."}'
-# Response: 200 OK
-```
-
-### 5.7 人工审查拒绝
-
-```bash
-curl -X PATCH http://localhost:3000/api/ai/copilot/messages/msg-001/review \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer ${RECRUITER_TOKEN}" \
-  -d '{"action":"rejected","reason":"信息不准确"}'
-# Response: 200 OK
-```
-
-### 5.8 生成草稿动作
-
-```bash
-curl -X POST http://localhost:3000/api/ai/copilot/draft-action \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer ${RECRUITER_TOKEN}" \
-  -d '{"sessionId":"sess-001","messageId":"msg-001","actionType":"schedule_interview","params":{"candidateId":"cand-001","suggestedDate":"2026-07-01"}}'
-# Response: 201 Created
-```
-
-### 5.9 确认草稿动作
-
-```bash
-curl -X POST http://localhost:3000/api/ai/copilot/draft-action/da-001/confirm \
-  -H "Authorization: Bearer ${RECRUITER_TOKEN}"
-# Response: 201 Created
-# {"action":{"id":"act-001",...},"draftAction":{"status":"confirmed"}}
-```
-
-### 5.10 Provider 健康检查
-
-```bash
-curl -X GET http://localhost:3000/api/ai/copilot/provider-health \
-  -H "Authorization: Bearer ${ADMIN_TOKEN}"
-# Response: 200 OK
-# {"provider":"deepseek","model":"deepseek-chat","status":"healthy","latency":234}
-```
-
-### 5.11 获取建议提示词
-
-```bash
-curl -X GET "http://localhost:3000/api/ai/copilot/suggestions?scope=dashboard" \
-  -H "Authorization: Bearer ${RECRUITER_TOKEN}"
-# Response: 200 OK
-# {"suggestions":[{...}]}
-```
-
-### 5.12 审计日志
-
-```bash
-curl -X GET http://localhost:3000/api/ai/copilot/audit/sess-001 \
-  -H "Authorization: Bearer ${ADMIN_TOKEN}"
-# Response: 200 OK
-# {"session":{...},"messages":[...],"activityLogs":[...]}
-```
-
-### 5.13 未认证请求
-
-```bash
-curl -X POST http://localhost:3000/api/ai/copilot/sessions \
-  -H "Content-Type: application/json" \
-  -d '{"scope":"dashboard"}'
-# Response: 403 Forbidden
-```
-
----
-
-## 6. 执行总结
-
-| 命令 | Exit Code | 结果 |
-|---|---|---|
-| `npx prisma db push` | 0 | PASS |
-| `npx prisma generate` | 0 | PASS |
-| `npx tsc --noEmit` | 0 | PASS |
-| `npm run build` | 0 | PASS |
-| 安全 grep (6 条) | 0 | PASS |
-| curl API 测试 (13 条) | 全部通过 | PASS |
-
-**所有命令执行成功，Phase 8.11 AI Copilot Deepening 通过全量验证。**
+=== Commands Log for Phase 8.11 ===
+
+--- pnpm prisma generate ---
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+
+
+--- tsc --noEmit ---
+
+--- npm run build ---
+✓ Compiled successfully in 3.8s
+✓ Generating static pages using 31 workers (77/77) in 547ms
+
+--- git status ---
+ M docs/self-checks/phase-8.11-ai-copilot-commands.log
+?? screenshots/phase-8.11-ai-copilot/31-copilot-evidence-drawer-knowledge-citation.png
+?? screenshots/phase-8.11-ai-copilot/31-copilot-evidence-drawer-knowledge-citation_u.png
+?? screenshots/phase-8.11-ai-copilot/32-copilot-evidence-drawer-transcript-segment.png
+?? screenshots/phase-8.11-ai-copilot/32-copilot-evidence-drawer-transcript-segment_u.png
+?? screenshots/phase-8.11-ai-copilot/33-copilot-evidence-drawer-funnel-metric.png
+?? screenshots/phase-8.11-ai-copilot/33-copilot-evidence-drawer-funnel-metric_u.png
+
+--- git log ---
+6f130e5 Phase 8.11: AI Copilot Deepening — Global AI Assistant with Evidence & Human Review
+50e5171 Phase 8.10A: Speech Intelligence Safety & Evidence Lock
+aad6201 Phase 8.10: Audio/Video/Speech Intelligence Foundation
+
+--- git branch ---
+agent/workbuddy/phase-7
+
+--- .env check ---
+
+=== Safety Grep ===
+--- AI决策/自动淘汰 ---
+--- 自动发Offer ---
+--- fake citation ---
+--- 情绪识别 ---
+server/services/ai/copilot-prompt-registry-v2.ts:请基于以上转写段落，分析表达结构、证据密度和追问质量。不得做情绪、口音、性格、声音评分或撒谎识别。`,
+--- PII ---
+server/services/ai/copilot-prompt-registry-v2.ts:5. 不得输出手机号、邮箱、身份证、详细薪资等敏感信息；
+server/services/ai/copilot-redaction-service.ts:// 扩展覆盖：手机号/邮箱/身份证/薪资/API Key/银行卡号/护照号
+server/services/ai/copilot-redaction-service.ts:  // 1. 手机号（中国 11 位）
+--- API Key ---
+app/api/ai/insights/generate/route.ts:    if (!process.env.OPENAI_API_KEY) {
+app/api/ai/insights/generate/route.ts:          suggestedAction: "配置 OPENAI_API_KEY 后可生成 AI 辅助建议。",
+app/api/ai/insights/generate/route.ts:        summary: "AI Provider 未配置，请设置 OPENAI_API_KEY 环境变量后重试。",
+
+=== All checks passed ===
