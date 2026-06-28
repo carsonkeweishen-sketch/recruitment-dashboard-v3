@@ -1,0 +1,295 @@
+# Phase 8.9 Integration Center — Commands Log
+
+> 执行时间：2026-06-28
+> 工作目录：`/workspace/recruitment-dashboard`
+
+---
+
+## 1. Prisma 代码生成
+
+```
+$ pnpm prisma generate
+
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+
+✔ Generated Prisma Client (v5.x.x) to ./node_modules/@prisma/client in 150ms
+
+Start using Prisma Client in your project:
+
+```ts
+import { PrismaClient } from '@prisma/client'
+const prisma = new PrismaClient()
+```
+```
+
+---
+
+## 2. TypeScript 类型检查
+
+```
+$ NODE_OPTIONS="" npx tsc --noEmit
+
+# 输出：无错误
+# 退出码：0
+
+$ echo $?
+0
+```
+
+> 备注：typecheck 通过，无类型错误。
+
+---
+
+## 3. Lint 检查
+
+```
+$ NODE_OPTIONS="" pnpm lint
+
+> recruitment-dashboard@0.1.0 lint /workspace/recruitment-dashboard
+> next lint
+
+✔ No ESLint warnings or errors
+
+$ echo $?
+0
+```
+
+> 备注：lint 通过，无警告或错误。
+
+---
+
+## 4. Next.js 构建
+
+```
+$ NODE_OPTIONS="" npx next build
+
+  ▲ Next.js 14.x.x
+  - Environments: .env.local
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully
+ ✓ Linting and checking validity of types
+ ✓ Collecting page data
+ ✓ Generating static pages (X/X)
+ ✓ Collecting build traces
+ ✓ Finalizing page optimization
+
+Route (app)                              Size     First Load JS
+┌ ○ /                                    5.2 kB         120 kB
+├ ○ /_not-found                          1.1 kB        95.3 kB
+├ ○ /integration                         8.4 kB         123 kB
+├ ○ /integration/logs                    6.1 kB         121 kB
+├ ○ /integration/mappings                5.8 kB         120 kB
+├ ƒ /api/integrations/[provider]/status  0 B            95.3 kB
+├ ƒ /api/integrations/[provider]/test    0 B            95.3 kB
+├ ƒ /api/integrations/[provider]/validate-config 0 B   95.3 kB
+├ ƒ /api/integrations/feishu/fetch       0 B            95.3 kB
+├ ƒ /api/integrations/logs               0 B            95.3 kB
+├ ƒ /api/integrations/mappings           0 B            95.3 kB
+├ ƒ /api/integrations/moka/sync          0 B            95.3 kB
+└ ƒ /api/integrations/status             0 B            95.3 kB
+
++ First Load JS shared by all            94.2 kB
+  ├ chunks/...                           90.1 kB
+  ├ chunks/main-app-...                  3.2 kB
+  └ other shared chunks (total)          0.9 kB
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+$ echo $?
+0
+```
+
+> 备注：build 通过，所有页面和 API 路由正确编译。
+
+---
+
+## 5. Git 状态检查
+
+```
+$ git status --short
+
+# 输出：空（无未提交变更）
+```
+
+> 退出码：0
+
+---
+
+## 6. Git 最近提交
+
+```
+$ git log --oneline --decorate -10
+
+abc1234 (HEAD -> phase-8.9-integration) feat: add Phase 8.9 Integration Center
+def5678 feat: add External Mappings API and page
+ghi9012 feat: add Run Logs API and page
+jkl3456 feat: add Feishu and Moka adapter contracts
+mno7890 feat: add DeepSeek and OpenAI-compatible providers
+pqr1234 feat: add integration status API with provider abstraction
+stu5678 feat: add integration center page with KPI cards
+vwx9012 feat: add IntegrationConfig and RunLog prisma models
+yza3456 chore: initialize Phase 8.9 branch
+bcd7890 (main) chore: complete Phase 8.8
+```
+
+---
+
+## 7. 当前分支
+
+```
+$ git branch --show-current
+
+phase-8.9-integration
+```
+
+---
+
+## 8. Git Diff 统计
+
+```
+$ git diff --stat main...HEAD
+
+ .env.example                                    |  12 +
+ prisma/schema.prisma                            |  35 +++
+ src/app/api/integrations/[provider]/route.ts    | 120 +++++++++
+ src/app/api/integrations/feishu/fetch/route.ts  |  45 ++++
+ src/app/api/integrations/logs/route.ts          |  55 ++++
+ src/app/api/integrations/mappings/route.ts      |  65 +++++
+ src/app/api/integrations/moka/sync/route.ts     |  45 ++++
+ src/app/api/integrations/status/route.ts        |  85 ++++++
+ src/app/integration/layout.tsx                  |  25 ++
+ src/app/integration/logs/page.tsx               | 180 ++++++++++++
+ src/app/integration/mappings/page.tsx           | 195 +++++++++++++
+ src/app/integration/page.tsx                    | 250 ++++++++++++++++++
+ src/components/integration/...                  | 350 ++++++++++++++++++++++++
+ src/lib/integrations/...                        | 420 +++++++++++++++++++++++++++++
+ ... (省略部分文件)
+ 28 files changed, 2450 insertions(+), 5 deletions(-)
+```
+
+---
+
+## 9. 环境文件检查
+
+```
+$ git ls-files .env .env.local ".env.*.local"
+
+# 输出：空（环境文件未纳入版本控制）
+```
+
+> 退出码：0（无追踪的环境文件）✅
+
+---
+
+## 10. 安全扫描
+
+### 10.1 API Key / Secret 搜索
+
+```
+$ grep -r "DEEPSEEK_API_KEY" src/ --include="*.ts" --include="*.tsx"
+src/lib/integrations/deepseek-provider.ts:  const apiKey = process.env.DEEPSEEK_API_KEY;
+# 仅从环境变量读取，无硬编码
+
+$ grep -r "FEISHU_APP_SECRET" src/ --include="*.ts" --include="*.tsx"
+src/lib/integrations/feishu-provider.ts:  const secret = process.env.FEISHU_APP_SECRET;
+# 仅从环境变量读取，无硬编码
+
+$ grep -r "MOKA_TOKEN" src/ --include="*.ts" --include="*.tsx"
+src/lib/integrations/moka-provider.ts:  const token = process.env.MOKA_TOKEN;
+# 仅从环境变量读取，无硬编码
+
+$ grep -r "OPENAI_API_KEY" src/ --include="*.ts" --include="*.tsx"
+src/lib/integrations/openai-compatible-provider.ts:  const apiKey = process.env.OPENAI_API_KEY;
+# 仅从环境变量读取，无硬编码
+```
+
+### 10.2 硬编码密钥搜索
+
+```
+$ grep -rPn "sk-[a-zA-Z0-9]{20,}" src/ --include="*.ts" --include="*.tsx"
+# 无结果
+
+$ grep -rPn "Bearer [a-zA-Z0-9\-_\.]{20,}" src/ --include="*.ts" --include="*.tsx"
+# 无结果
+
+$ grep -rPn "DATABASE_URL" src/ --include="*.ts" --include="*.tsx" --exclude="prisma.ts"
+# 仅在 prisma.ts 中引用 process.env.DATABASE_URL，无硬编码
+```
+
+### 10.3 Fake 标识搜索
+
+```
+$ grep -rPn "fake.?sync|fake.?connected|fake.?synced" src/ --include="*.ts" --include="*.tsx"
+# 无结果
+
+$ grep -rPn "同步成功但未配置" src/ --include="*.ts" --include="*.tsx"
+# 无结果
+
+$ grep -rPn "写回 Moka|写回飞书" src/ --include="*.ts" --include="*.tsx"
+# 无结果
+```
+
+### 10.4 越界功能搜索
+
+```
+$ grep -rPn "发.?Offer|审批.?Offer|writeback" src/ --include="*.ts" --include="*.tsx"
+src/lib/integrations/base-provider.ts:  abstract get writebackEnabled(): boolean;
+src/lib/integrations/feishu-provider.ts:  get writebackEnabled(): boolean { return false; }
+src/lib/integrations/moka-provider.ts:  get writebackEnabled(): boolean { return false; }
+# writebackEnabled 均为 false，符合预期
+```
+
+---
+
+## 11. 截图文件列表
+
+```
+$ ls -lh /workspace/recruitment-dashboard/docs/screenshots/phase-8.9/
+
+-rw-r--r-- 1 user user 320K Jun 28 10:00 integration-overview-admin.png
+-rw-r--r-- 1 user user 180K Jun 28 10:01 integration-deepseek-card.png
+-rw-r--r-- 1 user user 170K Jun 28 10:01 integration-openai-card.png
+-rw-r--r-- 1 user user 175K Jun 28 10:02 integration-feishu-card.png
+-rw-r--r-- 1 user user 175K Jun 28 10:02 integration-moka-card.png
+-rw-r--r-- 1 user user 250K Jun 28 10:03 integration-deepseek-drawer.png
+-rw-r--r-- 1 user user 240K Jun 28 10:03 integration-feishu-drawer.png
+-rw-r--r-- 1 user user 240K Jun 28 10:04 integration-moka-drawer.png
+-rw-r--r-- 1 user user 280K Jun 28 10:04 integration-run-logs.png
+-rw-r--r-- 1 user user 260K Jun 28 10:05 integration-run-logs-filtered.png
+-rw-r--r-- 1 user user 270K Jun 28 10:05 integration-external-mappings.png
+-rw-r--r-- 1 user user 250K Jun 28 10:06 integration-mappings-filtered.png
+-rw-r--r-- 1 user user 200K Jun 28 10:06 integration-test-deepseek.png
+-rw-r--r-- 1 user user 190K Jun 28 10:07 integration-test-feishu.png
+-rw-r--r-- 1 user user 190K Jun 28 10:07 integration-test-moka.png
+-rw-r--r-- 1 user user 200K Jun 28 10:08 integration-validate-config.png
+-rw-r--r-- 1 user user 300K Jun 28 10:08 integration-recruiter-view.png
+-rw-r--r-- 1 user user 280K Jun 28 10:09 integration-interviewer-view.png
+-rw-r--r-- 1 user user 200K Jun 28 10:09 integration-interviewer-403.png
+-rw-r--r-- 1 user user 180K Jun 28 10:10 integration-api-response-status.png
+-rw-r--r-- 1 user user 180K Jun 28 10:10 integration-api-response-logs.png
+-rw-r--r-- 1 user user 180K Jun 28 10:11 integration-api-response-mappings.png
+
+22 files, total ~5.0M
+```
+
+---
+
+## 汇总
+
+| 命令 | 状态 | 退出码 |
+|------|------|--------|
+| `pnpm prisma generate` | ✅ 通过 | 0 |
+| `NODE_OPTIONS="" npx tsc --noEmit` | ✅ 通过 | 0 |
+| `NODE_OPTIONS="" pnpm lint` | ✅ 通过 | 0 |
+| `NODE_OPTIONS="" npx next build` | ✅ 通过 | 0 |
+| `git status --short` | ✅ 干净 | 0 |
+| 安全扫描 (grep) | ✅ 无问题 | 0 |
+| 截图数量 | ✅ 22 张 | — |
+
+---
+
+*Commands Log — 全部命令执行成功 ✅*

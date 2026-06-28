@@ -65,7 +65,7 @@ const navGroups: NavGroup[] = [
   {
     label: "设置",
     items: [
-      { label: "集成", href: "/integrations", icon: "plug", enabled: false, phaseLabel: "Phase 9+" },
+      { label: "集成", href: "/integrations", icon: "plug", enabled: true },
       { label: "设置", href: "/settings", icon: "settings", enabled: false, phaseLabel: "Phase 9+" },
     ],
   },

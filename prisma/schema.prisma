@@ -631,15 +631,65 @@ model DataSourceLink {
 }
 
 model IntegrationConnection {
-  id            String    @id @default(cuid())
-  provider      String    @unique
-  status        String    @default("not_configured")
-  displayName   String?
-  lastCheckedAt DateTime?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id                String    @id @default(cuid())
+  provider          String    @unique
+  status            String    @default("not_configured")
+  displayName       String?
+  mode              String    @default("ai_provider")
+  isWritebackEnabled Boolean  @default(false) @map("is_writeback_enabled")
+  lastCheckedAt     DateTime?
+  lastSuccessAt     DateTime?
+  lastErrorCode     String?
+  lastErrorMessage  String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 
   @@map("integration_connections")
+}
+
+model IntegrationCredentialMeta {
+  id             String    @id @default(cuid())
+  provider       String    @unique
+  configured     Boolean   @default(false)
+  maskedKeyPreview String? @map("masked_key_preview")
+  secretStorage  String    @default("none") @map("secret_storage")
+  lastRotatedAt  DateTime? @map("last_rotated_at")
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@map("integration_credential_meta")
+}
+
+model IntegrationRunLog {
+  id           String   @id @default(cuid())
+  provider     String
+  runType      String   @map("run_type")
+  status       String
+  latencyMs    Int?     @map("latency_ms")
+  requestId    String?  @map("request_id")
+  errorCode    String?  @map("error_code")
+  errorMessage String?  @map("error_message")
+  createdById  String?  @map("created_by_id")
+  createdAt    DateTime @default(now())
+
+  @@map("integration_run_logs")
+}
+
+model ExternalObjectMapping {
+  id                String    @id @default(cuid())
+  provider          String
+  externalObjectType String   @map("external_object_type")
+  externalId        String?   @map("external_id")
+  externalUrl       String?   @map("external_url")
+  objectType        String    @map("object_type")
+  objectId          String?   @map("object_id")
+  syncStatus        String    @default("link_only") @map("sync_status")
+  lastSyncedAt      DateTime? @map("last_synced_at")
+  createdById       String?   @map("created_by_id")
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@map("external_object_mappings")
 }
 model KnowledgeCollection {
   id          String   @id @default(cuid())
