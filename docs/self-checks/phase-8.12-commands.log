@@ -1,0 +1,54 @@
+=== Phase 8.12 Commands Log ===
+
+--- prisma generate ---
+
+
+
+--- tsc --noEmit ---
+
+--- npm run build ---
+✓ Compiled successfully in 3.6s
+✓ Generating static pages using 31 workers (77/77) in 959ms
+
+--- git status ---
+ M components/layout/Sidebar.tsx
+ M components/ui/StatusBadge.tsx
+?? components/ui/ProvenanceBadge.tsx
+?? components/ui/StateBlock.tsx
+?? docs/self-checks/phase-8.12-api-smoke-evidence.md
+?? docs/self-checks/phase-8.12-commands.log
+?? docs/self-checks/phase-8.12-dom-evidence.md
+?? docs/self-checks/phase-8.12-ui-audit.md
+?? docs/self-checks/phase-8.12-ui-review.md
+?? screenshots/phase-8.12-audit/
+?? screenshots/phase-8.12/
+?? scripts/screenshot-8.12.py
+
+--- git log ---
+c11feaf Phase 8.11: Patch — add 3 evidence drawer screenshots + updated commands log
+6f130e5 Phase 8.11: AI Copilot Deepening — Global AI Assistant with Evidence & Human Review
+50e5171 Phase 8.10A: Speech Intelligence Safety & Evidence Lock
+aad6201 Phase 8.10: Audio/Video/Speech Intelligence Foundation
+92fcf9c Phase 8.9A: Integration Center Final UI/UX Polish & Evidence Lock
+
+--- git branch ---
+agent/workbuddy/phase-7
+
+--- .env check ---
+
+=== Safety Grep ===
+--- AI决策 ---
+--- 自动发Offer ---
+--- 面霸/面试官排名 ---
+server/services/interview/interview-risk-signal-service.ts:// - Never outputs "面霸" or derogatory labels
+--- 情绪识别 ---
+server/services/ai/copilot-prompt-registry-v2.ts:请基于以上转写段落，分析表达结构、证据密度和追问质量。不得做情绪、口音、性格、声音评分或撒谎识别。`,
+--- fake ---
+--- PII ---
+server/services/ai/copilot-prompt-registry-v2.ts:5. 不得输出手机号、邮箱、身份证、详细薪资等敏感信息；
+server/services/ai/copilot-redaction-service.ts:// 扩展覆盖：手机号/邮箱/身份证/薪资/API Key/银行卡号/护照号
+--- API Key ---
+app/api/ai/insights/generate/route.ts:          suggestedAction: "配置 OPENAI_API_KEY 后可生成 AI 辅助建议。",
+app/api/ai/insights/generate/route.ts:        summary: "AI Provider 未配置，请设置 OPENAI_API_KEY 环境变量后重试。",
+
+=== All checks passed ===

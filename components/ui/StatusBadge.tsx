@@ -1,36 +1,36 @@
+"use client";
+
 /**
- * Status Badge — 统一状态标签组件
- *
- * 4 种语义色变体。参考：Stripe Chip / Rippling Status Badge
+ * Phase 8.12 — Unified StatusBadge
+ * 统一所有状态、优先级、风险、AI、权限的视觉标签
+ * 禁止在各页面自行定义颜色
  */
 
-import { tokens } from "@/components/ui/design-tokens";
+export type BadgeVariant = "success" | "warning" | "danger" | "info" | "neutral" | "pending" | "ai" | "system_rule" | "default";
 
-type BadgeVariant = "default" | "success" | "warning" | "danger" | "info";
+interface StatusBadgeProps {
+  label: string;
+  variant?: BadgeVariant;
+  size?: "sm" | "md";
+  className?: string;
+}
 
-const variantStyles: Record<BadgeVariant, string> = {
-  default: "bg-[var(--color-surface-tertiary)] text-[var(--color-text-secondary)]",
+const VARIANT_STYLES: Record<BadgeVariant, string> = {
   success: "bg-[var(--color-success-light)] text-[var(--color-success)]",
   warning: "bg-[var(--color-warning-light)] text-[var(--color-warning)]",
   danger: "bg-[var(--color-danger-light)] text-[var(--color-danger)]",
-  info: "bg-[var(--color-primary-light)] text-[var(--color-primary)]",
+  info: "bg-[var(--color-info-light)] text-[var(--color-info)]",
+  neutral: "bg-[var(--color-surface-tertiary)] text-[var(--color-text-tertiary)]",
+  default: "bg-[var(--color-surface-tertiary)] text-[var(--color-text-tertiary)]",
+  pending: "bg-[var(--color-warning-light)] text-[var(--color-warning)]",
+  ai: "bg-[var(--color-primary-light)] text-[var(--color-primary)]",
+  system_rule: "bg-[var(--color-info-light)] text-[var(--color-info)]",
 };
 
-interface StatusBadgeProps {
-  /** 标签文本 */
-  label: string;
-  /** 语义变体 */
-  variant?: BadgeVariant;
-}
-
-export function StatusBadge({
-  label,
-  variant = "default",
-}: StatusBadgeProps) {
+export function StatusBadge({ label, variant = "neutral", size = "sm", className = "" }: StatusBadgeProps) {
+  const sizeClass = size === "sm" ? "px-1.5 py-0.5 text-[10px]" : "px-2 py-1 text-xs";
   return (
-    <span
-      className={`inline-flex items-center ${tokens.radius.badge} px-2.5 py-0.5 text-xs font-medium ${variantStyles[variant]}`}
-    >
+    <span className={`inline-flex items-center rounded-full font-medium ${sizeClass} ${VARIANT_STYLES[variant]} ${className}`}>
       {label}
     </span>
   );

@@ -30,49 +30,46 @@ const navGroups: NavGroup[] = [
     ],
   },
   {
+    label: "招聘运营",
+    items: [
+      { label: "岗位中心", href: "/jobs", icon: "briefcase", enabled: true },
+      { label: "候选人中心", href: "/candidates", icon: "users", enabled: true },
+    ],
+  },
+  {
+    label: "面试",
+    items: [
+      { label: "面试管理", href: "/interviews", icon: "chat", enabled: true },
+      { label: "面试质量", href: "/interview-quality", icon: "star", enabled: true },
+    ],
+  },
+  {
     label: "风险与行动",
     items: [
-      { label: "风险行动中心", href: "/actions", icon: "check", enabled: true },
+      { label: "行动中心", href: "/actions", icon: "check", enabled: true },
+      { label: "Offer 风险", href: "/offer-risks", icon: "alert", enabled: true },
     ],
   },
   {
-    label: "招聘分析",
+    label: "分析",
     items: [
-      { label: "岗位分析", href: "/jobs", icon: "briefcase", enabled: true },
-      { label: "候选人评估", href: "/candidates", icon: "users", enabled: true },
-      { label: "数据漏斗", href: "/funnel", icon: "chart", enabled: false, phaseLabel: "Phase 8.2" },
+      { label: "招聘漏斗", href: "/analytics/recruitment-funnel", icon: "chart", enabled: true },
     ],
   },
   {
-    label: "面试质量",
+    label: "AI 与知识",
     items: [
-      { label: "面试质量", href: "/interviews", icon: "chat", enabled: true },
-      { label: "面试官质量", href: "/interviewer-quality", icon: "star", enabled: false, phaseLabel: "Phase 8.5" },
+      { label: "音视频转写", href: "/media", icon: "media", enabled: true },
+      { label: "知识库", href: "/knowledge", icon: "book", enabled: true },
+      { label: "资料接入", href: "/data-sources", icon: "database", enabled: true },
     ],
   },
   {
-    label: "风险分析",
+    label: "集成与设置",
     items: [
-      { label: "Offer 风险", href: "/offer-risks", icon: "alert", enabled: false, phaseLabel: "Phase 8.6" },
-    ],
-  },
-  {
-    label: "知识资产",
-    items: [
-      { label: "知识库 / 模板库", href: "/knowledge", icon: "book", enabled: false, phaseLabel: "Phase 8.7" },
-    ],
-  },
-  {
-    label: "证据",
-    items: [
-      { label: "音视频证据", href: "/media", icon: "media", enabled: true },
-    ],
-  },
-  {
-    label: "设置",
-    items: [
-      { label: "集成", href: "/integrations", icon: "plug", enabled: true },
-      { label: "设置", href: "/settings", icon: "settings", enabled: false, phaseLabel: "Phase 9+" },
+      { label: "集成中心", href: "/integrations", icon: "plug", enabled: true },
+      { label: "报告", href: "/reports", icon: "report", enabled: false, phaseLabel: "规划中" },
+      { label: "设置", href: "/settings", icon: "settings", enabled: false, phaseLabel: "规划中" },
     ],
   },
 ];
@@ -90,6 +87,8 @@ const iconMap: Record<string, string> = {
   plug: "🔌",
   settings: "⚙️",
   media: "🎙️",
+  database: "🗄️",
+  report: "📋",
 };
 
 export function Sidebar() {
