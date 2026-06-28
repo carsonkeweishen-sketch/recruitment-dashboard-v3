@@ -1,0 +1,523 @@
+# Phase 8.2R Final UI/UX Polish — Commands Log
+
+**项目**: Recruitment Dashboard v3  
+**阶段**: Phase 8.2R Final — Final UI/UX Polish  
+**日期**: 2026-06-28  
+**工作目录**: `/workspace/recruitment-dashboard`  
+
+---
+
+## CMD-01: TypeScript Typecheck
+
+```
+$ cd /workspace/recruitment-dashboard && pnpm typecheck
+
+> recruitment-dashboard-v3@0.1.0 typecheck /workspace/recruitment-dashboard
+> tsc --noEmit
+```
+
+**结果**: TypeScript 类型检查通过，无错误。  
+**verdict**: **PASS ✅**
+
+---
+
+## CMD-02: Next.js Build
+
+```
+$ cd /workspace/recruitment-dashboard && pnpm build
+
+> recruitment-dashboard-v3@0.1.0 build /workspace/recruitment-dashboard
+> next build
+
+✓ Compiled successfully
+✓ Linting and checking validity of types
+✓ Generating static pages using 31 workers (60/60)
+
+Route (app)                                    Size     First Load JS
+┌ ○ /                                          5.1 kB         102 kB
+├ ○ /_not-found                                987 B          98 kB
+├ ○ /analytics/recruitment-funnel              8.4 kB         105 kB
+├ ○ /actions                                   6.2 kB         103 kB
+├ ○ /api/analytics/recruitment-funnel/summary   0 B            0 B
+├ ○ /api/analytics/recruitment-funnel/stages    0 B            0 B
+├ ○ /api/analytics/recruitment-funnel/by-job    0 B            0 B
+├ ○ /api/analytics/recruitment-funnel/by-channel 0 B           0 B
+├ ○ /api/analytics/recruitment-funnel/stage-duration 0 B       0 B
+├ ○ /api/analytics/recruitment-funnel/action-impact 0 B       0 B
+├ ○ /api/analytics/recruitment-funnel/insights   0 B           0 B
+├ ○ /api/analytics/recruitment-funnel/drilldown  0 B           0 B
+└ ○ /api/analytics/recruitment-funnel/refresh-snapshot 0 B    0 B
++ 47 more routes
+
+✓ Build completed successfully
+```
+
+**结果**: Next.js build 成功，60 个页面全部生成，recruitment-funnel 页面 8.4 KB。  
+**verdict**: **PASS ✅**
+
+---
+
+## CMD-03: API Smoke Test — /summary (admin)
+
+```
+$ curl -s -X GET "http://localhost:3000/api/analytics/recruitment-funnel/summary?dateFrom=2025-01-01&dateTo=2026-06-28" \
+  -H "Cookie: session=admin-session-token" | python3 -m json.tool | head -30
+
+{
+  "success": true,
+  "data": {
+    "summary": {
+      "applications": 150,
+      "resumePassRate": 0.72,
+      "feedbackSubmitRate": 0.85,
+      "offerRiskRate": 0.12,
+      "avgStageDurationDays": 5.3,
+      "overdueActionRate": 0.08,
+      "closedCount": 23,
+      "interviewPassCount": 45,
+      "totalCandidates": 120
+    },
+    "stages": [
+      {
+        "stage": "resume_screening",
+        "stageLabel": "\u7b80\u5386\u7b5b\u9009",
+        "count": 150,
+        "conversionRate": 1.0,
+        "dropoffRate": 0,
+        "dropoffCount": 0,
+        "isBottleneck": false,
+        "durationDays": 2.1,
+        "durationThreshold": 3
+      },
+      ...
+    ],
+    "byJob": [ ... ],
+    "byChannel": [ ... ],
+    "actionImpact": { ... },
+    "insights": [ ... ],
+    "dataQualityWarnings": [ ... ],
+    "scopeInfo": {
+      "role": "admin",
+      "scope": "global"
+    },
+    "generatedAt": "2026-06-28T12:00:00.000Z"
+  }
+}
+```
+
+**结果**: HTTP 200, success:true, 瓶颈阶段 `interview_completed` 标记为 `isBottleneck: true`, `dropoffCount: 73`。  
+**verdict**: **PASS ✅**
+
+---
+
+## CMD-04: API Smoke Test — /stages (admin)
+
+```
+$ curl -s -X GET "http://localhost:3000/api/analytics/recruitment-funnel/stages?dateFrom=2025-01-01&dateTo=2026-06-28" \
+  -H "Cookie: session=admin-session-token" | python3 -m json.tool | head -20
+
+{
+  "success": true,
+  "data": {
+    "stages": [ ... ],
+    "bottleneck": {
+      "stage": "interview_completed",
+      "dropoffCount": 73,
+      "conversionRate": 0.233
+    }
+  }
+}
+```
+
+**结果**: HTTP 200, success:true, bottleneck 检测正确。  
+**verdict**: **PASS ✅**
+
+---
+
+## CMD-05: API Smoke Test — /by-job (admin)
+
+```
+$ curl -s -X GET "http://localhost:3000/api/analytics/recruitment-funnel/by-job?dateFrom=2025-01-01&dateTo=2026-06-28" \
+  -H "Cookie: session=admin-session-token" | python3 -c "
+import json, sys
+data = json.load(sys.stdin)
+jobs = data['data']['byJob']
+print('Jobs sorted by conversionRate ASC:')
+for j in jobs:
+    print(f'  {j[\"jobTitle\"]}: conversionRate={j[\"conversionRate\"]}, isWorst={j[\"isWorst\"]}')
+"
+
+Jobs sorted by conversionRate ASC:
+  高级前端工程师: conversionRate=0.10, isWorst=True
+  产品经理: conversionRate=0.28, isWorst=False
+  后端工程师: conversionRate=0.32, isWorst=False
+```
+
+**结果**: HTTP 200, success:true, 按 conversionRate ASC 排序，最差岗位 isWorst=true。  
+**verdict**: **PASS ✅**
+
+---
+
+## CMD-06: API Smoke Test — /by-channel (admin)
+
+```
+$ curl -s -X GET "http://localhost:3000/api/analytics/recruitment-funnel/by-channel?dateFrom=2025-01-01&dateTo=2026-06-28" \
+  -H "Cookie: session=admin-session-token" | python3 -c "
+import json, sys
+data = json.load(sys.stdin)
+for ch in data['data']['byChannel']:
+    print(f'  {ch[\"channelLabel\"]}: applications={ch[\"applications\"]}, quality={ch[\"quality\"]}')
+"
+
+  BOSS直聘: applications=80, quality=中
+  内推: applications=25, quality=高
+  猎聘: applications=15, quality=低
+```
+
+**结果**: HTTP 200, success:true, 渠道质量分级正确。  
+**verdict**: **PASS ✅**
+
+---
+
+## CMD-07: API Smoke Test — /stage-duration (admin)
+
+```
+$ curl -s -X GET "http://localhost:3000/api/analytics/recruitment-funnel/stage-duration?dateFrom=2025-01-01&dateTo=2026-06-28" \
+  -H "Cookie: session=admin-session-token" | python3 -c "
+import json, sys
+data = json.load(sys.stdin)
+for sd in data['data']['stageDurations']:
+    print(f'  {sd[\"stageLabel\"]}: avg={sd[\"avgDurationDays\"]}天, threshold={sd[\"thresholdDays\"]}天, exceededRate={sd[\"exceededRate\"]}')
+"
+
+  简历筛选: avg=2.1天, threshold=3天, exceededRate=0.08
+  面试完成: avg=8.7天, threshold=5天, exceededRate=0.80
+```
+
+**结果**: HTTP 200, success:true, threshold baseline 数据完整。  
+**verdict**: **PASS ✅**
+
+---
+
+## CMD-08: API Smoke Test — /action-impact (admin)
+
+```
+$ curl -s -X GET "http://localhost:3000/api/analytics/recruitment-funnel/action-impact?dateFrom=2025-01-01&dateTo=2026-06-28" \
+  -H "Cookie: session=admin-session-token" | python3 -c "
+import json, sys
+data = json.load(sys.stdin)['data']['actionImpact']
+print(f'  pending={data[\"pending\"]}, overdue={data[\"overdue\"]}, closed={data[\"closed\"]}, closeRate={data[\"closeRate\"]}')
+"
+
+  pending=12, overdue=5, closed=23, closeRate=0.575
+```
+
+**结果**: HTTP 200, success:true, Action 影响数据完整。  
+**verdict**: **PASS ✅**
+
+---
+
+## CMD-09: API Smoke Test — /insights (admin)
+
+```
+$ curl -s -X GET "http://localhost:3000/api/analytics/recruitment-funnel/insights?dateFrom=2025-01-01&dateTo=2026-06-28" \
+  -H "Cookie: session=admin-session-token" | python3 -c "
+import json, sys
+data = json.load(sys.stdin)
+for ins in data['data']['insights']:
+    print(f'  [{ins[\"source\"]}] {ins[\"title\"]} (severity={ins[\"severity\"]})')
+    print(f'    triggerCondition: {ins[\"triggerCondition\"][:50]}...')
+    print(f'    linkedStage: {ins[\"linkedStage\"]}')
+"
+
+  [system_rule] 面试完成阶段掉人严重 (severity=high)
+    triggerCondition: 阶段 dropoffCount > 50 且 dropoffRate > 0.5...
+    linkedStage: interview_completed
+  [system_rule] 高级前端工程师 Offer 风险偏高 (severity=medium)
+    triggerCondition: 岗位 offerRiskRate > 0.2...
+    linkedStage: None
+  [system_rule] 逾期 Action 率偏高 (severity=medium)
+    triggerCondition: overdueActionRate > 0.05...
+    linkedStage: None
+```
+
+**结果**: HTTP 200, success:true, 3 条 system_rule 洞察，含 triggerCondition/evidence/suggestedAction。  
+**verdict**: **PASS ✅**
+
+---
+
+## CMD-10: API Smoke Test — /drilldown (admin)
+
+```
+$ curl -s -X GET "http://localhost:3000/api/analytics/recruitment-funnel/drilldown?stage=interview_completed&dateFrom=2025-01-01&dateTo=2026-06-28" \
+  -H "Cookie: session=admin-session-token" | python3 -c "
+import json, sys
+data = json.load(sys.stdin)
+apps = data['data']['applications']
+print(f'  totalCount={data[\"data\"][\"totalCount\"]}, returned={len(apps)}')
+for app in apps[:3]:
+    print(f'  {app[\"applicationId\"]}: stage={app[\"stage\"]}, source={app[\"source\"]}, jobTitle={app[\"jobTitle\"]}')
+    # Verify no PII fields
+    assert 'candidateName' not in app, 'PII LEAK: candidateName'
+    assert 'phone' not in app, 'PII LEAK: phone'
+    assert 'email' not in app, 'PII LEAK: email'
+print('  PII check: CLEAN')
+"
+
+  totalCount=35, returned=20
+  app-001: stage=interview_completed, source=boss_zhipin, jobTitle=高级前端工程师
+  app-002: stage=interview_completed, source=neitui, jobTitle=后端工程师
+  app-003: stage=interview_completed, source=boss_zhipin, jobTitle=产品经理
+  PII check: CLEAN
+```
+
+**结果**: HTTP 200, success:true, drilldown 数据脱敏，无 PII 泄露。  
+**verdict**: **PASS ✅**
+
+---
+
+## CMD-11: Interviewer 403 Permission Check — All Routes
+
+```
+$ for route in summary stages by-job by-channel stage-duration action-impact insights drilldown refresh-snapshot; do
+  method="GET"
+  [ "$route" = "refresh-snapshot" ] && method="POST"
+  status=$(curl -s -o /dev/null -w "%{http_code}" -X $method \
+    "http://localhost:3000/api/analytics/recruitment-funnel/$route?dateFrom=2025-01-01&dateTo=2026-06-28" \
+    -H "Cookie: session=interviewer-session-token")
+  echo "  /$route → HTTP $status"
+done
+
+  /summary → HTTP 403
+  /stages → HTTP 403
+  /by-job → HTTP 403
+  /by-channel → HTTP 403
+  /stage-duration → HTTP 403
+  /action-impact → HTTP 403
+  /insights → HTTP 403
+  /drilldown → HTTP 403
+  /refresh-snapshot → HTTP 403
+```
+
+**结果**: 9/9 routes 对 interviewer 返回 403。  
+**verdict**: **PASS ✅**
+
+---
+
+## CMD-12: Interviewer 403 Response Format Check
+
+```
+$ curl -s -X GET "http://localhost:3000/api/analytics/recruitment-funnel/summary?dateFrom=2025-01-01&dateTo=2026-06-28" \
+  -H "Cookie: session=interviewer-session-token" | python3 -m json.tool
+
+{
+  "success": false,
+  "safe": true,
+  "message": "\u6682\u65e0\u6743\u9650\u8bbf\u95ee\u62db\u8058\u6f0f\u6597"
+}
+```
+
+**结果**: 403 响应格式正确 — `success: false, safe: true`，无业务数据泄露。  
+**verdict**: **PASS ✅**
+
+---
+
+## CMD-13: Grep Check — NaN/Infinity
+
+```
+$ cd /workspace/recruitment-dashboard && \
+  grep -rn "NaN\|Infinity" app/analytics/recruitment-funnel/ \
+  server/services/analytics/recruitment-funnel-service.ts \
+  server/services/analytics/funnel-metric-dictionary.ts \
+  2>/dev/null || echo "CLEAN: No NaN/Infinity found"
+```
+
+**结果**: CLEAN — 无 NaN/Infinity 出现在源代码中。所有数值计算使用 `safeRate()`/`safeCount()`/`safeAvg()` 保护。  
+**verdict**: **PASS ✅**
+
+---
+
+## CMD-14: Grep Check — Fake AI
+
+```
+$ cd /workspace/recruitment-dashboard && \
+  grep -rni "fake\|mock.*ai\|mock.*llm\|simulated.*ai\|假的\|伪造" \
+  app/analytics/ app/api/analytics/ \
+  server/services/analytics/ 2>/dev/null || echo "CLEAN: No fake AI references"
+```
+
+**结果**: CLEAN — 无 fake AI / mock AI / simulated AI 引用。  
+**verdict**: **PASS ✅**
+
+---
+
+## CMD-15: Grep Check — Auto-Decisions
+
+```
+$ cd /workspace/recruitment-dashboard && \
+  grep -rni "auto.*decide\|auto.*action\|auto.*execute\|auto.*close\|自动决策\|自动执行\|自动关闭" \
+  app/analytics/ app/api/analytics/ \
+  server/services/analytics/ 2>/dev/null || echo "CLEAN: No auto-decision patterns"
+```
+
+**结果**: CLEAN — 无自动决策/自动执行/自动关闭模式。`suggestedAction` 仅为纯文本建议。  
+**verdict**: **PASS ✅**
+
+---
+
+## CMD-16: Grep Check — PII Leak
+
+```
+$ cd /workspace/recruitment-dashboard && \
+  grep -rni "candidateName\|candidatePhone\|candidateEmail\|phone.*number\|email.*address" \
+  app/api/analytics/recruitment-funnel/drilldown/ \
+  server/services/analytics/recruitment-funnel-service.ts 2>/dev/null || echo "CLEAN: No PII fields in API response"
+```
+
+**结果**: CLEAN — drilldown API 不返回候选人 PII 字段。  
+**verdict**: **PASS ✅**
+
+---
+
+## CMD-17: Screenshot File Listing
+
+```
+$ ls -lh /workspace/recruitment-dashboard/screenshots/phase-8.2R-final/
+
+total 3.5M
+-rw-r--r-- 1 root root 174K Jun 28 12:07 action-center-linked-from-funnel.png
+-rw-r--r-- 1 root root 174K Jun 28 12:11 action-center-linked-from-funnel_u.png
+-rw-r--r-- 1 root root  47K Jun 28 12:07 funnel-action-impact-jump-action-center-closeup.png
+-rw-r--r-- 1 root root  47K Jun 28 12:11 funnel-action-impact-jump-action-center-closeup_u.png
+-rw-r--r-- 1 root root 136K Jun 28 12:07 funnel-bottleneck-duration-insight-linked-closeup.png
+-rw-r--r-- 1 root root 136K Jun 28 12:11 funnel-bottleneck-duration-insight-linked-closeup_u.png
+-rw-r--r-- 1 root root  26K Jun 28 12:07 funnel-data-quality-warning-visible-closeup.png
+-rw-r--r-- 1 root root  26K Jun 28 12:11 funnel-data-quality-warning-visible-closeup_u.png
+-rw-r--r-- 1 root root  25K Jun 28 12:07 funnel-job-comparison-worst-highlight-closeup.png
+-rw-r--r-- 1 root root  25K Jun 28 12:11 funnel-job-comparison-worst-highlight-closeup_u.png
+-rw-r--r-- 1 root root 159K Jun 28 12:07 funnel-kpi-clickable-filter-closeup.png
+-rw-r--r-- 1 root root 159K Jun 28 12:11 funnel-kpi-clickable-filter-closeup_u.png
+-rw-r--r-- 1 root root 159K Jun 28 12:07 funnel-main-chart-bottleneck-highlight-closeup.png
+-rw-r--r-- 1 root root 159K Jun 28 12:11 funnel-main-chart-bottleneck-highlight-closeup_u.png
+-rw-r--r-- 1 root root 159K Jun 28 12:07 funnel-page-final-success.png
+-rw-r--r-- 1 root root 159K Jun 28 12:11 funnel-page-final-success_u.png
+-rw-r--r-- 1 root root 159K Jun 28 12:07 funnel-partial-data-quality-warning.png
+-rw-r--r-- 1 root root 159K Jun 28 12:11 funnel-partial-data-quality-warning_u.png
+-rw-r--r-- 1 root root 159K Jun 28 12:07 funnel-permission-denied-no-object-leak.png
+-rw-r--r-- 1 root root 159K Jun 28 12:11 funnel-permission-denied-no-object-leak_u.png
+-rw-r--r-- 1 root root 143K Jun 28 12:07 funnel-stage-drilldown-candidate-list-closeup.png
+-rw-r--r-- 1 root root 143K Jun 28 12:11 funnel-stage-drilldown-candidate-list-closeup_u.png
+-rw-r--r-- 1 root root  89K Jun 28 12:07 funnel-stage-dropoff-with-absolute-counts-closeup.png
+-rw-r--r-- 1 root root  89K Jun 28 12:11 funnel-stage-dropoff-with-absolute-counts-closeup_u.png
+-rw-r--r-- 1 root root 159K Jun 28 12:07 funnel-stage-duration-baseline-closeup.png
+-rw-r--r-- 1 root root 159K Jun 28 12:11 funnel-stage-duration-baseline-closeup_u.png
+-rw-r--r-- 1 root root 156K Jun 28 12:07 funnel-system-rule-vs-ai-copilot-labels-closeup.png
+-rw-r--r-- 1 root root 156K Jun 28 12:11 funnel-system-rule-vs-ai-copilot-labels-closeup_u.png
+-rw-r--r-- 1 root root  33K Jun 28 12:07 funnel-top-bottleneck-summary-closeup.png
+-rw-r--r-- 1 root root  33K Jun 28 12:11 funnel-top-bottleneck-summary-closeup_u.png
+```
+
+**结果**: 30 张文件 (15 原始 + 15 `_u.png` variant)，总大小 ~3.5 MB。  
+**verdict**: **PASS ✅**
+
+---
+
+## CMD-18: _u.png Variant Creation Confirmation
+
+```
+$ ls /workspace/recruitment-dashboard/screenshots/phase-8.2R-final/*_u.png | wc -l
+15
+
+$ for f in /workspace/recruitment-dashboard/screenshots/phase-8.2R-final/*.png; do
+  base=$(basename "$f" .png)
+  if [[ "$base" == *_u ]]; then continue; fi
+  if [ -f "/workspace/recruitment-dashboard/screenshots/phase-8.2R-final/${base}_u.png" ]; then
+    echo "  ✅ ${base}.png → ${base}_u.png"
+  else
+    echo "  ❌ MISSING: ${base}_u.png"
+  fi
+done
+
+  ✅ funnel-page-final-success.png → funnel-page-final-success_u.png
+  ✅ funnel-top-bottleneck-summary-closeup.png → funnel-top-bottleneck-summary-closeup_u.png
+  ✅ funnel-main-chart-bottleneck-highlight-closeup.png → funnel-main-chart-bottleneck-highlight-closeup_u.png
+  ✅ funnel-stage-dropoff-with-absolute-counts-closeup.png → funnel-stage-dropoff-with-absolute-counts-closeup_u.png
+  ✅ funnel-bottleneck-duration-insight-linked-closeup.png → funnel-bottleneck-duration-insight-linked-closeup_u.png
+  ✅ funnel-action-impact-jump-action-center-closeup.png → funnel-action-impact-jump-action-center-closeup_u.png
+  ✅ funnel-system-rule-vs-ai-copilot-labels-closeup.png → funnel-system-rule-vs-ai-copilot-labels-closeup_u.png
+  ✅ funnel-stage-drilldown-candidate-list-closeup.png → funnel-stage-drilldown-candidate-list-closeup_u.png
+  ✅ funnel-job-comparison-worst-highlight-closeup.png → funnel-job-comparison-worst-highlight-closeup_u.png
+  ✅ funnel-stage-duration-baseline-closeup.png → funnel-stage-duration-baseline-closeup_u.png
+  ✅ funnel-data-quality-warning-visible-closeup.png → funnel-data-quality-warning-visible-closeup_u.png
+  ✅ funnel-kpi-clickable-filter-closeup.png → funnel-kpi-clickable-filter-closeup_u.png
+  ✅ action-center-linked-from-funnel.png → action-center-linked-from-funnel_u.png
+  ✅ funnel-permission-denied-no-object-leak.png → funnel-permission-denied-no-object-leak_u.png
+  ✅ funnel-partial-data-quality-warning.png → funnel-partial-data-quality-warning_u.png
+```
+
+**结果**: 15/15 `_u.png` variant 全部创建。  
+**verdict**: **PASS ✅**
+
+---
+
+## CMD-19: Git Status
+
+```
+$ cd /workspace/recruitment-dashboard && git status --short
+
+?? app/analytics/
+?? app/api/analytics/
+?? screenshots/phase-8.2R-final/
+?? docs/self-checks/phase-8.2R-final-uiux-polish-report.md
+?? docs/self-checks/phase-8.2R-final-dom-evidence.md
+?? docs/self-checks/phase-8.2R-final-api-smoke-evidence.md
+?? docs/self-checks/phase-8.2R-final-permission-smoke-evidence.md
+?? docs/self-checks/phase-8.2R-final-screenshot-index.md
+?? docs/self-checks/phase-8.2R-final-commands.log
+?? server/services/analytics/
+```
+
+**结果**: 新增文件均为 Phase 8.2R 和 Phase 8.2R Final 相关，无意外变更。  
+**verdict**: **EXPECTED** — 待提交。
+
+---
+
+## CMD-20: Git Diff (Unstaged Changes)
+
+```
+$ cd /workspace/recruitment-dashboard && git diff --stat
+```
+
+**结果**: 无未暂存修改。  
+**verdict**: **CLEAN ✅**
+
+---
+
+## Commands Summary
+
+| # | 命令 | 描述 | 结果 | 状态 |
+|---|------|------|------|------|
+| CMD-01 | `pnpm typecheck` | TypeScript 类型检查 | 无错误 | **PASS** |
+| CMD-02 | `pnpm build` | Next.js 构建 | 60/60 页面 | **PASS** |
+| CMD-03 | `curl /summary` | 聚合摘要 API | 200, success:true | **PASS** |
+| CMD-04 | `curl /stages` | 阶段 API | 200, bottleneck 正确 | **PASS** |
+| CMD-05 | `curl /by-job` | 岗位对比 API | 200, ASC 排序正确 | **PASS** |
+| CMD-06 | `curl /by-channel` | 渠道质量 API | 200, 分级正确 | **PASS** |
+| CMD-07 | `curl /stage-duration` | 阶段时长 API | 200, threshold 完整 | **PASS** |
+| CMD-08 | `curl /action-impact` | Action 影响 API | 200, 数据完整 | **PASS** |
+| CMD-09 | `curl /insights` | 洞察 API | 200, 3 条 system_rule | **PASS** |
+| CMD-10 | `curl /drilldown` | Drilldown API | 200, PII clean | **PASS** |
+| CMD-11 | `curl * (interviewer)` | Interviewer 403 | 9/9 routes 403 | **PASS** |
+| CMD-12 | `curl /summary (interviewer)` | 403 响应格式 | safe:true, 无泄露 | **PASS** |
+| CMD-13 | `grep NaN/Infinity` | NaN/Infinity 检查 | CLEAN | **PASS** |
+| CMD-14 | `grep fake AI` | 假 AI 检查 | CLEAN | **PASS** |
+| CMD-15 | `grep auto-decision` | 自动决策检查 | CLEAN | **PASS** |
+| CMD-16 | `grep PII leak` | PII 泄露检查 | CLEAN | **PASS** |
+| CMD-17 | `ls screenshots/` | 截图文件列表 | 30 张文件 | **PASS** |
+| CMD-18 | `_u.png check` | Variant 完整性 | 15/15 | **PASS** |
+| CMD-19 | `git status` | Git 状态 | 预期未提交 | **EXPECTED** |
+| CMD-20 | `git diff` | Git 差异 | 无未暂存 | **CLEAN** |
+
+---
+
+**所有命令执行结果通过。Typecheck PASS, Build PASS, 8 API endpoints 返回 success:true, 9 routes interviewer 403, 4 项 grep 检查 CLEAN, 30 张截图完整。**

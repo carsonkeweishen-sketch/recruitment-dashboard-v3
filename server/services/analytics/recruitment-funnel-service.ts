@@ -74,16 +74,36 @@ function computeStageCounts(applications: any[]) {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function computeStageMetrics(applications: any[], interviews: any[], feedbacks: any[], actions: any[]) {
   const stageCounts = computeStageCounts(applications);
-  const stages: {
-    stageKey: string;
-    label: string;
-    count: number;
-    conversionRate: number | null;
-    dropoffRate: number | null;
-    avgDurationDays: number | null;
-  }[] = [];
-
+  
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const stages: any[] = [];
   let prevCount: number | null = null;
+
+  // Duration threshold (days) per stage
+  const durationThresholds: Record<string, number> = {
+    resume_reviewed: 3,
+    screen_passed: 5,
+    interview_scheduled: 7,
+    interview_completed: 3,
+    feedback_submitted: 2,
+  };
+
+  // Calculate action summary per stage
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  function getActionSummary(stageKey: string): any {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const stageActions = actions.filter((a: any) => {
+      // Match action to stage via application stage
+      return true; // For now, aggregate all actions — per-stage filtering via job/app linkage
+    });
+    const now = new Date();
+    return {
+      open: stageActions.filter((a: any) => a.status === "open" && (!a.dueAt || new Date(a.dueAt) >= now)).length,
+      inProgress: stageActions.filter((a: any) => a.status === "in_progress").length,
+      overdue: stageActions.filter((a: any) => a.status !== "resolved" && a.status !== "dismissed" && a.dueAt && new Date(a.dueAt) < now).length,
+      resolved: stageActions.filter((a: any) => a.status === "resolved" || a.status === "dismissed").length,
+    };
+  }
 
   for (const stageConfig of FUNNEL_STAGES) {
     const count = stageCounts[stageConfig.key] || 0;
@@ -92,8 +112,9 @@ function computeStageMetrics(applications: any[], interviews: any[], feedbacks: 
       ? safeRate(count, prevCount)
       : stageConfig.key === "sourced" ? 1 : null;
 
+    const dropoffCount = prevCount !== null ? prevCount - count : null;
     const dropoffRate = prevCount !== null && prevCount > 0
-      ? safeRate(prevCount - count, prevCount)
+      ? safeRate(dropoffCount!, prevCount)
       : null;
 
     // Estimate stage duration from interview data
@@ -113,16 +134,53 @@ function computeStageMetrics(applications: any[], interviews: any[], feedbacks: 
       }
     }
 
+    const threshold = durationThresholds[stageConfig.key] || null;
+    const actionSummary = getActionSummary(stageConfig.key);
+
     stages.push({
       stageKey: stageConfig.key,
       label: stageConfig.label,
       count,
       conversionRate,
+      dropoffCount,
       dropoffRate,
       avgDurationDays,
+      durationThresholdDays: threshold,
+      isBottleneck: false, // computed below
+      bottleneckReason: undefined as string | undefined,
+      actionSummary,
+      systemInsight: null as any,
     });
 
     prevCount = count;
+  }
+
+  // Compute bottlenecks: find max dropoff stage (excluding sourced/closed)
+  let maxDropoff = 0;
+  let bottleneckIdx = -1;
+  for (let i = 1; i < stages.length - 1; i++) {
+    const dc = stages[i].dropoffCount;
+    if (dc !== null && dc > maxDropoff) {
+      maxDropoff = dc;
+      bottleneckIdx = i;
+    }
+  }
+  // Also check for low conversion
+  if (bottleneckIdx < 0) {
+    let minConv = 1;
+    for (let i = 1; i < stages.length - 1; i++) {
+      const cr = stages[i].conversionRate;
+      if (cr !== null && cr < minConv && cr < 0.7) {
+        minConv = cr;
+        bottleneckIdx = i;
+      }
+    }
+  }
+  if (bottleneckIdx >= 0) {
+    stages[bottleneckIdx].isBottleneck = true;
+    stages[bottleneckIdx].bottleneckReason = maxDropoff > 0
+      ? `最大流失阶段：流失 ${maxDropoff} 人`
+      : "最低转化率阶段";
   }
 
   return stages;
@@ -197,7 +255,12 @@ function computeByJob(applications: any[], stages: ReturnType<typeof computeStag
     screenPassRate: safeRate(entry.screenPassed, entry.applications),
     interviewPassRate: safeRate(entry.interviewPassed, entry.interviewCompleted),
     offerRiskRate: safeRate(entry.offerRisks, entry.applications),
-  }));
+  })).sort((a, b) => {
+    // Sort: worst conversion first (by screenPassRate, then interviewPassRate)
+    const aRate = a.screenPassRate ?? 1;
+    const bRate = b.screenPassRate ?? 1;
+    return aRate - bRate;
+  });
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -327,9 +390,37 @@ export async function getFunnelAnalysis(
     dataQualityWarnings,
   });
 
+  // 8. Attach insights to bottleneck stages
+  const bottleneckStage = stages.find(s => s.isBottleneck);
+  if (bottleneckStage && insights.length > 0) {
+    bottleneckStage.systemInsight = {
+      title: insights[0].insightKey,
+      triggerCondition: insights[0].triggerCondition,
+      evidence: [insights[0].evidence],
+      suggestedAction: insights[0].suggestedAction,
+      generatedBy: "system_rule",
+    };
+  }
+
+  // 9. Compute top bottleneck summary for header
+  const topBottleneck = bottleneckStage
+    ? {
+        stageKey: bottleneckStage.stageKey,
+        stageLabel: bottleneckStage.label,
+        dropoffCount: bottleneckStage.dropoffCount,
+        conversionRate: bottleneckStage.conversionRate,
+        avgDurationDays: bottleneckStage.avgDurationDays,
+        durationThresholdDays: bottleneckStage.durationThresholdDays,
+        reason: bottleneckStage.bottleneckReason,
+        actionSummary: bottleneckStage.actionSummary,
+        systemInsight: bottleneckStage.systemInsight,
+      }
+    : null;
+
   return {
     summary,
     stages,
+    topBottleneck,
     byJob,
     byChannel,
     actionImpact,

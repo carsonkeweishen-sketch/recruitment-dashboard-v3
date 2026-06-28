@@ -9,16 +9,49 @@ import { ErrorState } from "@/components/ui/ErrorState";
 import { LoadingSkeleton } from "@/components/ui/LoadingSkeleton";
 
 // ============================================================================
-// Types
+// Types (extended for Final UI/UX Polish)
 // ============================================================================
+
+interface ActionSummary {
+  open: number;
+  inProgress: number;
+  overdue: number;
+  resolved: number;
+}
+
+interface SystemInsight {
+  title: string;
+  triggerCondition: string;
+  evidence: string[];
+  suggestedAction: string;
+  generatedBy: string;
+}
 
 interface StageMetric {
   stageKey: string;
   label: string;
   count: number;
   conversionRate: number | null;
+  dropoffCount: number | null;
   dropoffRate: number | null;
   avgDurationDays: number | null;
+  durationThresholdDays: number | null;
+  isBottleneck: boolean;
+  bottleneckReason?: string;
+  actionSummary: ActionSummary;
+  systemInsight: SystemInsight | null;
+}
+
+interface TopBottleneck {
+  stageKey: string;
+  stageLabel: string;
+  dropoffCount: number | null;
+  conversionRate: number | null;
+  avgDurationDays: number | null;
+  durationThresholdDays: number | null;
+  reason: string | null;
+  actionSummary: ActionSummary;
+  systemInsight: SystemInsight | null;
 }
 
 interface FunnelSummary {
@@ -86,6 +119,7 @@ interface DataQualityWarning {
 interface FunnelData {
   summary: FunnelSummary;
   stages: StageMetric[];
+  topBottleneck: TopBottleneck | null;
   byJob: JobMetric[];
   byChannel: ChannelMetric[];
   actionImpact: ActionImpact;
@@ -148,6 +182,7 @@ export default function RecruitmentFunnelPage() {
   const [showJobTable, setShowJobTable] = useState(true);
   const [showChannelTable, setShowChannelTable] = useState(true);
   const [showOverdueActions, setShowOverdueActions] = useState(false);
+  const [selectedStage, setSelectedStage] = useState<string | null>(null);
 
   const fetchData = () => {
     setLoading(true);
@@ -216,7 +251,7 @@ export default function RecruitmentFunnelPage() {
   if (!data || data.stages.length === 0) {
     return (
       <ProductShell title="招聘漏斗" description="招聘数据漏斗与转化分析">
-        <EmptyState title="暂无漏斗数据" description="当前没有足够的招聘数据来生成漏斗分析。请先添加候选人、投递和面试记录。" />
+        <EmptyState title="暂无漏斗数据" description="当前没有足够的招聘数据来生成漏斗分析。" />
       </ProductShell>
     );
   }
@@ -224,13 +259,14 @@ export default function RecruitmentFunnelPage() {
   // ==========================================================================
   // Main Content
   // ==========================================================================
-  const { summary, stages, byJob, byChannel, actionImpact, insights, dataQualityWarnings, generatedAt } = data;
+  const { summary, stages, topBottleneck, byJob, byChannel, actionImpact, insights, dataQualityWarnings, generatedAt } = data;
   const maxStageCount = Math.max(...stages.map((s) => s.count), 1);
+  const bottleneckStageKey = topBottleneck?.stageKey || stages.find(s => s.isBottleneck)?.stageKey || null;
 
   return (
     <ProductShell
       title="招聘漏斗"
-      description="从全局、岗位、渠道和阶段视角分析招聘转化、卡点和行动闭环效果"
+      description="从全局、岗位、渠道和阶段视角分析招聘转化、卡点和行动闭环效果 — 管理层30秒看清最大卡点"
       kpiRow={
         <div className="grid grid-cols-2 lg:grid-cols-6 gap-3">
           <KpiCard label="投递量" value={summary.applications} />
@@ -282,6 +318,53 @@ export default function RecruitmentFunnelPage() {
       }
     >
       <div className="space-y-6">
+        {/* P0-1: Top Bottleneck Summary — 首屏最大卡点结论 */}
+        {topBottleneck && (
+          <div className="rounded-2xl border-2 border-[var(--color-danger)] bg-[var(--color-danger-light)]/10 p-5">
+            <div className="flex items-start gap-3">
+              <span className="text-2xl shrink-0">🚨</span>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <StatusBadge label="当前最大卡点" variant="danger" />
+                  <h2 className="text-base font-bold text-[var(--color-text-primary)]">
+                    {topBottleneck.stageLabel} — 流失 {fmtNum(topBottleneck.dropoffCount)} 人
+                    {topBottleneck.conversionRate !== null && (
+                      <span className="text-[var(--color-danger)] ml-2">（转化率仅 {fmtRate(topBottleneck.conversionRate)}）</span>
+                    )}
+                  </h2>
+                </div>
+                <p className="text-sm text-[var(--color-text-secondary)] mb-3">
+                  {topBottleneck.reason}
+                  {topBottleneck.avgDurationDays !== null && (
+                    <span> · 平均停留 {fmtDays(topBottleneck.avgDurationDays)}
+                      {topBottleneck.durationThresholdDays !== null && (
+                        <span className="text-[var(--color-warning)]"> / 阈值 {topBottleneck.durationThresholdDays} 天</span>
+                      )}
+                    </span>
+                  )}
+                </p>
+                {topBottleneck.systemInsight && (
+                  <div className="rounded-xl border border-[var(--color-warning-light)] bg-[var(--color-surface)] p-3 mb-3">
+                    <div className="flex items-center gap-2 mb-1">
+                      <StatusBadge label="系统规则提醒" variant="warning" />
+                      <span className="text-xs text-[var(--color-text-tertiary)]">generatedBy=system_rule</span>
+                    </div>
+                    <p className="text-sm text-[var(--color-text-primary)] font-medium">{topBottleneck.systemInsight.triggerCondition}</p>
+                    <p className="text-xs text-[var(--color-text-secondary)] mt-1">{topBottleneck.systemInsight.evidence[0]}</p>
+                    <p className="text-xs text-[var(--color-primary)] mt-1">建议：{topBottleneck.systemInsight.suggestedAction}</p>
+                  </div>
+                )}
+                <div className="flex items-center gap-3 text-xs text-[var(--color-text-secondary)]">
+                  <span>Action: 待处理 {topBottleneck.actionSummary.open} · 进行中 {topBottleneck.actionSummary.inProgress} · 逾期 {topBottleneck.actionSummary.overdue} · 已解决 {topBottleneck.actionSummary.resolved}</span>
+                  <a href={`/actions?source=funnel&stage=${topBottleneck.stageKey}`} className="text-[var(--color-primary)] hover:underline font-medium">
+                    前往 Action Center →
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Data Quality Warnings */}
         {dataQualityWarnings.length > 0 && (
           <div className="rounded-2xl border border-[var(--color-warning-light)] bg-[var(--color-warning-light)]/10 p-4">
@@ -296,57 +379,57 @@ export default function RecruitmentFunnelPage() {
           </div>
         )}
 
-        {/* Main Funnel Chart */}
+        {/* P0-1+2: Main Funnel with bottleneck highlight + absolute dropoff */}
         <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6">
           <h2 className="text-base font-semibold text-[var(--color-text-primary)] mb-4">招聘转化漏斗</h2>
           <div className="space-y-2">
             {stages.map((stage, idx) => {
               const barWidth = maxStageCount > 0 ? (stage.count / maxStageCount) * 100 : 0;
-              const nextStage = idx < stages.length - 1 ? stages[idx + 1] : null;
-              const dropoff = nextStage && stage.count > 0 ? stage.count - nextStage.count : 0;
-              const hasDropoff = dropoff > 0 && nextStage !== null;
+              const isBottleneck = stage.isBottleneck;
 
               return (
                 <div key={stage.stageKey}>
-                  <div className="flex items-center gap-4">
-                    <div className="w-28 shrink-0 text-right">
-                      <span className="text-sm font-medium text-[var(--color-text-primary)]">{stage.label}</span>
+                  <div className={`flex items-center gap-4 ${isBottleneck ? "bg-[var(--color-danger-light)]/10 rounded-lg -mx-2 px-2 py-1" : ""}`}>
+                    <div className="w-32 shrink-0 text-right flex items-center justify-end gap-1">
+                      {isBottleneck && <StatusBadge label="卡点" variant="danger" />}
+                      <span className={`text-sm font-medium ${isBottleneck ? "text-[var(--color-danger)]" : "text-[var(--color-text-primary)]"}`}>{stage.label}</span>
                     </div>
                     <div className="flex-1 relative">
                       <div
                         className="h-9 rounded-lg transition-all duration-500 flex items-center justify-center min-w-[40px]"
                         style={{
                           width: `${Math.max(barWidth, 3)}%`,
-                          backgroundColor: idx < 4 ? "var(--color-primary)" :
+                          backgroundColor: isBottleneck ? "var(--color-danger)" :
+                            idx < 4 ? "var(--color-primary)" :
                             idx < 7 ? "var(--color-warning)" :
-                            "var(--color-danger)",
-                          opacity: 0.85,
+                            "var(--color-text-tertiary)",
+                          opacity: isBottleneck ? 1 : 0.85,
                         }}
                       >
                         <span className="text-sm font-bold text-white drop-shadow-sm">{stage.count}</span>
                       </div>
                     </div>
-                    <div className="w-32 shrink-0 text-left">
+                    <div className="w-40 shrink-0 text-left">
                       <span className="text-xs text-[var(--color-text-secondary)]">
                         转化 {fmtRate(stage.conversionRate)}
-                        {stage.dropoffRate !== null && stage.dropoffRate > 0 && (
-                          <span className="text-[var(--color-danger)] ml-1">
-                            ↓{Math.round(stage.dropoffRate * 100)}%
-                          </span>
-                        )}
                       </span>
+                      {stage.dropoffCount !== null && stage.dropoffCount > 0 && (
+                        <span className={`text-xs ml-1 ${isBottleneck ? "text-[var(--color-danger)] font-bold" : "text-[var(--color-danger)]"}`}>
+                          流失 {stage.dropoffCount} 人
+                        </span>
+                      )}
                     </div>
                   </div>
-                  {hasDropoff && (
-                    <div className="flex items-center gap-4 ml-28 my-1">
+                  {stage.dropoffCount !== null && stage.dropoffCount > 0 && idx < stages.length - 1 && (
+                    <div className="flex items-center gap-4 ml-32 my-1">
                       <div className="flex-1 flex items-center gap-2">
-                        <div className="h-px flex-1 border-t border-dashed border-[var(--color-danger-light)]" />
-                        <span className="text-[10px] text-[var(--color-danger)] font-medium whitespace-nowrap">
-                          掉落 {dropoff} 人
+                        <div className={`h-px flex-1 border-t border-dashed ${isBottleneck ? "border-[var(--color-danger)]" : "border-[var(--color-danger-light)]"}`} />
+                        <span className={`text-[10px] font-medium whitespace-nowrap ${isBottleneck ? "text-[var(--color-danger)]" : "text-[var(--color-text-tertiary)]"}`}>
+                          ↓{stage.dropoffCount} 人
                         </span>
-                        <div className="h-px flex-1 border-t border-dashed border-[var(--color-danger-light)]" />
+                        <div className={`h-px flex-1 border-t border-dashed ${isBottleneck ? "border-[var(--color-danger)]" : "border-[var(--color-danger-light)]"}`} />
                       </div>
-                      <div className="w-32" />
+                      <div className="w-40" />
                     </div>
                   )}
                 </div>
@@ -355,12 +438,13 @@ export default function RecruitmentFunnelPage() {
           </div>
         </div>
 
-        {/* Bottleneck Insights */}
+        {/* Bottleneck Insights with stage linkage */}
         {insights.length > 0 && (
           <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6">
             <div className="flex items-center gap-2 mb-4">
               <h2 className="text-base font-semibold text-[var(--color-text-primary)]">系统洞察与卡点分析</h2>
               <StatusBadge label={`system_rule · ${insights.length}条`} variant="info" />
+              <span className="text-[10px] text-[var(--color-text-tertiary)] ml-auto">系统规则：确定性分析</span>
             </div>
             <div className="space-y-3">
               {insights.map((insight) => (
@@ -374,6 +458,11 @@ export default function RecruitmentFunnelPage() {
                       <div className="flex items-center gap-2 mb-1">
                         <StatusBadge label={insight.severity === "critical" ? "严重" : insight.severity === "warning" ? "警告" : "提示"} variant={severityVariant[insight.severity] || "default"} />
                         <span className="text-sm font-semibold text-[var(--color-text-primary)]">{insight.insightKey}</span>
+                        {bottleneckStageKey && (
+                          <span className="text-[10px] text-[var(--color-primary)] bg-[var(--color-primary-light)] rounded-full px-2 py-0.5">
+                            关联瓶颈：{stages.find(s => s.stageKey === bottleneckStageKey)?.label}
+                          </span>
+                        )}
                       </div>
                       <p className="text-xs text-[var(--color-text-secondary)] mt-1">{insight.triggerCondition}</p>
                     </div>
@@ -398,10 +487,10 @@ export default function RecruitmentFunnelPage() {
 
         {/* Job Comparison + Channel Quality */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Job Comparison */}
+          {/* Job Comparison — sorted by risk (worst first) */}
           <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-semibold text-[var(--color-text-primary)]">岗位对比</h2>
+              <h2 className="text-base font-semibold text-[var(--color-text-primary)]">岗位对比（按转化异常排序）</h2>
               <button onClick={() => setShowJobTable(!showJobTable)} className="text-xs text-[var(--color-primary)] hover:underline">
                 {showJobTable ? "收起" : "展开"}
               </button>
@@ -420,21 +509,27 @@ export default function RecruitmentFunnelPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {byJob.map((job) => (
-                      <tr key={job.jobId} className="border-b border-[var(--color-border-light)] hover:bg-[var(--color-surface-tertiary)]">
-                        <td className="py-2 text-[var(--color-text-primary)] font-medium truncate max-w-[120px]">{job.jobTitle}</td>
-                        <td className="py-2 text-right text-[var(--color-text-secondary)]">{job.applications}</td>
-                        <td className="py-2 text-right text-[var(--color-text-secondary)]">{fmtRate(job.screenPassRate)}</td>
-                        <td className="py-2 text-right text-[var(--color-text-secondary)]">{fmtRate(job.interviewPassRate)}</td>
-                        <td className="py-2 text-right">
-                          {job.offerRiskRate !== null && job.offerRiskRate > 0.3
-                            ? <span className="text-[var(--color-danger)]">{fmtRate(job.offerRiskRate)}</span>
-                            : <span className="text-[var(--color-text-secondary)]">{fmtRate(job.offerRiskRate)}</span>
-                          }
-                        </td>
-                        <td className="py-2 text-right text-[var(--color-text-secondary)]">{job.closed}</td>
-                      </tr>
-                    ))}
+                    {byJob.map((job, idx) => {
+                      const isWorst = idx === 0 && job.applications > 0;
+                      return (
+                        <tr key={job.jobId} className={`border-b border-[var(--color-border-light)] hover:bg-[var(--color-surface-tertiary)] ${isWorst ? "bg-[var(--color-danger-light)]/5" : ""}`}>
+                          <td className="py-2 text-[var(--color-text-primary)] font-medium truncate max-w-[120px]">
+                            {isWorst && <span className="text-[var(--color-danger)] mr-1">⚠</span>}
+                            {job.jobTitle}
+                          </td>
+                          <td className="py-2 text-right text-[var(--color-text-secondary)]">{job.applications}</td>
+                          <td className="py-2 text-right text-[var(--color-text-secondary)]">{fmtRate(job.screenPassRate)}</td>
+                          <td className="py-2 text-right text-[var(--color-text-secondary)]">{fmtRate(job.interviewPassRate)}</td>
+                          <td className="py-2 text-right">
+                            {job.offerRiskRate !== null && job.offerRiskRate > 0.3
+                              ? <span className="text-[var(--color-danger)]">{fmtRate(job.offerRiskRate)}</span>
+                              : <span className="text-[var(--color-text-secondary)]">{fmtRate(job.offerRiskRate)}</span>
+                            }
+                          </td>
+                          <td className="py-2 text-right text-[var(--color-text-secondary)]">{job.closed}</td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -485,11 +580,18 @@ export default function RecruitmentFunnelPage() {
           </div>
         </div>
 
-        {/* Action Impact */}
+        {/* P0-4: Action Impact with jump to Action Center */}
         <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-base font-semibold text-[var(--color-text-primary)]">Action 影响分析</h2>
-            <StatusBadge label={`${actionImpact.total} 个Action`} variant="info" />
+            <div className="flex items-center gap-2">
+              <StatusBadge label={`${actionImpact.total} 个Action`} variant="info" />
+              {bottleneckStageKey && (
+                <a href={`/actions?source=funnel&stage=${bottleneckStageKey}`} className="text-xs text-[var(--color-primary)] hover:underline font-medium">
+                  前往 Action Center →
+                </a>
+              )}
+            </div>
           </div>
           <div className="grid grid-cols-4 gap-4 mb-4">
             <div className="text-center p-3 rounded-xl bg-[var(--color-surface-tertiary)]">
@@ -527,16 +629,22 @@ export default function RecruitmentFunnelPage() {
           )}
         </div>
 
-        {/* AI Copilot hint */}
+        {/* system_rule vs AI Copilot labels */}
         <div className="rounded-2xl border border-dashed border-[var(--color-primary-light)] bg-[var(--color-surface)] p-5">
           <div className="flex items-center gap-3">
             <span className="text-lg">🤖</span>
             <div>
-              <h3 className="text-sm font-semibold text-[var(--color-text-primary)]">AI Copilot 可解释漏斗卡点</h3>
+              <h3 className="text-sm font-semibold text-[var(--color-text-primary)]">AI Copilot — 辅助建议，仅供参考</h3>
               <p className="text-xs text-[var(--color-text-secondary)] mt-1">
-                AI Copilot 可以基于当前漏斗数据、知识库证据和系统规则洞察，为管理层解释招聘瓶颈原因。
+                AI Copilot 可基于当前漏斗数据、知识库证据和系统规则洞察，为管理层解释招聘瓶颈原因。
                 回答必须基于有权限的 funnel evidence / Knowledge citation，没有证据时提示证据不足。
               </p>
+              <div className="flex items-center gap-2 mt-2">
+                <StatusBadge label="system_rule" variant="info" />
+                <span className="text-[10px] text-[var(--color-text-tertiary)]">确定性规则 · 不需要 LLM</span>
+                <StatusBadge label="AI Copilot" variant="default" />
+                <span className="text-[10px] text-[var(--color-text-tertiary)]">辅助建议 · 仅供参考 · 需 evidence/citation</span>
+              </div>
             </div>
           </div>
         </div>
