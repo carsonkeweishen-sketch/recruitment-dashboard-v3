@@ -3,8 +3,14 @@ import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-const prisma = new PrismaClient({ adapter: new PrismaPg(pool) });
+let _prisma: PrismaClient | null = null;
+function getPrisma(): PrismaClient {
+  if (!_prisma) {
+    const p = new Pool({ connectionString: process.env.DATABASE_URL });
+    _prisma = new PrismaClient({ adapter: new PrismaPg(p) });
+  }
+  return _prisma;
+}
 
 const PAUSE_THRESHOLD = 2000; // ms — gaps longer than this count as "long pauses"
 
@@ -37,7 +43,7 @@ function isClosedQuestion(text: string): boolean {
 
 export async function computeSpeechMetrics(transcriptId: string): Promise<SpeechMetrics> {
   // 1. Fetch all segments for this transcript
-  const segments = await prisma.transcriptSegment.findMany({
+  const segments = await getPrisma().transcriptSegment.findMany({
     where: { transcriptId },
     orderBy: { segmentIndex: "asc" },
   });
@@ -132,9 +138,9 @@ export async function computeSpeechMetrics(transcriptId: string): Promise<Speech
   ];
 
   // Delete old metrics and insert new ones (upsert pattern)
-  await prisma.speechMetric.deleteMany({ where: { transcriptId } });
+  await getPrisma().speechMetric.deleteMany({ where: { transcriptId } });
 
-  await prisma.speechMetric.createMany({
+  await getPrisma().speechMetric.createMany({
     data: metricEntries.map((m) => ({
       transcriptId,
       metricKey: m.metricKey,
@@ -148,7 +154,7 @@ export async function computeSpeechMetrics(transcriptId: string): Promise<Speech
 
 export async function getSpeechMetrics(transcriptId: string): Promise<SpeechMetrics> {
   // Try fetching from SpeechMetric table first
-  const existingMetrics = await prisma.speechMetric.findMany({
+  const existingMetrics = await getPrisma().speechMetric.findMany({
     where: { transcriptId },
   });
 

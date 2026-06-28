@@ -1,6 +1,7 @@
 // Phase 8.10: GET /api/speech/transcripts/:id — Transcript detail with segments
+// Supports both transcript ID and mediaAssetId
 import { getSession } from "@/server/auth/session";
-import { getTranscriptById } from "@/server/services/media/media-service";
+import { getTranscriptById, getTranscriptByMediaAssetId } from "@/server/services/media/media-service";
 import { getMediaAssetById } from "@/server/services/media/media-service";
 import { buildScopeWhere } from "@/server/permissions/check-permission";
 
@@ -14,7 +15,11 @@ export async function GET(
   const { id } = await params;
 
   try {
-    const transcript = await getTranscriptById(id);
+    // Try transcript ID first, then mediaAssetId
+    let transcript = await getTranscriptById(id);
+    if (!transcript) {
+      transcript = await getTranscriptByMediaAssetId(id);
+    }
     if (!transcript) {
       return Response.json({ success: false, error: "未找到该转写记录" }, { status: 404 });
     }

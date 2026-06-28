@@ -4,7 +4,7 @@ import { AppShell } from "@/components/layout/AppShell";
 
 export const metadata: Metadata = {
   title: "Recruitment Dashboard v3",
-  description: "智能招聘 AI 看板 — 招聘效率管理系统",
+  description: "理然智能招聘 AI 看板",
 };
 
 export default function RootLayout({

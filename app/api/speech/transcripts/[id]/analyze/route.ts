@@ -1,7 +1,7 @@
 // Phase 8.10: POST /api/speech/transcripts/:id/analyze — Run communication analysis
 import { getSession } from "@/server/auth/session";
 import { analyzeCommunication } from "@/server/services/speech/communication-analysis-service";
-import { getTranscriptById } from "@/server/services/media/media-service";
+import { getTranscriptById, getTranscriptByMediaAssetId } from "@/server/services/media/media-service";
 import { getMediaAssetById } from "@/server/services/media/media-service";
 import { buildScopeWhere } from "@/server/permissions/check-permission";
 
@@ -20,7 +20,10 @@ export async function POST(
   const { id } = await params;
 
   try {
-    const transcript = await getTranscriptById(id);
+    let transcript = await getTranscriptById(id);
+    if (!transcript) {
+      transcript = await getTranscriptByMediaAssetId(id);
+    }
     if (!transcript) {
       return Response.json({ success: false, error: "未找到该转写记录" }, { status: 404 });
     }
@@ -44,7 +47,7 @@ export async function POST(
       );
     }
 
-    const report = await analyzeCommunication(id, session.userId);
+    const report = await analyzeCommunication(transcript.id, session.userId);
     return Response.json({ success: true, data: report });
   } catch (err) {
     const message = err instanceof Error ? err.message : "分析失败";

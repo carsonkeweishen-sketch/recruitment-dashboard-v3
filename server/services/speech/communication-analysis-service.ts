@@ -3,8 +3,14 @@ import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-const prisma = new PrismaClient({ adapter: new PrismaPg(pool) });
+let _prisma: PrismaClient | null = null;
+function getPrisma(): PrismaClient {
+  if (!_prisma) {
+    const p = new Pool({ connectionString: process.env.DATABASE_URL });
+    _prisma = new PrismaClient({ adapter: new PrismaPg(p) });
+  }
+  return _prisma;
+}
 
 export interface StarAnalysis {
   completeness: number; // 0-100
@@ -164,7 +170,7 @@ export async function analyzeCommunication(
   userId?: string
 ): Promise<CommunicationReport> {
   // 1. Fetch segments
-  const transcript = await prisma.transcript.findUnique({
+  const transcript = await getPrisma().transcript.findUnique({
     where: { id: transcriptId },
     include: {
       segments: { orderBy: { segmentIndex: "asc" } },
@@ -406,7 +412,7 @@ export async function analyzeCommunication(
   ];
 
   for (const at of analysisTypes) {
-    const analysis = await prisma.communicationAnalysis.create({
+    const analysis = await getPrisma().communicationAnalysis.create({
       data: {
         transcriptId,
         analysisType: at.type,
@@ -428,7 +434,7 @@ export async function analyzeCommunication(
     for (const segId of evidenceIds) {
       const seg = segments.find((s) => s.id === segId);
       if (seg) {
-        await prisma.communicationEvidence.create({
+        await getPrisma().communicationEvidence.create({
           data: {
             analysisId: analysis.id,
             transcriptSegmentId: seg.id,
@@ -443,23 +449,27 @@ export async function analyzeCommunication(
     }
   }
 
-  // Write activity log if userId provided
+  // Write activity log if userId provided (non-blocking)
   if (userId) {
-    await prisma.activityLog.create({
-      data: {
-        actorId: userId,
-        action: "COMMUNICATION_ANALYZED",
-        resourceType: "transcript",
-        resourceId: transcriptId,
-        detail: {
-          analysisTypes: analysisTypes.map((a) => a.type),
-          starCompleteness,
-          evidenceDensity: density,
-          followupDepth: depth,
-          vaguenessLevel,
+    try {
+      await getPrisma().activityLog.create({
+        data: {
+          actorId: userId,
+          action: "COMMUNICATION_ANALYZED",
+          resourceType: "transcript",
+          resourceId: transcriptId,
+          detail: {
+            analysisTypes: analysisTypes.map((a) => a.type),
+            starCompleteness,
+            evidenceDensity: density,
+            followupDepth: depth,
+            vaguenessLevel,
+          },
         },
-      },
-    });
+      });
+    } catch {
+      // Activity log is non-critical; ignore FK errors in dev
+    }
   }
 
   return report;

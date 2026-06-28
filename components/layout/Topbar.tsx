@@ -23,10 +23,10 @@ export function Topbar() {
     <header className="flex h-[var(--topbar-height)] items-center justify-between border-b border-[var(--color-border)] bg-[var(--color-surface)] px-6">
       <div className="flex items-center gap-3">
         <h1 className="text-sm font-medium text-[var(--color-text-primary)]">
-          Recruitment Dashboard
+          理然智能招聘 AI 看板
         </h1>
         <span className="rounded-full bg-[var(--color-primary-light)] px-2 py-0.5 text-xs font-medium text-[var(--color-primary)]">
-          Phase 1
+          v3
         </span>
       </div>
 

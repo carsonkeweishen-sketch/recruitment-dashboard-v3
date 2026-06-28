@@ -376,8 +376,29 @@ export default function MediaPage() {
               setError(assetsRes.error || "加载失败");
               return;
             }
+            // API returns { items: [...], total: N }, map fields to frontend types
+            const rawItems = assetsRes.data?.items || [];
+            const mappedAssets: MediaAsset[] = rawItems.map(
+              (raw: Record<string, unknown>) => ({
+                id: raw.id as string,
+                fileName: (raw.fileName as string) || "",
+                fileType: (raw.mediaType as MediaType) || "audio",
+                mimeType: (raw.mimeType as string) || "",
+                fileSize: (raw.fileSize as number) || 0,
+                durationMs: (raw.durationMs as number) || null,
+                objectType: (raw.objectType as string) || "",
+                objectId: (raw.objectId as string) || "",
+                transcriptStatus:
+                  (raw.transcriptionStatus as TranscriptStatus) || "none",
+                uploadedBy: (raw.uploadedById as string) || "",
+                uploadedAt: (raw.createdAt as string) || "",
+                aiUsable: (raw.aiUsable as boolean) ?? false,
+                redacted: (raw.redacted as boolean) ?? false,
+                reviewApproved: (raw.reviewApproved as boolean) ?? false,
+              }),
+            );
             setData({
-              assets: assetsRes.data || [],
+              assets: mappedAssets,
               stats: statsRes.success
                 ? statsRes.data
                 : {
@@ -682,6 +703,21 @@ export default function MediaPage() {
       }
     >
       <div className="space-y-6">
+        {/* ================================================================
+            Privacy/Safety Notice Banner (Persistent)
+            ================================================================ */}
+        <div className="rounded-xl border border-[var(--color-info-light)] bg-[var(--color-info-light)]/10 px-5 py-3.5 flex items-start gap-3">
+          <span className="text-base shrink-0 mt-0.5">🛡️</span>
+          <div className="text-xs text-[var(--color-text-secondary)] leading-relaxed space-y-1">
+            <p>
+              本中心分析面试沟通内容、结构和证据密度，不做情绪、声音、口音、性格或撒谎判断。
+            </p>
+            <p>
+              AI 辅助建议仅供参考，请结合真实业务和面试证据人工确认。
+            </p>
+          </div>
+        </div>
+
         {/* ================================================================
             Upload Drop Zone
             ================================================================ */}
@@ -1290,26 +1326,32 @@ function DrawerOverviewTab({
             <MetricMiniCard
               label="候选人说话占比"
               value={`${speechMetrics.candidateSpeakingRatio}%`}
+              disclaimer="用于观察面试流程是否给到充分表达空间，不作为候选人评分"
             />
             <MetricMiniCard
               label="面试官说话占比"
               value={`${speechMetrics.interviewerSpeakingRatio}%`}
+              disclaimer="用于观察面试流程是否给到充分表达空间，不作为候选人评分"
             />
             <MetricMiniCard
               label="平均回答时长"
               value={`${(speechMetrics.avgAnswerDurationMs / 1000).toFixed(1)}s`}
+              disclaimer="仅用于定位回看片段和观察追问时机，不作为候选人评分"
             />
             <MetricMiniCard
               label="长停顿次数"
               value={speechMetrics.longPauseCount}
+              disclaimer="仅用于定位回看片段和观察追问时机，不作为候选人评分"
             />
             <MetricMiniCard
               label="追问次数"
               value={speechMetrics.followupCount}
+              disclaimer="帮助面试官复盘，不用于排名或评价"
             />
             <MetricMiniCard
               label="封闭式问题比例"
               value={`${speechMetrics.closedQuestionRatio}%`}
+              disclaimer="帮助面试官复盘，不用于排名或评价"
             />
           </div>
         </div>
@@ -1383,10 +1425,12 @@ function MetricMiniCard({
   label,
   value,
   trend,
+  disclaimer,
 }: {
   label: string;
   value: string | number;
   trend?: "up" | "down";
+  disclaimer?: string;
 }) {
   return (
     <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-tertiary)] p-3">
@@ -1403,6 +1447,11 @@ function MetricMiniCard({
           </span>
         )}
       </div>
+      {disclaimer && (
+        <p className="text-[10px] text-[var(--color-text-tertiary)] mt-1.5 leading-tight border-t border-[var(--color-border-light)] pt-1.5">
+          {disclaimer}
+        </p>
+      )}
     </div>
   );
 }
@@ -1619,6 +1668,7 @@ function DrawerMetricsTab({
         metrics.candidateSpeakingRatio > 50
           ? ("up" as const)
           : ("down" as const),
+      disclaimer: "用于观察面试流程是否给到充分表达空间，不作为候选人评分",
     },
     {
       label: "面试官说话占比",
@@ -1627,22 +1677,27 @@ function DrawerMetricsTab({
         metrics.interviewerSpeakingRatio > 50
           ? ("up" as const)
           : ("down" as const),
+      disclaimer: "用于观察面试流程是否给到充分表达空间，不作为候选人评分",
     },
     {
       label: "平均回答时长",
       value: `${(metrics.avgAnswerDurationMs / 1000).toFixed(1)}s`,
+      disclaimer: "仅用于定位回看片段和观察追问时机，不作为候选人评分",
     },
     {
       label: "长停顿次数",
       value: metrics.longPauseCount,
+      disclaimer: "仅用于定位回看片段和观察追问时机，不作为候选人评分",
     },
     {
       label: "追问次数",
       value: metrics.followupCount,
+      disclaimer: "帮助面试官复盘，不用于排名或评价",
     },
     {
       label: "封闭式问题比例",
       value: `${metrics.closedQuestionRatio}%`,
+      disclaimer: "帮助面试官复盘，不用于排名或评价",
     },
   ];
 
@@ -1655,6 +1710,7 @@ function DrawerMetricsTab({
             label={item.label}
             value={item.value}
             trend={item.trend}
+            disclaimer={item.disclaimer}
           />
         ))}
       </div>
@@ -1710,6 +1766,9 @@ function DrawerStarTab({ analysis }: { analysis: StarAnalysis | null }) {
         >
           {analysis.overallScore}%
         </div>
+        <p className="text-[10px] text-[var(--color-text-tertiary)] mt-2 leading-tight">
+          基于 transcript evidence 判断回答结构，不作为候选人评分
+        </p>
       </div>
 
       {/* Dimension Progress Bars */}
@@ -1838,6 +1897,9 @@ function DrawerEvidenceTab({
             {density.label}
           </span>
         </div>
+        <p className="text-[10px] text-[var(--color-text-tertiary)] mb-4 leading-tight">
+          量化证据出现频率，无证据≠淘汰
+        </p>
 
         {/* Metric Counts */}
         <div className="grid grid-cols-2 gap-3">
@@ -1952,6 +2014,9 @@ function DrawerFollowupTab({
             {depth.label}
           </span>
         </div>
+        <p className="text-[10px] text-[var(--color-text-tertiary)] mb-4 leading-tight">
+          帮助面试官复盘，不用于排名或评价
+        </p>
 
         {/* Indicators */}
         <div className="grid grid-cols-2 gap-3">
@@ -2156,21 +2221,47 @@ function DrawerSuggestionsTab({
         const reviewStatus =
           REVIEW_STATUS_CONFIG[suggestion.reviewStatus];
 
+        const isSystemRule = suggestion.provider === "system_rule";
+        const sourceBadge = isSystemRule
+          ? {
+              label: "系统规则提醒",
+              bg: "var(--color-info-light)",
+              color: "var(--color-info)",
+            }
+          : {
+              label: "AI 辅助建议",
+              bg: "var(--color-primary-light)",
+              color: "var(--color-primary)",
+            };
+
         return (
           <div
             key={suggestion.id}
             className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5"
           >
-            {/* Provider Info */}
+            {/* Source Badge & Provider Info */}
             <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2 text-xs text-[var(--color-text-tertiary)]">
-                <span className="font-mono">{suggestion.provider}</span>
-                <span>·</span>
-                <span className="font-mono">{suggestion.model}</span>
-                <span>·</span>
-                <span className="font-mono">
-                  v{suggestion.promptVersion}
+              <div className="flex items-center gap-2">
+                <span
+                  className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium"
+                  style={{
+                    backgroundColor: sourceBadge.bg,
+                    color: sourceBadge.color,
+                  }}
+                >
+                  {sourceBadge.label}
                 </span>
+                {!isSystemRule && (
+                  <div className="flex items-center gap-1 text-xs text-[var(--color-text-tertiary)]">
+                    <span className="font-mono">{suggestion.provider}</span>
+                    <span>·</span>
+                    <span className="font-mono">{suggestion.model}</span>
+                    <span>·</span>
+                    <span className="font-mono">
+                      v{suggestion.promptVersion}
+                    </span>
+                  </div>
+                )}
               </div>
               <span
                 className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium"
@@ -2189,6 +2280,15 @@ function DrawerSuggestionsTab({
                 {suggestion.content}
               </p>
             </div>
+
+            {/* AI Copilot Disclaimer */}
+            {!isSystemRule && (
+              <div className="rounded-lg border border-[var(--color-warning-light)] bg-[var(--color-warning-light)]/10 px-3 py-2 mb-4">
+                <p className="text-xs text-[var(--color-text-tertiary)]">
+                  仅供参考，请结合真实业务和面试证据人工确认
+                </p>
+              </div>
+            )}
 
             {/* Review Controls */}
             {suggestion.reviewStatus === "pending" && (

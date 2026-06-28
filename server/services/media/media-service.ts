@@ -4,8 +4,14 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 import type { ScopeWhere } from "@/server/permissions/types";
 
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-const prisma = new PrismaClient({ adapter: new PrismaPg(pool) });
+let _prisma: PrismaClient | null = null;
+function getPrisma(): PrismaClient {
+  if (!_prisma) {
+    const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+    _prisma = new PrismaClient({ adapter: new PrismaPg(pool) });
+  }
+  return _prisma;
+}
 
 // ============================================================
 // Types
@@ -59,7 +65,7 @@ async function resolveScopedMediaWhere(scope: ScopeWhere): Promise<Record<string
 
   if (scope.scope === "DEPARTMENT" && scope.departmentId) {
     // Jobs in department
-    const deptJobs = await prisma.job.findMany({
+    const deptJobs = await getPrisma().job.findMany({
       where: { departmentId: scope.departmentId },
       select: { id: true },
     });
@@ -68,13 +74,13 @@ async function resolveScopedMediaWhere(scope: ScopeWhere): Promise<Record<string
 
   if (scope.scope === "OWNED" && scope.userId) {
     // Own interviews
-    const ownInterviews = await prisma.interview.findMany({
+    const ownInterviews = await getPrisma().interview.findMany({
       where: { interviewerId: scope.userId },
       select: { id: true },
     });
     allowedObjectIds.push(...ownInterviews.map((i) => i.id));
     // Own jobs
-    const ownJobs = await prisma.job.findMany({
+    const ownJobs = await getPrisma().job.findMany({
       where: { ownerId: scope.userId },
       select: { id: true },
     });
@@ -84,14 +90,14 @@ async function resolveScopedMediaWhere(scope: ScopeWhere): Promise<Record<string
 
   if (scope.scope === "RELATED" && scope.userId) {
     if (scope.role === "interviewer") {
-      const relatedInterviews = await prisma.interview.findMany({
+      const relatedInterviews = await getPrisma().interview.findMany({
         where: { interviewerId: scope.userId },
         select: { id: true },
       });
       allowedObjectIds.push(...relatedInterviews.map((i) => i.id));
     } else {
       // business_owner
-      const bizJobs = await prisma.job.findMany({
+      const bizJobs = await getPrisma().job.findMany({
         where: { businessOwnerId: scope.userId },
         select: { id: true },
       });
@@ -134,13 +140,13 @@ export async function getMediaAssets(filters: MediaAssetFilters, scope: ScopeWhe
   if (filters.transcriptionStatus) where.transcriptionStatus = filters.transcriptionStatus;
 
   const [items, total] = await Promise.all([
-    prisma.mediaAsset.findMany({
+    getPrisma().mediaAsset.findMany({
       where: where as any,
       orderBy: { createdAt: "desc" },
       skip: filters.offset ?? 0,
       take: filters.limit ?? 20,
     }),
-    prisma.mediaAsset.count({ where: where as any }),
+    getPrisma().mediaAsset.count({ where: where as any }),
   ]);
 
   return { items, total };
@@ -151,13 +157,13 @@ export async function getMediaAssetById(id: string, scope: ScopeWhere) {
   const scopeWhere = await resolveScopedMediaWhere(scope);
   const where: Record<string, unknown> = { id, ...scopeWhere };
 
-  const asset = await prisma.mediaAsset.findFirst({ where: where as any });
+  const asset = await getPrisma().mediaAsset.findFirst({ where: where as any });
   return asset;
 }
 
 /** 3. Upload/create a media asset */
 export async function uploadMedia(data: UploadMediaData) {
-  const asset = await prisma.mediaAsset.create({
+  const asset = await getPrisma().mediaAsset.create({
     data: {
       objectType: data.objectType,
       objectId: data.objectId,
@@ -179,7 +185,7 @@ export async function createTranscriptionJob(mediaAssetId: string, userId: strin
   const deepseekKey = process.env.DEEPSEEK_API_KEY;
   if (!deepseekKey) {
     // Provider not configured — create job with not_configured status
-    const job = await prisma.transcriptionJob.create({
+    const job = await getPrisma().transcriptionJob.create({
       data: {
         mediaAssetId,
         provider: "deepseek",
@@ -189,7 +195,7 @@ export async function createTranscriptionJob(mediaAssetId: string, userId: strin
       },
     });
 
-    await prisma.mediaAsset.update({
+    await getPrisma().mediaAsset.update({
       where: { id: mediaAssetId },
       data: { transcriptionStatus: "not_configured" },
     });
@@ -198,7 +204,7 @@ export async function createTranscriptionJob(mediaAssetId: string, userId: strin
   }
 
   // Create job with processing status
-  const job = await prisma.transcriptionJob.create({
+  const job = await getPrisma().transcriptionJob.create({
     data: {
       mediaAssetId,
       provider: "deepseek",
@@ -209,13 +215,13 @@ export async function createTranscriptionJob(mediaAssetId: string, userId: strin
     },
   });
 
-  await prisma.mediaAsset.update({
+  await getPrisma().mediaAsset.update({
     where: { id: mediaAssetId },
     data: { transcriptionStatus: "processing" },
   });
 
   // Mock-complete: create a transcript with segments
-  const transcript = await prisma.transcript.create({
+  const transcript = await getPrisma().transcript.create({
     data: {
       mediaAssetId,
       transcriptionJobId: job.id,
@@ -237,7 +243,7 @@ export async function createTranscriptionJob(mediaAssetId: string, userId: strin
   ];
 
   for (const seg of mockSegments) {
-    await prisma.transcriptSegment.create({
+    await getPrisma().transcriptSegment.create({
       data: {
         transcriptId: transcript.id,
         segmentIndex: seg.index,
@@ -252,7 +258,7 @@ export async function createTranscriptionJob(mediaAssetId: string, userId: strin
   }
 
   // Update job to ready
-  await prisma.transcriptionJob.update({
+  await getPrisma().transcriptionJob.update({
     where: { id: job.id },
     data: {
       status: "ready",
@@ -261,7 +267,7 @@ export async function createTranscriptionJob(mediaAssetId: string, userId: strin
     },
   });
 
-  await prisma.mediaAsset.update({
+  await getPrisma().mediaAsset.update({
     where: { id: mediaAssetId },
     data: { transcriptionStatus: "ready" },
   });
@@ -279,7 +285,7 @@ export async function createManualTranscript(
   data: ManualTranscriptData,
   userId: string
 ) {
-  const transcript = await prisma.transcript.create({
+  const transcript = await getPrisma().transcript.create({
     data: {
       mediaAssetId,
       source: "manual",
@@ -293,7 +299,7 @@ export async function createManualTranscript(
 
   for (let i = 0; i < data.segments.length; i++) {
     const seg = data.segments[i];
-    await prisma.transcriptSegment.create({
+    await getPrisma().transcriptSegment.create({
       data: {
         transcriptId: transcript.id,
         segmentIndex: i,
@@ -307,7 +313,7 @@ export async function createManualTranscript(
     });
   }
 
-  await prisma.mediaAsset.update({
+  await getPrisma().mediaAsset.update({
     where: { id: mediaAssetId },
     data: { transcriptionStatus: "ready" },
   });
@@ -317,8 +323,20 @@ export async function createManualTranscript(
 
 /** 6. Get transcript by ID with segments */
 export async function getTranscriptById(id: string) {
-  const transcript = await prisma.transcript.findUnique({
+  const transcript = await getPrisma().transcript.findUnique({
     where: { id },
+    include: {
+      segments: { orderBy: { segmentIndex: "asc" } },
+      analyses: { orderBy: { createdAt: "desc" } },
+    },
+  });
+  return transcript;
+}
+
+/** 6b. Get transcript by mediaAssetId (for frontend convenience) */
+export async function getTranscriptByMediaAssetId(mediaAssetId: string) {
+  const transcript = await getPrisma().transcript.findFirst({
+    where: { mediaAssetId },
     include: {
       segments: { orderBy: { segmentIndex: "asc" } },
       analyses: { orderBy: { createdAt: "desc" } },
@@ -329,7 +347,7 @@ export async function getTranscriptById(id: string) {
 
 /** 7. Review transcript */
 export async function reviewTranscript(id: string, data: ReviewTranscriptData, userId: string) {
-  const transcript = await prisma.transcript.update({
+  const transcript = await getPrisma().transcript.update({
     where: { id },
     data: {
       reviewStatus: data.reviewStatus,
@@ -337,7 +355,7 @@ export async function reviewTranscript(id: string, data: ReviewTranscriptData, u
   });
 
   // Write activity log
-  await prisma.activityLog.create({
+  await getPrisma().activityLog.create({
     data: {
       actorId: userId,
       action: "TRANSCRIPT_REVIEWED",
@@ -356,7 +374,7 @@ export async function reviewTranscript(id: string, data: ReviewTranscriptData, u
 
 /** 8. Analyze transcript via system rules */
 export async function analyzeTranscript(id: string, userId: string) {
-  const transcript = await prisma.transcript.findUnique({
+  const transcript = await getPrisma().transcript.findUnique({
     where: { id },
     include: {
       segments: { orderBy: { segmentIndex: "asc" } },
@@ -373,7 +391,7 @@ export async function analyzeTranscript(id: string, userId: string) {
   );
 
   // Save STAR analysis
-  await prisma.transcriptAnalysis.create({
+  await getPrisma().transcriptAnalysis.create({
     data: {
       transcriptId: id,
       analysisType: "star",
@@ -383,7 +401,7 @@ export async function analyzeTranscript(id: string, userId: string) {
   });
 
   // Save evidence density
-  await prisma.transcriptAnalysis.create({
+  await getPrisma().transcriptAnalysis.create({
     data: {
       transcriptId: id,
       analysisType: "evidence_density",
@@ -393,7 +411,7 @@ export async function analyzeTranscript(id: string, userId: string) {
   });
 
   // Save followup depth
-  await prisma.transcriptAnalysis.create({
+  await getPrisma().transcriptAnalysis.create({
     data: {
       transcriptId: id,
       analysisType: "followup_depth",
@@ -403,7 +421,7 @@ export async function analyzeTranscript(id: string, userId: string) {
   });
 
   // Save vagueness analysis
-  await prisma.transcriptAnalysis.create({
+  await getPrisma().transcriptAnalysis.create({
     data: {
       transcriptId: id,
       analysisType: "vagueness",
@@ -413,7 +431,7 @@ export async function analyzeTranscript(id: string, userId: string) {
   });
 
   // Write activity log
-  await prisma.activityLog.create({
+  await getPrisma().activityLog.create({
     data: {
       actorId: userId,
       action: "TRANSCRIPT_ANALYZED",
@@ -434,7 +452,7 @@ export async function getInterviewMedia(interviewId: string, scope: ScopeWhere) 
   // First verify the interview is within scope
   const scopeWhere = await resolveScopedMediaWhere(scope);
 
-  const media = await prisma.mediaAsset.findMany({
+  const media = await getPrisma().mediaAsset.findMany({
     where: {
       objectType: "interview",
       objectId: interviewId,
@@ -451,16 +469,16 @@ export async function getMediaStats(scope: ScopeWhere) {
   const scopeWhere = await resolveScopedMediaWhere(scope);
 
   const [total, pending, processing, ready, failed, notConfigured] = await Promise.all([
-    prisma.mediaAsset.count({ where: scopeWhere as any }),
-    prisma.mediaAsset.count({ where: { ...scopeWhere, transcriptionStatus: "pending" } as any }),
-    prisma.mediaAsset.count({ where: { ...scopeWhere, transcriptionStatus: "processing" } as any }),
-    prisma.mediaAsset.count({ where: { ...scopeWhere, transcriptionStatus: "ready" } as any }),
-    prisma.mediaAsset.count({ where: { ...scopeWhere, transcriptionStatus: "failed" } as any }),
-    prisma.mediaAsset.count({ where: { ...scopeWhere, transcriptionStatus: "not_configured" } as any }),
+    getPrisma().mediaAsset.count({ where: scopeWhere as any }),
+    getPrisma().mediaAsset.count({ where: { ...scopeWhere, transcriptionStatus: "pending" } as any }),
+    getPrisma().mediaAsset.count({ where: { ...scopeWhere, transcriptionStatus: "processing" } as any }),
+    getPrisma().mediaAsset.count({ where: { ...scopeWhere, transcriptionStatus: "ready" } as any }),
+    getPrisma().mediaAsset.count({ where: { ...scopeWhere, transcriptionStatus: "failed" } as any }),
+    getPrisma().mediaAsset.count({ where: { ...scopeWhere, transcriptionStatus: "not_configured" } as any }),
   ]);
 
   // Count AI-usable segments
-  const aiUsable = await prisma.transcriptSegment.count({
+  const aiUsable = await getPrisma().transcriptSegment.count({
     where: {
       isAiUsable: true,
       transcript: {
@@ -470,7 +488,7 @@ export async function getMediaStats(scope: ScopeWhere) {
   });
 
   // Count review-approved transcripts
-  const reviewApproved = await prisma.transcript.count({
+  const reviewApproved = await getPrisma().transcript.count({
     where: {
       reviewStatus: "approved",
       mediaAsset: scopeWhere as any,
