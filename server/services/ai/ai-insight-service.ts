@@ -18,8 +18,9 @@ export async function generateInsight(objectType: string, objectId: string, ques
   }
 
   const context = await buildContext(objectType, objectId);
-  const promptKey = `${objectType}-${mode}-v1` || `${objectType}-risk-explainer-v1`;
-  const prompt = getPrompt(promptKey) || getPrompt("job-risk-explainer-v1");
+  // Fix: original `${objectType}-${mode}-v1` || `...` was always truthy (short-circuit bug)
+  const promptKey = `${objectType}-${mode}-v1`;
+  const prompt = getPrompt(promptKey) ?? getPrompt("job-risk-explainer-v1");
   if (!prompt) throw new Error("No prompt template found");
 
   const userPrompt = prompt.userPromptTemplate.replace("{{context}}", context).replace("{{question}}", question);

@@ -52,12 +52,13 @@ export async function GET(_request: Request) {
     return Response.json({
       success: true,
       data: {
-        totalMedia: mediaStats.total,
-        pendingTranscription: mediaStats.pending + mediaStats.notConfigured,
-        readyTranscripts,
-        analyzedCount,
-        evidenceGapCount,
-        followupInsufficientCount,
+        total: mediaStats.total,
+        pending: mediaStats.pending + mediaStats.notConfigured,
+        ready: readyTranscripts,
+        analyzed: analyzedCount,
+        evidenceGap: evidenceGapCount,
+        insufficientFollowup: followupInsufficientCount,
+        highSpeakingLowEvidence: 0,
       },
     });
   } catch (err) {

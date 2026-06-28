@@ -990,3 +990,101 @@ model CommunicationReview {
 
   @@map("communication_reviews")
 }
+
+// ============================================================
+// Phase 8.11 — AI Copilot Deepening
+// ============================================================
+
+model AICopilotSession {
+  id          String   @id @default(cuid())
+  userId      String   @map("user_id")
+  role        String
+  moduleKey   String   @map("module_key")
+  objectType  String   @map("object_type")
+  objectId    String   @map("object_id")
+  status      String   @default("active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  messages    AICopilotMessage[]
+  contextRefs AICopilotContextRef[]
+
+  @@index([userId, status])
+  @@index([objectType, objectId])
+  @@map("ai_copilot_sessions")
+}
+
+model AICopilotMessage {
+  id                String   @id @default(cuid())
+  sessionId         String   @map("session_id")
+  session           AICopilotSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  role              String
+  content           String
+  answerStatus      String?  @map("answer_status")
+  provider          String?
+  model             String?
+  promptVersion     String?  @map("prompt_version")
+  humanReviewStatus String   @default("pending") @map("human_review_status")
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  contextRefs       AICopilotContextRef[]
+  draftActions      AIDraftAction[]
+  reviewEvents      AIReviewEvent[]
+
+  @@index([sessionId, createdAt])
+  @@map("ai_copilot_messages")
+}
+
+model AICopilotContextRef {
+  id              String   @id @default(cuid())
+  sessionId       String   @map("session_id")
+  session         AICopilotSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  messageId       String?  @map("message_id")
+  message         AICopilotMessage? @relation(fields: [messageId], references: [id], onDelete: SetNull)
+  refType         String   @map("ref_type")
+  refId           String   @map("ref_id")
+  objectType      String   @map("object_type")
+  objectId        String   @map("object_id")
+  sourceLabel     String   @map("source_label")
+  excerpt         String?
+  redactionStatus String   @default("applied") @map("redaction_status")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  @@index([sessionId])
+  @@index([messageId])
+  @@map("ai_copilot_context_refs")
+}
+
+model AIDraftAction {
+  id                String    @id @default(cuid())
+  sourceMessageId   String    @map("source_message_id")
+  sourceMessage     AICopilotMessage @relation(fields: [sourceMessageId], references: [id], onDelete: Cascade)
+  title             String
+  description       String?
+  category          String    @default("ai_suggestion")
+  priority          String    @default("medium")
+  suggestedOwnerId  String?   @map("suggested_owner_id")
+  dueAt             DateTime? @map("due_at")
+  status            String    @default("draft")
+  confirmedActionId String?   @map("confirmed_action_id")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  @@index([sourceMessageId])
+  @@index([status])
+  @@map("ai_draft_actions")
+}
+
+model AIReviewEvent {
+  id            String   @id @default(cuid())
+  messageId     String   @map("message_id")
+  message       AICopilotMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  reviewStatus  String   @map("review_status")
+  editedContent String?  @map("edited_content")
+  reviewedById  String   @map("reviewed_by_id")
+  reviewNote    String?  @map("review_note")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  @@index([messageId])
+  @@map("ai_review_events")
+}
