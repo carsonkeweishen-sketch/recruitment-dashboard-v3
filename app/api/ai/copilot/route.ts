@@ -22,7 +22,7 @@ export async function POST(request: Request) {
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Unknown error";
     if (msg.includes("not configured")) {
-      return Response.json({ success: true, data: { status: "not_configured", message: "AI Provider 未配置，暂不能生成 AI 辅助建议。系统规则提醒仍可使用。" } });
+      return Response.json({ success: true, data: { status: "not_configured", message: "AI Provider 未配置，暂不能生成 AI 辅助建议。系统规则提醒仍可使用。", configLink: "/integrations?provider=deepseek" } });
     }
     return Response.json({ success: false, error: "AI 助手暂时不可用，请稍后重试" }, { status: 500 });
   }

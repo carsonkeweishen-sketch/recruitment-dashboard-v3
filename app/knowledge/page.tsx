@@ -858,14 +858,20 @@ export default function KnowledgePage() {
           )}
         </div>
 
-        {/* AI Copilot hint */}
+        {/* AI Copilot hint — with provider config link */}
         <div className="rounded-2xl border border-dashed border-[var(--color-border)] bg-[var(--color-surface-secondary)] p-4 flex items-start gap-3">
           <span className="text-xl shrink-0">🤖</span>
-          <div>
+          <div className="flex-1">
             <h4 className="text-sm font-semibold text-[var(--color-text-primary)]">AI Copilot 集成</h4>
             <p className="text-xs text-[var(--color-text-secondary)] mt-1">
               AI Copilot 可以直接引用知识库中的结构化知识，辅助生成面试评估、候选人分析和岗位匹配建议。
               在面试反馈或候选人分析页面打开 AI 助手即可使用知识库检索。
+            </p>
+            <p className="text-xs mt-2">
+              <a href="/integrations?provider=deepseek" className="text-[var(--color-primary)] hover:underline font-medium">
+                前往配置 AI Provider →
+              </a>
+              <span className="text-[var(--color-text-tertiary)] ml-2">检查 DeepSeek / OpenAI 连接状态</span>
             </p>
           </div>
         </div>
