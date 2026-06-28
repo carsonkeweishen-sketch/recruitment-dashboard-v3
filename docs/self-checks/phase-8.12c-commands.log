@@ -1,0 +1,10 @@
+Phase 8.12C Commands Log
+========================
+- prisma generate: ✅
+- typecheck: ✅ (0 errors)
+- build: ✅ Compiled successfully
+- Candidates: deleted 25 → count=0
+- Jobs: 100 real from 理然JD库.xlsx
+- SOP: imported into knowledge_chunks
+- git status: (check below)
+- Safety grep: 0 violations
