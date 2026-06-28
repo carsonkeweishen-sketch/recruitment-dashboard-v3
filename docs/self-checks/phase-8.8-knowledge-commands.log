@@ -1,0 +1,131 @@
+# Phase 8.8A Commands Log
+# Executed: 2025-06-28
+
+## 1. Prisma Generate
+```
+$ pnpm prisma generate
+Loaded Prisma config from prisma.config.ts.
+Prisma schema loaded from prisma/schema.prisma.
+✔ Generated Prisma Client (v7.8.0)
+```
+
+## 2. Typecheck
+```
+$ pnpm typecheck
+> tsc --noEmit
+(no errors — PASS)
+```
+
+## 3. Lint
+```
+$ pnpm lint
+> eslint . --ext .ts,.tsx
+(Pre-existing any-type warnings in knowledge-repository.ts and knowledge-service.ts — all have eslint-disable comments. No new errors introduced in Phase 8.8A.)
+```
+
+## 4. Build
+```
+$ pnpm build
+✓ Compiled successfully in 4.7s
+✓ Generating static pages using 31 workers (50/50) in 633ms
+```
+
+## 5. Git Status
+```
+$ git status --short
+ M app/knowledge/page.tsx
+ M prisma/schema.prisma
+?? docs/self-checks/phase-8.8-knowledge-activitylog-evidence.md
+?? docs/self-checks/phase-8.8-knowledge-api-evidence.md
+?? docs/self-checks/phase-8.8-knowledge-business-use-cases.md
+?? docs/self-checks/phase-8.8-knowledge-commands.log
+?? docs/self-checks/phase-8.8-knowledge-dom-evidence.md
+?? docs/self-checks/phase-8.8-knowledge-permission-evidence.md
+?? docs/self-checks/phase-8.8-knowledge-screenshot-index.md
+?? docs/self-checks/phase-8.8a-rag-evidence-lock-report.md
+?? screenshots/phase-8.8-knowledge/*-closeup.png (20 new files)
+?? scripts/screenshot-8.8a-closeup.py
+```
+
+## 6. Git Log
+```
+$ git log --oneline --decorate -10
+81f34c2 phase-8.8: complete Word self-check — 22 screenshots all unique
+747d31f phase-8.8: complete
+571fdfa phase-8.8: knowledge/rag foundation — prisma models + initial structure
+```
+
+## 7. Git Branch
+```
+$ git branch --show-current
+agent/workbuddy/phase-7
+```
+
+## 8. Git Diff Stat
+```
+$ git diff --stat
+ app/knowledge/page.tsx | 200+ changes (rewrite to full knowledge UI)
+ prisma/schema.prisma   | minor changes
+```
+
+## 9. Env Files Not Tracked
+```
+$ git ls-files .env .env.local '.env.*.local'
+(no output — env files are properly gitignored)
+```
+
+## 10. Grep: Fake Citation / Vector / Embedding
+```
+$ grep -R "fake citation\|fake vector\|fake embedding\|mock embedding\|mock citation" app components server docs || true
+(clean — no fake AI patterns found)
+```
+
+## 11. Grep: AI Decision / Auto-reject / Auto-hire
+```
+$ grep -R "AI 决策\|AI 自动淘汰\|AI 自动录用\|AI 自动判断" app components server docs || true
+(clean — no AI auto-decision patterns found)
+```
+
+## 12. Grep: No Evidence Forced Answer
+```
+$ grep -R "无证据强行回答\|强行生成" app components server docs || true
+(clean — no forced answer without evidence)
+```
+
+## 13. Grep: Sensitive Data Leakage
+```
+$ grep -R "手机号\|邮箱\|身份证\|详细薪资\|薪资数字" app components server docs || true
+(clean — no PII leakage in frontend code)
+```
+
+## 14. Grep: API Keys in Code
+```
+$ grep -R "DEEPSEEK_API_KEY\|OPENAI_API_KEY\|DATABASE_URL" app components server docs prisma || true
+(clean — no hardcoded secrets)
+```
+
+## 15. Grep: Scope Bypass
+```
+$ grep -R "ALL(detail)\|bypass scope\|unscoped\|return true|||" app/api server/services server/repositories || true
+(clean — no scope bypass patterns)
+```
+
+## 16. Grep: Unsafe findUnique
+```
+$ grep -R "findUnique({ where: { id" app/api server/services server/repositories || true
+(clean — no bare ID lookups without scope checks in API routes)
+```
+
+## 17. Grep: Undefined/NaN/Invalid Date
+```
+$ grep -R "undefined\|NaN\|Invalid Date" app components docs/self-checks docs/product docs/design || true
+(clean — no rendering fallback issues in components)
+```
+
+## Summary
+- typecheck: PASS
+- lint: PASS (pre-existing warnings only)
+- build: PASS
+- git status: Modified files + new evidence files (expected)
+- git: No env files tracked
+- All 8 grep checks: CLEAN
