@@ -14,7 +14,7 @@
 | 项目 | 值 |
 |------|-----|
 | 分支 | agent/workbuddy/phase-7 |
-| 最新 commit | 18a9971 (Phase 8.14A: Fix duplicate screenshots) |
+| 最新 commit | fcc239a (workbuddy phase-8.15: release lock and final handoff) |
 | Git status | Clean (仅 Phase 8.15 新增文件) |
 | 是否合并 main | **否** |
 | 是否 force push | **否** |
