@@ -1,0 +1,60 @@
+=== Phase 8.15B Commands Log ===
+Date: 2026-06-29
+
+--- 1. Prisma Generate ---
+npx prisma generate
+✔ Generated Prisma Client (v7.8.0) in ~645ms
+Exit code: 0 (PASS)
+
+--- 2. TypeScript Typecheck ---
+npx tsc --noEmit
+(no output — zero errors)
+Exit code: 0 (PASS)
+
+--- 3. Lint ---
+npx eslint app/ components/ lib/ server/ --ext .ts,.tsx
+Result: 141 errors (@typescript-eslint/no-explicit-any, pre-existing), 10 warnings, 1 unused-vars
+Verdict: CONDITIONAL PASS — no new functional errors
+
+--- 4. Build ---
+npx next build
+BUILD_ID: 9hukHm5jK-wGnolE30Ug3
+✔ Compiled successfully
+✔ Generating static pages (77/77)
+Exit code: 0 (PASS)
+
+--- 5. Git Status ---
+Branch: agent/workbuddy/phase-7
+Recent commits:
+  f145d9b (HEAD, tag: workbuddy-phase-8.15) workbuddy phase-8.15a: fix audit gaps
+  7049c77 workbuddy phase-8.15a: demo bug bash and hotfix window
+  c2da6db workbuddy phase-8.15: add Word self-check report
+
+Unstaged: screenshots/phase-8.15b/ scripts/phase-8.15b-capture.js (new Phase 8.15B files)
+Git diff --stat: (clean)
+Env files tracked: (none)
+
+--- 6. Phase 8.15B Screenshot Capture ---
+Playwright automated capture: 16/16 steps PASS
+Required screenshots:
+  ✅ 02-copilot-citation-closeup.png (140.1 KB)
+  ✅ 03-copilot-human-review-closeup.png (76.2 KB)
+  ✅ 04-copilot-no-evidence-closeup.png (117.9 KB)
+  ✅ 07-action-detail-fixed.png (135.3 KB)
+
+Action Detail verification:
+  - resolution button: true
+  - dismiss button: true
+  - Action title: "猎头渠道沟通calibration"
+  - Status: "待处理"
+  - Priority: "低"
+  - Owner: "李招聘"
+  - Source: "手动创建"
+
+--- 7. Security Grep ---
+Fake/Mock in app/components/server: 4 lines (media-service.ts mock segments only, NOT demo path)
+Tech jargon: 150 lines (adapter/readonly/L0 in integration labels — ACCEPTABLE)
+AI auto-decision: 2 lines (protective disclaimers only — CLEAN)
+API Key hardcode: 0 lines — CLEAN
+
+--- End of commands.log ---
