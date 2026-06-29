@@ -1,0 +1,30 @@
+=== Phase 8.14A Commands Log ===
+/workspace/recruitment-dashboard
+agent/workbuddy/phase-7
+ae0e2cc Phase 8.14: Add Word self-check report for GPT review
+668c20d Phase 8.14 Final: Complete Evidence Pack — 25 PNGs + 12 evidence files + commands.log
+74e3e73 Phase 8.14: CEO Demo Readiness — 25 screenshots + demo script + 3 paths
+8e463ec Phase 8.13B: Fixed — Job Detail Drawer confirmed OPEN, Knowledge page correct, raw commands log
+3e999e8 Phase 8.13B: Evidence Proof & Demo Path Final Lock
+?? docs/self-checks/phase-8.14a-api-evidence.md
+?? docs/self-checks/phase-8.14a-commands.log
+?? docs/self-checks/phase-8.14a-demo-path.md
+?? docs/self-checks/phase-8.14a-demo-script.md
+?? docs/self-checks/phase-8.14a-dom-evidence.md
+?? docs/self-checks/phase-8.14a-final-checklist.md
+?? docs/self-checks/phase-8.14a-known-limitations.md
+?? docs/self-checks/phase-8.14a-permission-evidence.md
+?? docs/self-checks/phase-8.14a-report.md
+?? docs/self-checks/phase-8.14a-screenshot-index.md
+?? screenshots/phase-8.14a/
+
+✓ Compiled successfully in 6.9s
+✓ Generating static pages using 31 workers (77/77) in 794ms
+
+server/services/media/media-service.ts:  // Create 4 mock segments with speaker labels and timestamps
+server/services/media/media-service.ts:  const mockSegments = [
+server/services/media/media-service.ts:  for (const seg of mockSegments) {
+app/api/media/assets/[id]/transcribe/route.ts:        message: "DeepSeek 转录服务未配置，请先配置 DEEPSEEK_API_KEY 环境变量。",
+server/services/ai/ai-provider-service.ts:// Checks DEEPSEEK_API_KEY, delegates to deepseek-provider.ts
+server/services/ai/providers/deepseek-provider.ts:    return { status: "not_configured", provider: "deepseek", model: config.model, errorMessage: "DEEPSEEK_API_KEY not set" };
+=== All checks passed ===
