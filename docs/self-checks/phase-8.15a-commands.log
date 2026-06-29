@@ -1,0 +1,93 @@
+=== Phase 8.15A Commands Log ===
+Date: 2026-06-29
+
+--- 1. Prisma Generate ---
+npx prisma generate
+Loaded Prisma config from prisma.config.ts.
+Prisma schema loaded from prisma/schema.prisma.
+✔ Generated Prisma Client (v7.8.0) in 645ms
+Exit code: 0 (PASS)
+
+--- 2. TypeScript Typecheck ---
+npx tsc --noEmit
+(no output — zero errors)
+Exit code: 0 (PASS)
+
+--- 3. Lint ---
+npx eslint app/ components/ lib/ server/ --ext .ts,.tsx
+Result: 141 errors (@typescript-eslint/no-explicit-any, pre-existing), 10 warnings, 1 unused-vars
+Verdict: CONDITIONAL PASS — no new functional errors
+
+--- 4. Build ---
+npx next build
+✔ Compiled successfully
+✔ Linting and checking validity of types
+✔ Generating static pages using 31 workers (77/77)
+Route (app):
+  ○ (Static) prerendered as static content
+  ƒ (Dynamic) server-rendered on demand
+Exit code: 0 (PASS)
+
+--- 5. Git Status ---
+Branch: agent/workbuddy/phase-7
+Recent commits:
+  c2da6db (HEAD, tag: workbuddy-phase-8.15) workbuddy phase-8.15: add Word self-check report
+  cc69cd8 workbuddy phase-8.15: fix 4 cross-directory duplicate screenshots
+  fcc239a workbuddy phase-8.15: release lock and final handoff
+  18a9971 Phase 8.14A: Fix duplicate screenshots
+  174afa3 Phase 8.14A: Demo Evidence & Story Polish
+
+Unstaged changes:
+  ?? docs/self-checks/phase-8.15a-*.md (new Phase 8.15A files)
+  ?? screenshots/phase-8.15a/ (Bug Bash screenshots)
+  ?? scripts/phase-8.15a-bug-bash.js
+
+Git diff --stat: (clean — no modifications to existing files)
+Env files tracked: (none)
+
+--- 6. Bug Bash Results ---
+Real click-through verification with Playwright:
+  18/18 checks PASS
+  0 P0 bugs
+  0 P1 bugs
+  0 P2 bugs
+  0 P3 bugs
+
+Page verification (content length + expected keywords):
+  ✅ Dashboard          len=12922  text="理然智能招聘 AI 看板"
+  ✅ Funnel             len=13750  text="招聘漏斗"
+  ✅ Action Center      len=12644  text="行动中心"
+  ✅ Job Center         len=16720  text="岗位"
+  ✅ Knowledge          len=12701  text="知识库"
+  ✅ Data Sources       len=12530  text="资料接入"
+  ✅ Integrations       len=12794  text="集成"
+  ✅ Candidates         len=12457  text="候选人"
+
+Interactive checks:
+  ✅ AI Copilot panel opens (data-copilot-panel element)
+  ✅ Copilot answers with deepseek provider + citations
+  ✅ Human Review buttons visible (接受/编辑后接受/忽略)
+  ✅ No Evidence: "证据不足，无法生成 AI 建议"
+  ✅ Job Detail Drawer opens ("岗位分析详情"+"JD摘要")
+  ✅ Knowledge search returns results ("场控"/"SOP")
+
+--- 7. Security Grep Summary ---
+Fake/Mock check:
+  4 lines in app/components/server:
+    - server/services/ai/ai-provider-service.ts: comment "No fake/mock responses"
+    - server/services/media/media-service.ts: mock segments (speech placeholder, NOT in demo path)
+  Verdict: CLEAN
+
+Tech jargon check:
+  150 lines (all adapter/readonly/L0 in integration status labels or Prisma adapter imports)
+  Verdict: ACCEPTABLE — legitimate UI labels
+
+AI auto-decision check:
+  2 lines (protective disclaimers only)
+  Verdict: CLEAN
+
+API Key hardcode check:
+  0 lines
+  Verdict: CLEAN
+
+--- End of commands.log ---
