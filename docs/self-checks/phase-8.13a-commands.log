@@ -1,0 +1,33 @@
+=== Phase 8.13A Commands Log ===
+
+--- prisma generate ---
+
+
+
+--- typecheck ---
+
+--- build ---
+✓ Compiled successfully in 6.4s
+✓ Generating static pages using 31 workers (77/77) in 770ms
+
+--- git ---
+agent/workbuddy/phase-7
+51a1b30 Phase 8.13: Full System Regression — 60 closeup screenshots + final report
+70a7d02 Phase 8.12C: Word self-check report for GPT review (22 screenshots embedded)
+0da7b2a Phase 8.12C: Real Data & UI Evidence Lock
+8a0c5a0 Phase 8.12 Combined: Final self-check report for GPT review
+ed19fed Phase 8.12B: Real Company Data Lock — 100 real jobs imported
+?? docs/self-checks/phase-8.13a-api-evidence.md
+?? docs/self-checks/phase-8.13a-commands.log
+?? docs/self-checks/phase-8.13a-permission-evidence.md
+?? screenshots/phase-8.13a/
+
+=== Safety Grep ===
+components/domain/ai/copilot/UniversalCopilotPanel.tsx:            🛡️ AI 辅助建议，仅供参考；���结合实际业务判断。系统不会自动录用、淘汰或推进候选人。
+server/services/interview/interview-risk-signal-service.ts:// - Never outputs "面霸" or derogatory labels
+server/services/ai/copilot-prompt-registry-v2.ts:请基于以上转写段落，分析表达结构、证据密度和追问质量。不得做情绪、口音、性格、声音评分或撒谎识别。`,
+app/api/media/assets/[id]/transcribe/route.ts:        message: "DeepSeek 转录服务未配置，请先配置 DEEPSEEK_API_KEY 环境变量。",
+server/services/ai/ai-provider-service.ts:// Checks DEEPSEEK_API_KEY, delegates to deepseek-provider.ts
+server/services/ai/providers/deepseek-provider.ts:    return { status: "not_configured", provider: "deepseek", model: config.model, errorMessage: "DEEPSEEK_API_KEY not set" };
+
+=== All checks passed ===
