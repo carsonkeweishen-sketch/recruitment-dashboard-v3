@@ -1,4 +1,5 @@
 import { AiRecruitmentDashboard } from "@/components/domain/dashboard/AiRecruitmentDashboard";
+import { RuntimeProofBadge } from "@/components/domain/dashboard/RuntimeProofBadge";
 
 export const metadata = {
   title: "AI 招聘洞察看板",
@@ -6,5 +7,10 @@ export const metadata = {
 };
 
 export default function DashboardPage() {
-  return <AiRecruitmentDashboard />;
+  return (
+    <>
+      <RuntimeProofBadge />
+      <AiRecruitmentDashboard />
+    </>
+  );
 }
