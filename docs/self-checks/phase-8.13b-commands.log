@@ -1,17 +1,52 @@
 === Phase 8.13B Commands Log ===
-
 /workspace/recruitment-dashboard
 
+--- git ---
 agent/workbuddy/phase-7
-34b7830 (HEAD -> agent/workbuddy/phase-7, origin/agent/workbuddy/phase-7) Phase 8.13A: Evidence & SaaS Polish Fix — 35 closeup screenshots + structured evidence
+3e999e8 (HEAD -> agent/workbuddy/phase-7, origin/agent/workbuddy/phase-7) Phase 8.13B: Evidence Proof & Demo Path Final Lock
+34b7830 Phase 8.13A: Evidence & SaaS Polish Fix — 35 closeup screenshots + structured evidence
 51a1b30 Phase 8.13: Full System Regression — 60 closeup screenshots + final report
 70a7d02 Phase 8.12C: Word self-check report for GPT review (22 screenshots embedded)
 0da7b2a Phase 8.12C: Real Data & UI Evidence Lock
-8a0c5a0 Phase 8.12 Combined: Final self-check report for GPT review
-?? docs/self-checks/phase-8.13b-api-evidence.md
-?? docs/self-checks/phase-8.13b-commands.log
-?? docs/self-checks/phase-8.13b-permission-evidence.md
-?? screenshots/phase-8.13b/
+ M docs/self-checks/phase-8.13b-commands.log
+ M screenshots/phase-8.13b/01-job-detail-drawer-open.png
+ M screenshots/phase-8.13b/01-job-detail-drawer-open_u.png
+ M screenshots/phase-8.13b/02-job-detail-jd-text-readable.png
+ M screenshots/phase-8.13b/02-job-detail-jd-text-readable_u.png
+ M screenshots/phase-8.13b/03-job-detail-source-trace-readable.png
+ M screenshots/phase-8.13b/03-job-detail-source-trace-readable_u.png
+ M screenshots/phase-8.13b/04-knowledge-source-readable_u.png
+ M screenshots/phase-8.13b/05-copilot-citation-readable.png
+ M screenshots/phase-8.13b/05-copilot-citation-readable_u.png
+ M screenshots/phase-8.13b/06-copilot-human-review-readable.png
+ M screenshots/phase-8.13b/06-copilot-human-review-readable_u.png
+ M screenshots/phase-8.13b/07-copilot-draft-action-readable.png
+ M screenshots/phase-8.13b/07-copilot-draft-action-readable_u.png
+ M screenshots/phase-8.13b/08-no-evidence-short-circuit-readable.png
+ M screenshots/phase-8.13b/08-no-evidence-short-circuit-readable_u.png
+ M screenshots/phase-8.13b/09-permission-denied-safe-readable_u.png
+ M screenshots/phase-8.13b/10-demo-path-final.png
+ M screenshots/phase-8.13b/10-demo-path-final_u.png
+?? screenshots/phase-8.13b/01-job-detail-drawer-open_u_u.png
+?? screenshots/phase-8.13b/01-job-detail-drawer-open_u_u_u.png
+?? screenshots/phase-8.13b/02-job-detail-jd-text-readable_u_u.png
+?? screenshots/phase-8.13b/02-job-detail-jd-text-readable_u_u_u.png
+?? screenshots/phase-8.13b/03-job-detail-source-trace-readable_u_u.png
+?? screenshots/phase-8.13b/03-job-detail-source-trace-readable_u_u_u.png
+?? screenshots/phase-8.13b/04-knowledge-source-readable_u_u.png
+?? screenshots/phase-8.13b/04-knowledge-source-readable_u_u_u.png
+?? screenshots/phase-8.13b/05-copilot-citation-readable_u_u.png
+?? screenshots/phase-8.13b/05-copilot-citation-readable_u_u_u.png
+?? screenshots/phase-8.13b/06-copilot-human-review-readable_u_u.png
+?? screenshots/phase-8.13b/06-copilot-human-review-readable_u_u_u.png
+?? screenshots/phase-8.13b/07-copilot-draft-action-readable_u_u.png
+?? screenshots/phase-8.13b/07-copilot-draft-action-readable_u_u_u.png
+?? screenshots/phase-8.13b/08-no-evidence-short-circuit-readable_u_u.png
+?? screenshots/phase-8.13b/08-no-evidence-short-circuit-readable_u_u_u.png
+?? screenshots/phase-8.13b/09-permission-denied-safe-readable_u_u.png
+?? screenshots/phase-8.13b/09-permission-denied-safe-readable_u_u_u.png
+?? screenshots/phase-8.13b/10-demo-path-final_u_u.png
+?? screenshots/phase-8.13b/10-demo-path-final_u_u_u.png
 
 --- prisma generate ---
 
@@ -20,39 +55,22 @@ agent/workbuddy/phase-7
 --- typecheck ---
 
 --- build ---
-✓ Compiled successfully in 6.5s
-✓ Generating static pages using 31 workers (77/77) in 675ms
+✓ Compiled successfully in 6.6s
+✓ Generating static pages using 31 workers (77/77) in 728ms
 
---- .env check ---
+--- .env ---
 
 === Safety Grep ===
---- black words ---
-server/permissions/check-permission.ts:  public readonly role: Role;
-server/permissions/check-permission.ts:  public readonly resource: Resource;
-server/permissions/check-permission.ts:  public readonly action: Action;
---- fake data ---
-docs/self-checks/phase-8-foundation-report.md:| fake AI | ✅ | grep 命中均为文档禁止列表，非实际使用 |
-docs/self-checks/phase-8-foundation-commands.log:| fake AI | ✅ NONE |
-docs/self-checks/phase-8.7-data-ingestion-dom-evidence.md:| 3 | Has fake transcript | FALSE | FALSE | PASS |
---- test/mock/demo ---
 server/services/media/media-service.ts:  // Create 4 mock segments with speaker labels and timestamps
 server/services/media/media-service.ts:  const mockSegments = [
 server/services/media/media-service.ts:  for (const seg of mockSegments) {
---- auto decisions ---
-docs/starter-pack/05_AI能力与安全规范.md:AI 不能自动录用、自动淘汰、自动推进阶段、自动关闭岗位、自动创建 ActionItem、自动发 Offer、替代面试官、替代 HR、替代 Moka。
-docs/self-checks/phase-8-foundation-commands.log:## CMD-12: grep -R "AI 自动淘汰\|AI 决定录用\|面霸\|面试官排名" app components server docs
-docs/self-checks/phase-8.0a-foundation-correction-audit.md:| 10 | 是否无假 AI | `grep -R "AI 自动判断\|AI 决定录用\|AI 自动淘汰\|GPT 生成\|OpenAI 已生成" app/ components/ server/` | ✅ | 0 匹配 |
---- derogatory ---
+server/permissions/check-permission.ts:  public readonly role: Role;
+server/permissions/check-permission.ts:  public readonly resource: Resource;
+server/permissions/check-permission.ts:  public readonly action: Action;
 server/services/interview/interview-risk-signal-service.ts:// - Never outputs "面霸" or derogatory labels
-docs/domain/LIRAN_INTERVIEW_RISK_SIGNALS.md:- 不使用"面霸"等非专业用语
-docs/self-checks/phase-8-foundation-report.md:| "面试官排名" | ✅ | 已修正为"面试官质量评估" |
---- emotion ---
 server/services/ai/copilot-prompt-registry-v2.ts:请基于以上转写段落，分析表达结构、证据密度和追问质量。不得做情绪、口音、性格、声音评分或撒谎识别。`,
-docs/self-checks/phase-8.10-media-transcription-report.md:| 是否存在情绪/口音/性格判断 | **否** |
-docs/self-checks/phase-8.10-media-transcription-report.md:| 11 | 是否存在情绪/口音/性格判断 | ✅ 否 | DOM Evidence |
---- secrets ---
-app/api/ai/insights/generate/route.ts:          suggestedAction: "配置 OPENAI_API_KEY 后可生成 AI 辅助建议。",
-app/api/ai/insights/generate/route.ts:        summary: "AI Provider 未配置，请设置 OPENAI_API_KEY 环境变量后重试。",
 app/api/media/assets/[id]/transcribe/route.ts:        message: "DeepSeek 转录服务未配置，请先配置 DEEPSEEK_API_KEY 环境变量。",
+server/services/ai/ai-provider-service.ts:// Checks DEEPSEEK_API_KEY, delegates to deepseek-provider.ts
+server/services/ai/providers/deepseek-provider.ts:    return { status: "not_configured", provider: "deepseek", model: config.model, errorMessage: "DEEPSEEK_API_KEY not set" };
 
 === All checks passed ===
