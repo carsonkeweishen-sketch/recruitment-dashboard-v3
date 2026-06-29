@@ -1,0 +1,58 @@
+=== Phase 8.13B Commands Log ===
+
+/workspace/recruitment-dashboard
+
+agent/workbuddy/phase-7
+34b7830 (HEAD -> agent/workbuddy/phase-7, origin/agent/workbuddy/phase-7) Phase 8.13A: Evidence & SaaS Polish Fix — 35 closeup screenshots + structured evidence
+51a1b30 Phase 8.13: Full System Regression — 60 closeup screenshots + final report
+70a7d02 Phase 8.12C: Word self-check report for GPT review (22 screenshots embedded)
+0da7b2a Phase 8.12C: Real Data & UI Evidence Lock
+8a0c5a0 Phase 8.12 Combined: Final self-check report for GPT review
+?? docs/self-checks/phase-8.13b-api-evidence.md
+?? docs/self-checks/phase-8.13b-commands.log
+?? docs/self-checks/phase-8.13b-permission-evidence.md
+?? screenshots/phase-8.13b/
+
+--- prisma generate ---
+
+
+
+--- typecheck ---
+
+--- build ---
+✓ Compiled successfully in 6.5s
+✓ Generating static pages using 31 workers (77/77) in 675ms
+
+--- .env check ---
+
+=== Safety Grep ===
+--- black words ---
+server/permissions/check-permission.ts:  public readonly role: Role;
+server/permissions/check-permission.ts:  public readonly resource: Resource;
+server/permissions/check-permission.ts:  public readonly action: Action;
+--- fake data ---
+docs/self-checks/phase-8-foundation-report.md:| fake AI | ✅ | grep 命中均为文档禁止列表，非实际使用 |
+docs/self-checks/phase-8-foundation-commands.log:| fake AI | ✅ NONE |
+docs/self-checks/phase-8.7-data-ingestion-dom-evidence.md:| 3 | Has fake transcript | FALSE | FALSE | PASS |
+--- test/mock/demo ---
+server/services/media/media-service.ts:  // Create 4 mock segments with speaker labels and timestamps
+server/services/media/media-service.ts:  const mockSegments = [
+server/services/media/media-service.ts:  for (const seg of mockSegments) {
+--- auto decisions ---
+docs/starter-pack/05_AI能力与安全规范.md:AI 不能自动录用、自动淘汰、自动推进阶段、自动关闭岗位、自动创建 ActionItem、自动发 Offer、替代面试官、替代 HR、替代 Moka。
+docs/self-checks/phase-8-foundation-commands.log:## CMD-12: grep -R "AI 自动淘汰\|AI 决定录用\|面霸\|面试官排名" app components server docs
+docs/self-checks/phase-8.0a-foundation-correction-audit.md:| 10 | 是否无假 AI | `grep -R "AI 自动判断\|AI 决定录用\|AI 自动淘汰\|GPT 生成\|OpenAI 已生成" app/ components/ server/` | ✅ | 0 匹配 |
+--- derogatory ---
+server/services/interview/interview-risk-signal-service.ts:// - Never outputs "面霸" or derogatory labels
+docs/domain/LIRAN_INTERVIEW_RISK_SIGNALS.md:- 不使用"面霸"等非专业用语
+docs/self-checks/phase-8-foundation-report.md:| "面试官排名" | ✅ | 已修正为"面试官质量评估" |
+--- emotion ---
+server/services/ai/copilot-prompt-registry-v2.ts:请基于以上转写段落，分析表达结构、证据密度和追问质量。不得做情绪、口音、性格、声音评分或撒谎识别。`,
+docs/self-checks/phase-8.10-media-transcription-report.md:| 是否存在情绪/口音/性格判断 | **否** |
+docs/self-checks/phase-8.10-media-transcription-report.md:| 11 | 是否存在情绪/口音/性格判断 | ✅ 否 | DOM Evidence |
+--- secrets ---
+app/api/ai/insights/generate/route.ts:          suggestedAction: "配置 OPENAI_API_KEY 后可生成 AI 辅助建议。",
+app/api/ai/insights/generate/route.ts:        summary: "AI Provider 未配置，请设置 OPENAI_API_KEY 环境变量后重试。",
+app/api/media/assets/[id]/transcribe/route.ts:        message: "DeepSeek 转录服务未配置，请先配置 DEEPSEEK_API_KEY 环境变量。",
+
+=== All checks passed ===
