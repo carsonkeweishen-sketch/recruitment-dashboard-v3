@@ -1,0 +1,37 @@
+=== Phase 8.14 Commands Log ===
+/workspace/recruitment-dashboard
+
+agent/workbuddy/phase-7
+8e463ec (HEAD -> agent/workbuddy/phase-7, origin/agent/workbuddy/phase-7) Phase 8.13B: Fixed — Job Detail Drawer confirmed OPEN, Knowledge page correct, raw commands log
+3e999e8 Phase 8.13B: Evidence Proof & Demo Path Final Lock
+34b7830 Phase 8.13A: Evidence & SaaS Polish Fix — 35 closeup screenshots + structured evidence
+51a1b30 Phase 8.13: Full System Regression — 60 closeup screenshots + final report
+70a7d02 Phase 8.12C: Word self-check report for GPT review (22 screenshots embedded)
+?? docs/product/phase-8.14-ceo-demo-script.md
+?? docs/self-checks/phase-8.14-ai-trust-evidence.md
+?? docs/self-checks/phase-8.14-commands.log
+?? docs/self-checks/phase-8.14-demo-data.md
+?? docs/self-checks/phase-8.14-demo-paths.md
+?? docs/self-checks/phase-8.14-saas-ui-review.md
+?? screenshots/phase-8.14/
+
+
+
+✓ Compiled successfully in 6.4s
+✓ Generating static pages using 31 workers (77/77) in 787ms
+
+
+docs/self-checks/phase-8-foundation-commands.log:| fake AI | ✅ NONE |
+docs/self-checks/phase-8.8a-rag-evidence-lock-report.md:**验证结果**: 所有 citation 指向真实数据库记录，无 fake citation。
+docs/self-checks/phase-8.8a-rag-evidence-lock-report.md:### 问题 10: 是否存在 fake citation？
+docs/product/phase-8.14-ceo-demo-script.md:| A3 | Copilot Answer | "看：provider/deepseek、model、promptVersion、citation引用来源全可见。Human Review三态：接受/编辑后接受/忽略。Draft Action只是草稿，必须人工确认。" | 进入Funnel |
+docs/product/phase-8.14-ceo-demo-script.md:| C3 | Knowledge | "知识检索与引用来源。无RAG/citation/embedding黑话。" |
+docs/product/phase-8.14-ceo-demo-script.md:| C4 | Copilot | "citation+Human Review+Draft Action。AI输出不是自动决策，必须人工确认。" |
+components/domain/ai/copilot/UniversalCopilotPanel.tsx:            🛡️ AI 辅助建议，仅供参考；���结合实际业务判断。系统不会自动录用、淘汰或推进候选人。
+docs/starter-pack/00_先读我_AI协同与执行规则.md:8. 不自动录用；
+docs/starter-pack/00_先读我_AI协同与执行规则.md:9. 不自动淘汰；
+app/api/media/assets/[id]/transcribe/route.ts:        message: "DeepSeek 转录服务未配置，请先配置 DEEPSEEK_API_KEY 环境变量。",
+server/services/ai/ai-provider-service.ts:// Checks DEEPSEEK_API_KEY, delegates to deepseek-provider.ts
+server/services/ai/providers/deepseek-provider.ts:    return { status: "not_configured", provider: "deepseek", model: config.model, errorMessage: "DEEPSEEK_API_KEY not set" };
+
+=== All checks passed ===
