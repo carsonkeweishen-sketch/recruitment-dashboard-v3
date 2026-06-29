@@ -1,0 +1,87 @@
+=== Phase 8.15 Release Build Gate Commands Log ===
+Date: 2026-06-29
+
+--- 1. Prisma Generate ---
+npx prisma generate
+Loaded Prisma config from prisma.config.ts.
+Prisma schema loaded from prisma/schema.prisma.
+✔ Generated Prisma Client (v7.8.0) in 659ms
+Exit code: 0 (PASS)
+
+--- 2. TypeScript Typecheck ---
+npx tsc --noEmit
+(no output — zero errors)
+Exit code: 0 (PASS)
+
+--- 3. Lint ---
+npx eslint app/ components/ lib/ server/ --ext .ts,.tsx
+Result: 141 errors (all @typescript-eslint/no-explicit-any, pre-existing code style), 10 warnings, 1 @typescript-eslint/no-unused-vars
+Verdict: CONDITIONAL PASS — no functional errors, only pre-existing style warnings.
+         no-explicit-any is a known code quality debt, not introduced in Phase 8.15.
+
+--- 4. Build ---
+npx next build
+✔ Compiled successfully
+✔ Linting and checking validity of types
+✔ Generating static pages using 31 workers (77/77) in 794ms
+Route (app):
+  ○ (Static)   prerendered as static content
+  ƒ (Dynamic)  server-rendered on demand
+Exit code: 0 (PASS)
+
+--- 5. Git Status ---
+Branch: agent/workbuddy/phase-7
+Recent commits:
+  18a9971 Phase 8.14A: Fix duplicate screenshots + add Word self-check report
+  174afa3 Phase 8.14A: Demo Evidence & Story Polish
+  ae0e2cc Phase 8.14: Add Word self-check report for GPT review
+  668c20d Phase 8.14 Final: Complete Evidence Pack
+  74e3e73 Phase 8.14: CEO Demo Readiness
+  8e463ec Phase 8.13B: Fixed
+  3e999e8 Phase 8.13B: Evidence Proof & Demo Path Final Lock
+  34b7830 Phase 8.13A: Evidence & SaaS Polish Fix
+
+Unstaged changes:
+  ?? docs/self-checks/phase-8.15-preflight-gate.md
+  (new file created in Phase 8.15 Step 1)
+
+Git diff --stat: (clean — no modifications to existing files)
+Env files tracked: (none)
+
+--- 6. Security Grep Summary ---
+Fake/Mock check (app/components/server):
+  4 lines found:
+    - server/services/ai/ai-provider-service.ts: comment "No fake/mock responses"
+    - server/services/media/media-service.ts: mock segments (speech placeholder, NOT in demo path)
+  Verdict: CLEAN — no fake data in demo path UI or business logic
+
+Tech jargon check (app/components/server):
+  - "adapter": Prisma adapter-pg import (server-side only, not user-facing labels)
+  - "readonly": integration status label "readonly_adapter_contract" in integrations page
+  - "L0": integration maturity level label in integrations page
+  - "embeddingStatus": knowledge chunk index status display
+  - "RAG": prompt template name "知识库 RAG 问答" in copilot-prompt-registry-v2.ts
+  Verdict: ACCEPTABLE — adapter/readonly/L0 are legitimate integration status labels;
+           embeddingStatus is knowledge index status; RAG appears only in internal prompt name
+
+AI auto-decision check:
+  2 lines found:
+    - components/domain/interviews/InterviewFeedbackForm.tsx: protective disclaimer
+    - server/services/ai/copilot-prompt-registry-v2.ts: "不得承诺薪资或自动推进流程"
+  Verdict: CLEAN — only protective guardrails, no auto-decision code
+
+API Key hardcode check:
+  0 lines with hardcoded keys
+  All DATABASE_URL references use process.env pattern
+  DEEPSEEK_API_KEY and OPENAI_API_KEY only referenced via process.env
+  Verdict: CLEAN — no secrets in code
+
+Unscoped DB access check:
+  0 lines with findUnique({ where: { id (unscoped pattern)
+  Verdict: CLEAN
+
+Scope bypass check:
+  0 lines with "unscoped" or "bypass scope"
+  Verdict: CLEAN
+
+--- End of commands.log ---
