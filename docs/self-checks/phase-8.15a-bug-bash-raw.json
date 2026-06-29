@@ -1,0 +1,107 @@
+{
+  "stepResults": [
+    {
+      "step": "1. Dashboard opens",
+      "status": "PASS"
+    },
+    {
+      "step": "2. AI Copilot opens from Dashboard",
+      "status": "PASS"
+    },
+    {
+      "step": "3. Copilot answers with real citation",
+      "status": "PASS"
+    },
+    {
+      "step": "4. Human Review visible",
+      "status": "PASS"
+    },
+    {
+      "step": "5. No Evidence professional refusal",
+      "status": "PASS"
+    },
+    {
+      "step": "6. Funnel page opens",
+      "status": "FAIL",
+      "error": "Funnel page returns 404"
+    },
+    {
+      "step": "7. Action Center opens",
+      "status": "FAIL",
+      "error": "Action Center returns 404"
+    },
+    {
+      "step": "8. Action Detail opens",
+      "status": "PASS"
+    },
+    {
+      "step": "9. Job Center shows real jobs",
+      "status": "FAIL",
+      "error": "Job Center returns 404"
+    },
+    {
+      "step": "10. Job Detail Drawer opens",
+      "status": "PASS"
+    },
+    {
+      "step": "11. JD text readable",
+      "status": "PASS"
+    },
+    {
+      "step": "12. Source trace readable",
+      "status": "PASS"
+    },
+    {
+      "step": "13. Knowledge search JD",
+      "status": "FAIL",
+      "error": "Knowledge returns 404"
+    },
+    {
+      "step": "14. Knowledge search SOP",
+      "status": "PASS"
+    },
+    {
+      "step": "15. No fake data in UI",
+      "status": "PASS"
+    },
+    {
+      "step": "16. No tech jargon in UI",
+      "status": "PASS"
+    },
+    {
+      "step": "17. Data Sources page opens",
+      "status": "FAIL",
+      "error": "Data Sources returns 404"
+    },
+    {
+      "step": "18. Integrations page honest",
+      "status": "FAIL",
+      "error": "Integrations returns 404"
+    },
+    {
+      "step": "19. Candidates empty state",
+      "status": "FAIL",
+      "error": "Candidates returns 404"
+    },
+    {
+      "step": "20. Permission denied safe",
+      "status": "PASS"
+    }
+  ],
+  "bugs": [
+    {
+      "id": "BUG-005",
+      "severity": "P1",
+      "page": "Job Detail",
+      "steps": "View Job Detail",
+      "actual": "Source trace not visible",
+      "expected": "Should show source_file/sheet/row",
+      "impactsDemo": true
+    }
+  ],
+  "passCount": 13,
+  "failCount": 7,
+  "p0": 0,
+  "p1": 1,
+  "p2": 0
+}
