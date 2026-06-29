@@ -2,36 +2,190 @@
 /workspace/recruitment-dashboard
 
 agent/workbuddy/phase-7
-8e463ec (HEAD -> agent/workbuddy/phase-7, origin/agent/workbuddy/phase-7) Phase 8.13B: Fixed — Job Detail Drawer confirmed OPEN, Knowledge page correct, raw commands log
+74e3e73 (HEAD -> agent/workbuddy/phase-7, origin/agent/workbuddy/phase-7) Phase 8.14: CEO Demo Readiness — 25 screenshots + demo script + 3 paths
+8e463ec Phase 8.13B: Fixed — Job Detail Drawer confirmed OPEN, Knowledge page correct, raw commands log
 3e999e8 Phase 8.13B: Evidence Proof & Demo Path Final Lock
 34b7830 Phase 8.13A: Evidence & SaaS Polish Fix — 35 closeup screenshots + structured evidence
 51a1b30 Phase 8.13: Full System Regression — 60 closeup screenshots + final report
-70a7d02 Phase 8.12C: Word self-check report for GPT review (22 screenshots embedded)
-?? docs/product/phase-8.14-ceo-demo-script.md
-?? docs/self-checks/phase-8.14-ai-trust-evidence.md
-?? docs/self-checks/phase-8.14-commands.log
-?? docs/self-checks/phase-8.14-demo-data.md
-?? docs/self-checks/phase-8.14-demo-paths.md
-?? docs/self-checks/phase-8.14-saas-ui-review.md
-?? screenshots/phase-8.14/
+ M docs/self-checks/phase-8.14-commands.log
+ M docs/self-checks/phase-8.14-report.md
+ D screenshots/phase-8.14/01-dashboard-ceo-opening.png
+ M screenshots/phase-8.14/01-dashboard-ceo-opening_u.png
+ D screenshots/phase-8.14/02-dashboard-ai-copilot-open.png
+ M screenshots/phase-8.14/02-dashboard-ai-copilot-open_u.png
+ D screenshots/phase-8.14/03-copilot-context-stack.png
+ M screenshots/phase-8.14/03-copilot-context-stack_u.png
+ D screenshots/phase-8.14/04-copilot-answer-with-citation.png
+ M screenshots/phase-8.14/04-copilot-answer-with-citation_u.png
+ M screenshots/phase-8.14/05-copilot-human-review.png
+ M screenshots/phase-8.14/05-copilot-human-review_u.png
+ D screenshots/phase-8.14/07-funnel-bottleneck-or-partial.png
+ M screenshots/phase-8.14/07-funnel-bottleneck-or-partial_u.png
+ D screenshots/phase-8.14/08-action-center.png
+ M screenshots/phase-8.14/08-action-center_u.png
+ D screenshots/phase-8.14/09-job-list-real-jobs.png
+ M screenshots/phase-8.14/09-job-list-real-jobs_u.png
+ D screenshots/phase-8.14/10-job-detail-drawer-jd-text.png
+ M screenshots/phase-8.14/10-job-detail-drawer-jd-text_u.png
+ D screenshots/phase-8.14/11-job-detail-source-trace.png
+ M screenshots/phase-8.14/11-job-detail-source-trace_u.png
+ D screenshots/phase-8.14/12-knowledge-search-real-jd.png
+ M screenshots/phase-8.14/12-knowledge-search-real-jd_u.png
+ D screenshots/phase-8.14/13-knowledge-search-real-sop.png
+ M screenshots/phase-8.14/13-knowledge-search-real-sop_u.png
+ D screenshots/phase-8.14/14-data-sources-real-files.png
+ M screenshots/phase-8.14/14-data-sources-real-files_u.png
+ D screenshots/phase-8.14/15-integrations-status.png
+ M screenshots/phase-8.14/15-integrations-status_u.png
+ D screenshots/phase-8.14/16-media-speech-foundation.png
+ M screenshots/phase-8.14/16-media-speech-foundation_u.png
+ D screenshots/phase-8.14/17-candidates-empty-or-real-source.png
+ M screenshots/phase-8.14/17-candidates-empty-or-real-source_u.png
+ D screenshots/phase-8.14/18-interview-quality-empty-or-real.png
+ M screenshots/phase-8.14/18-interview-quality-empty-or-real_u.png
+ D screenshots/phase-8.14/19-offer-risk-empty-or-real.png
+ M screenshots/phase-8.14/19-offer-risk-empty-or-real_u.png
+ D screenshots/phase-8.14/20-permission-denied-safe.png
+ M screenshots/phase-8.14/20-permission-denied-safe_u.png
+ D screenshots/phase-8.14/21-not-configured-state.png
+ M screenshots/phase-8.14/21-not-configured-state_u.png
+ D screenshots/phase-8.14/22-loading-state.png
+ M screenshots/phase-8.14/22-loading-state_u.png
+ D screenshots/phase-8.14/23-error-state.png
+ M screenshots/phase-8.14/23-error-state_u.png
+ D screenshots/phase-8.14/24-sidebar-navigation.png
+ M screenshots/phase-8.14/24-sidebar-navigation_u.png
+ D screenshots/phase-8.14/25-demo-path-final-summary.png
+ M screenshots/phase-8.14/25-demo-path-final-summary_u.png
+?? docs/self-checks/phase-8.14-api-evidence.md
+?? docs/self-checks/phase-8.14-demo-path.md
+?? docs/self-checks/phase-8.14-demo-script.md
+?? docs/self-checks/phase-8.14-dom-evidence.md
+?? docs/self-checks/phase-8.14-permission-evidence.md
+?? docs/self-checks/phase-8.14-screenshot-index.md
+?? screenshots/phase-8.14/01-dashboard-hero.png
+?? screenshots/phase-8.14/01-dashboard-hero_u.png
+?? screenshots/phase-8.14/02-dashboard-ai-entry.png
+?? screenshots/phase-8.14/02-dashboard-ai-entry_u.png
+?? screenshots/phase-8.14/03-copilot-open-from-dashboard.png
+?? screenshots/phase-8.14/03-copilot-open-from-dashboard_u.png
+?? screenshots/phase-8.14/04-copilot-answer-with-real-citation.png
+?? screenshots/phase-8.14/04-copilot-answer-with-real-citation_u.png
+?? screenshots/phase-8.14/06-copilot-no-evidence_u.png
+?? screenshots/phase-8.14/07-funnel-overview.png
+?? screenshots/phase-8.14/07-funnel-overview_u.png
+?? screenshots/phase-8.14/08-funnel-bottleneck.png
+?? screenshots/phase-8.14/08-funnel-bottleneck_u.png
+?? screenshots/phase-8.14/09-funnel-action-entry.png
+?? screenshots/phase-8.14/09-funnel-action-entry_u.png
+?? screenshots/phase-8.14/10-action-center-overview.png
+?? screenshots/phase-8.14/10-action-center-overview_u.png
+?? screenshots/phase-8.14/11-action-detail.png
+?? screenshots/phase-8.14/11-action-detail_u.png
+?? screenshots/phase-8.14/12-job-center-real-jobs.png
+?? screenshots/phase-8.14/12-job-center-real-jobs_u.png
+?? screenshots/phase-8.14/13-job-detail-drawer-open.png
+?? screenshots/phase-8.14/13-job-detail-drawer-open_u.png
+?? screenshots/phase-8.14/14-job-detail-jd-text-readable.png
+?? screenshots/phase-8.14/14-job-detail-jd-text-readable_u.png
+?? screenshots/phase-8.14/15-job-detail-source-trace-readable.png
+?? screenshots/phase-8.14/15-job-detail-source-trace-readable_u.png
+?? screenshots/phase-8.14/16-knowledge-search-real-jd.png
+?? screenshots/phase-8.14/16-knowledge-search-real-jd_u.png
+?? screenshots/phase-8.14/17-knowledge-search-real-sop.png
+?? screenshots/phase-8.14/17-knowledge-search-real-sop_u.png
+?? screenshots/phase-8.14/18-knowledge-source-trace.png
+?? screenshots/phase-8.14/18-knowledge-source-trace_u.png
+?? screenshots/phase-8.14/19-data-sources-real-files.png
+?? screenshots/phase-8.14/19-data-sources-real-files_u.png
+?? screenshots/phase-8.14/20-integrations-status.png
+?? screenshots/phase-8.14/20-integrations-status_u.png
+?? screenshots/phase-8.14/21-permission-denied-safe.png
+?? screenshots/phase-8.14/21-permission-denied-safe_u.png
+?? screenshots/phase-8.14/22-empty-state-candidates.png
+?? screenshots/phase-8.14/22-empty-state-candidates_u.png
+?? screenshots/phase-8.14/23-loading-state.png
+?? screenshots/phase-8.14/23-loading-state_u.png
+?? screenshots/phase-8.14/24-error-state.png
+?? screenshots/phase-8.14/24-error-state_u.png
+?? screenshots/phase-8.14/25-demo-final-path-overview.png
+?? screenshots/phase-8.14/25-demo-final-path-overview_u.png
+ docs/self-checks/phase-8.14-commands.log           | 135 ++++++++++++++++-----
+ docs/self-checks/phase-8.14-report.md              |  70 ++++++++---
+ .../phase-8.14/01-dashboard-ceo-opening.png        | Bin 255499 -> 0 bytes
+ .../phase-8.14/01-dashboard-ceo-opening_u.png      | Bin 60379 -> 60379 bytes
+ .../phase-8.14/02-dashboard-ai-copilot-open.png    | Bin 246456 -> 0 bytes
+ .../phase-8.14/02-dashboard-ai-copilot-open_u.png  | Bin 45817 -> 45817 bytes
+ .../phase-8.14/03-copilot-context-stack.png        | Bin 535965 -> 0 bytes
+ .../phase-8.14/03-copilot-context-stack_u.png      | Bin 64820 -> 64820 bytes
+ .../phase-8.14/04-copilot-answer-with-citation.png | Bin 573716 -> 0 bytes
+ .../04-copilot-answer-with-citation_u.png          | Bin 71946 -> 71946 bytes
+ screenshots/phase-8.14/05-copilot-human-review.png | Bin 573716 -> 573676 bytes
+ .../phase-8.14/05-copilot-human-review_u.png       | Bin 71946 -> 71968 bytes
+ .../phase-8.14/07-funnel-bottleneck-or-partial.png | Bin 169131 -> 0 bytes
+ .../07-funnel-bottleneck-or-partial_u.png          | Bin 46187 -> 46187 bytes
+ screenshots/phase-8.14/08-action-center.png        | Bin 173251 -> 0 bytes
+ screenshots/phase-8.14/08-action-center_u.png      | Bin 48410 -> 48410 bytes
+ screenshots/phase-8.14/09-job-list-real-jobs.png   | Bin 190938 -> 0 bytes
+ screenshots/phase-8.14/09-job-list-real-jobs_u.png | Bin 69192 -> 69192 bytes
+ .../phase-8.14/10-job-detail-drawer-jd-text.png    | Bin 368416 -> 0 bytes
+ .../phase-8.14/10-job-detail-drawer-jd-text_u.png  | Bin 98924 -> 98924 bytes
+ .../phase-8.14/11-job-detail-source-trace.png      | Bin 368416 -> 0 bytes
+ .../phase-8.14/11-job-detail-source-trace_u.png    | Bin 98924 -> 98924 bytes
+ .../phase-8.14/12-knowledge-search-real-jd.png     | Bin 173294 -> 0 bytes
+ .../phase-8.14/12-knowledge-search-real-jd_u.png   | Bin 50572 -> 50572 bytes
+ .../phase-8.14/13-knowledge-search-real-sop.png    | Bin 173294 -> 0 bytes
+ .../phase-8.14/13-knowledge-search-real-sop_u.png  | Bin 50572 -> 50572 bytes
+ .../phase-8.14/14-data-sources-real-files.png      | Bin 87547 -> 0 bytes
+ .../phase-8.14/14-data-sources-real-files_u.png    | Bin 22449 -> 22449 bytes
+ screenshots/phase-8.14/15-integrations-status.png  | Bin 171122 -> 0 bytes
+ .../phase-8.14/15-integrations-status_u.png        | Bin 44311 -> 44311 bytes
+ .../phase-8.14/16-media-speech-foundation.png      | Bin 275343 -> 0 bytes
+ .../phase-8.14/16-media-speech-foundation_u.png    | Bin 74118 -> 74118 bytes
+ .../17-candidates-empty-or-real-source.png         | Bin 58678 -> 0 bytes
+ .../17-candidates-empty-or-real-source_u.png       | Bin 15650 -> 15650 bytes
+ .../18-interview-quality-empty-or-real.png         | Bin 90466 -> 0 bytes
+ .../18-interview-quality-empty-or-real_u.png       | Bin 25264 -> 25264 bytes
+ .../phase-8.14/19-offer-risk-empty-or-real.png     | Bin 74412 -> 0 bytes
+ .../phase-8.14/19-offer-risk-empty-or-real_u.png   | Bin 18769 -> 18769 bytes
+ .../phase-8.14/20-permission-denied-safe.png       | Bin 67232 -> 0 bytes
+ .../phase-8.14/20-permission-denied-safe_u.png     | Bin 16660 -> 16660 bytes
+ screenshots/phase-8.14/21-not-configured-state.png | Bin 171122 -> 0 bytes
+ .../phase-8.14/21-not-configured-state_u.png       | Bin 44311 -> 44311 bytes
+ screenshots/phase-8.14/22-loading-state.png        | Bin 255573 -> 0 bytes
+ screenshots/phase-8.14/22-loading-state_u.png      | Bin 60393 -> 60393 bytes
+ screenshots/phase-8.14/23-error-state.png          | Bin 14365 -> 0 bytes
+ screenshots/phase-8.14/23-error-state_u.png        | Bin 264 -> 264 bytes
+ screenshots/phase-8.14/24-sidebar-navigation.png   | Bin 89972 -> 0 bytes
+ screenshots/phase-8.14/24-sidebar-navigation_u.png | Bin 20322 -> 20322 bytes
+ .../phase-8.14/25-demo-path-final-summary.png      | Bin 535893 -> 0 bytes
+ .../phase-8.14/25-demo-path-final-summary_u.png    | Bin 64830 -> 64830 bytes
+ 50 files changed, 160 insertions(+), 45 deletions(-)
 
 
 
-✓ Compiled successfully in 6.4s
-✓ Generating static pages using 31 workers (77/77) in 787ms
+✓ Compiled successfully in 6.6s
+✓ Generating static pages using 31 workers (77/77) in 799ms
 
 
-docs/self-checks/phase-8-foundation-commands.log:| fake AI | ✅ NONE |
-docs/self-checks/phase-8.8a-rag-evidence-lock-report.md:**验证结果**: 所有 citation 指向真实数据库记录，无 fake citation。
-docs/self-checks/phase-8.8a-rag-evidence-lock-report.md:### 问题 10: 是否存在 fake citation？
-docs/product/phase-8.14-ceo-demo-script.md:| A3 | Copilot Answer | "看：provider/deepseek、model、promptVersion、citation引用来源全可见。Human Review三态：接受/编辑后接受/忽略。Draft Action只是草稿，必须人工确认。" | 进入Funnel |
-docs/product/phase-8.14-ceo-demo-script.md:| C3 | Knowledge | "知识检索与引用来源。无RAG/citation/embedding黑话。" |
-docs/product/phase-8.14-ceo-demo-script.md:| C4 | Copilot | "citation+Human Review+Draft Action。AI输出不是自动决策，必须人工确认。" |
-components/domain/ai/copilot/UniversalCopilotPanel.tsx:            🛡️ AI 辅助建议，仅供参考；���结合实际业务判断。系统不会自动录用、淘汰或推进候选人。
-docs/starter-pack/00_先读我_AI协同与执行规则.md:8. 不自动录用；
-docs/starter-pack/00_先读我_AI协同与执行规则.md:9. 不自动淘汰；
+=== Safety Grep ===
+server/services/media/media-service.ts:  // Create 4 mock segments with speaker labels and timestamps
+server/services/media/media-service.ts:  const mockSegments = [
+server/services/media/media-service.ts:  for (const seg of mockSegments) {
+docs/product/AI_CAPABILITY_FRAMEWORK.md:| 2 | **分层递进** | L1 确定性规则 → L2 AI 增强 → L3 有限自动，逐层成熟后开放 |
+docs/product/AI_CAPABILITY_FRAMEWORK.md:| 5 | **可撤销** | L3 自动操作必须可回滚，人可覆盖 |
+docs/product/AI_CAPABILITY_FRAMEWORK.md:| 8 | **渐进式验证** | L1 先行验证 → L2 小范围灰度 → L3 全量需人确认 |
+components/domain/interviews/InterviewFeedbackForm.tsx:          ⚠️ 此反馈仅作为面试参考，不会自动推进候选人阶段或做出录用决定。最终决策请基于面试官综合判断。
+docs/starter-pack/00_先读我_AI协同与执行规则.md:10. 不自动推进候选人阶段；
+docs/starter-pack/05_AI能力与安全规范.md:AI 不能自动录用、自动淘汰、自动推进阶段、自动关闭岗位、自动创建 ActionItem、自动发 Offer、替代面试官、替代 HR、替代 Moka。
+app/api/ai/insights/generate/route.ts:          suggestedAction: "配置 OPENAI_API_KEY 后可生成 AI 辅助建议。",
+app/api/ai/insights/generate/route.ts:        summary: "AI Provider 未配置，请设置 OPENAI_API_KEY 环境变量后重试。",
 app/api/media/assets/[id]/transcribe/route.ts:        message: "DeepSeek 转录服务未配置，请先配置 DEEPSEEK_API_KEY 环境变量。",
-server/services/ai/ai-provider-service.ts:// Checks DEEPSEEK_API_KEY, delegates to deepseek-provider.ts
-server/services/ai/providers/deepseek-provider.ts:    return { status: "not_configured", provider: "deepseek", model: config.model, errorMessage: "DEEPSEEK_API_KEY not set" };
+server/services/ai/ai-context-builder.ts:      const job = await prisma.job.findUnique({ where: { id: objectId }, select: { title: true, jdText: true, profileSummary: true, headcount: true } });
+server/services/ai/ai-context-builder.ts:      const fb = await prisma.interviewFeedback.findUnique({ where: { id: objectId }, select: { feedbackQualityScore: true, overallRecommendation: true, evidenceText: true, scores: true } });
+server/services/ai/ai-context-builder.ts:      const risk = await prisma.offerRisk.findUnique({ where: { id: objectId }, select: { riskType: true, level: true, description: true } });
+server/services/interview/interview-service.ts:// No unscoped fallbacks. No optional role/userId.
+server/services/ai/context-sources/knowledge-context-source.ts:    if (!collection) return true;
+server/services/ai/context-sources/knowledge-context-source.ts:    if (collection.visibility === "public") return true;
 
 === All checks passed ===
